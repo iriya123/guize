@@ -6,43 +6,13 @@ DOMAIN-SUFFIX,time.windows.com
 DOMAIN-SUFFIX,lanzov.com
 DOMAIN-SUFFIX,hao123.com
 DOMAIN-SUFFIX,ggkuai.com
-# tvbox
-DOMAIN-SUFFIX,lzcdn2.com
-DOMAIN-SUFFIX,6080yy3.com
-DOMAIN-SUFFIX,bttwoo.com
-DOMAIN-SUFFIX,myvideos.info
-DOMAIN-SUFFIX,vplay.life
-DOMAIN-SUFFIX,dm84.tv
-DOMAIN-SUFFIX,play7.com
-DOMAIN-SUFFIX,keke9.app
-DOMAIN-SUFFIX,cdn4.com
-DOMAIN-SUFFIX,xfani.com
-DOMAIN-SUFFIX,xb6v.com
-DOMAIN-SUFFIX,lldm.net
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # 域名关键字匹配
 DOMAIN-KEYWORD,baidu
 DOMAIN-KEYWORD,dxmjuhe
 DOMAIN-KEYWORD,lzcdn2
 DOMAIN-KEYWORD,jiaozi
-DOMAIN-KEYWORD,bttwoo
-DOMAIN-KEYWORD,nkdyw
-DOMAIN-KEYWORD,fenggoudy2
-DOMAIN-KEYWORD,ikan6
-DOMAIN-KEYWORD,vidhub1
+
 
 
 
