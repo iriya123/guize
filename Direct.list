@@ -16,7 +16,7 @@ DOMAIN-KEYWORD,dxmjuhe
 
 # IP段匹配
 IP-CIDR,219.146.1.66/32,no-resolve
-IP-CIDR,216.180.230.138/32,no-resolve
+
 
 
 
