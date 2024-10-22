@@ -7,6 +7,24 @@ DOMAIN-SUFFIX,lanzov.com
 DOMAIN-SUFFIX,hao123.com
 DOMAIN-SUFFIX,ggkuai.com
 
+# ikun影视
+DOMAIN-SUFFIX,kkzycdn.com
+DOMAIN-SUFFIX,lziapi.com
+DOMAIN-SUFFIX,apiyhzy.com
+DOMAIN-SUFFIX,bfikuncdn.com
+DOMAIN-SUFFIX,imgikuncdn.com
+DOMAIN-SUFFIX,ukuapi.com
+DOMAIN-SUFFIX,picturecdn.com
+DOMAIN-SUFFIX,jinyingimage.com
+DOMAIN-SUFFIX,hongniuzy2.com
+DOMAIN-SUFFIX,ddys.pro
+DOMAIN-SUFFIX,zxzj.pro
+
+
+
+
+
+
 # 域名关键字匹配
 DOMAIN-KEYWORD,baidu
 DOMAIN-KEYWORD,dxmjuhe
