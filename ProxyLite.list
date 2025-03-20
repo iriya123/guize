@@ -1,5 +1,6 @@
 # 代理补充列表
 
+
 # 域名后缀匹配
 DOMAIN-SUFFIX,qichiyu.com
 DOMAIN-SUFFIX,hanime1.me
@@ -7,6 +8,7 @@ DOMAIN-SUFFIX,hanime1.me
 # 域名关键字匹配
 DOMAIN-KEYWORD,1e100
 DOMAIN-KEYWORD,jivosite
+DOMAIN-KEYWORD,2dfan
 
 # IP段匹配
 IP-CIDR,142.171.133.131/32,no-resolve
