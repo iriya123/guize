@@ -1,0 +1,927 @@
+EMUELEC:~/roms/mame #
+echo "===== 1. 压缩工具实际位置 ====="
+for x in 7z 7zz 7za unzip bsdtar busybox file; do
+  echo "--- $x ---"
+  command -v "$x" 2>/dev/null
+done
+
+echo "===== 2. BusyBox 支持的压缩功能 ====="
+busybox --list 2>/dev/null | grep -E '^(unzip|tar|7z|file)$'
+
+echo "===== 3. 检查一个 7z 文件头 ====="
+if command -v od >/dev/null 2>&1; then
+  od -An -tx1 -N8 \
+    "/storage/roms/arcade/动作闯关街机/simpsons.7z"
+fi
+
+echo "===== 4. 查看 EmulationStation 系统配置 ====="
+for f in \
+  /storage/.config/emulationstation/es_systems.cfg \
+  /etc/emulationstation/es_systems.cfg \
+  /usr/config/emulationstation/es_systems.cfg
+do
+  if [ -r "$f" ]; then
+    echo "--- $f ---"
+    grep -n -E 'name>|fullname>|path>|extension>|command>|platform>' "$f" \
+      | grep -i -E 'mame|arcade|fbneo|pgm|ports|path>|extension>|command>|platform>'
+  fi
+done
+===== 1. 压缩工具实际位置 =====
+--- 7z ---
+/usr/bin/7z
+--- 7zz ---
+--- 7za ---
+/usr/bin/7za
+--- unzip ---
+/usr/bin/unzip
+--- bsdtar ---
+--- busybox ---
+/usr/bin/busybox
+--- file ---
+/usr/bin/file
+===== 2. BusyBox 支持的压缩功能 =====
+tar
+unzip
+===== 3. 检查一个 7z 文件头 =====
+ 37 7a bc af 27 1c 00 04
+===== 4. 查看 EmulationStation 系统配置 =====
+--- /storage/.config/emulationstation/es_systems.cfg ---
+10:             <path>/storage/roms/screenshots</path>
+11:             <extension>.pbm .PBM .jpg .JPG .png .PNG</extension>
+12:             <command>ignore</command>
+13:             <platform>ignore</platform>
+22:             <path>/storage/roms/amstradgx4000</path>
+23:             <extension>.cpr .CPR .dsk .DSK .sna .SNA .tap .TAP .cdt .CDT .voc .VOC .m3u .M3U .zip .ZIP</extension>
+24:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+25:             <platform>amstradgx4000</platform>
+41:             <path>/storage/roms/amstradcpc</path>
+42:             <extension>.dsk .DSK .sna .SNA .tap .TAP .cdt .CDT .voc .VOC .m3u .M3U .zip .ZIP .7z .7Z</extension>
+43:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+44:             <platform>amstradcpc</platform>
+55:             <name>arcade</name>
+59:             <path>/storage/roms/arcade</path>
+60:             <extension>.zip .ZIP .7z .7Z .cmd .dat .lww .LWW .DAT</extension>
+61:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+62:             <platform>arcade</platform>
+91:             <name>mame</name>
+92:             <fullname>街机MAME</fullname>
+95:             <path>/storage/roms/mame</path>
+96:             <extension>.7z .7Z .zip .ZIP .cmd.dat</extension>
+97:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+98:             <platform>arcade</platform>
+119:            <path>/storage/roms/fmtownsux</path>
+120:            <extension>.cmd</extension>
+121:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+122:            <platform>fmtmarty</platform>
+133:        <name>pgm2</name>
+134:        <fullname>街机 PGM2</fullname>
+138:        <path>/storage/roms/pgm2</path>
+139:        <extension>.zip</extension>
+140:        <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+141:        <platform>pgm2</platform>
+159:            <path>/storage/roms/atari2600</path>
+160:            <extension>.a26 .A26 .bin .BIN .zip .ZIP .7z .7Z</extension>
+161:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+162:            <platform>atari2600</platform>
+183:            <path>/storage/roms/atari5200</path>
+184:            <extension>.rom .ROM .xfd .XFD .atr .ATR .atx .ATX .cdm .CDM .cas .CAS .bin .BIN .a52 .A52 .xex .XEX .zip .ZIP .7z .7Z</extension>
+185:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+186:            <platform>atari5200</platform>
+203:            <path>/storage/roms/atari7800</path>
+204:            <extension>.a78 .A78 .bin .BIN .zip .ZIP .7z .7Z</extension>
+205:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+206:            <platform>atari7800</platform>
+222:            <path>/storage/roms/atari800</path>
+223:            <extension>.rom .ROM .xfd .XFD .atr .ATR .atx .ATX .cdm .CDM .cas .CAS .bin .BIN .a52 .A52 .xex .XEX .zip .ZIP .7z .7Z</extension>
+224:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+225:            <platform>atari800</platform>
+241:            <path>/storage/roms/atarilynx</path>
+242:            <extension>.lnx .LNX .zip .ZIP .7z .7Z</extension>
+243:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+244:            <platform>atarilynx</platform>
+261:            <path>/storage/roms/atarist</path>
+262:            <extension>.st .ST .msa .MSA .stx .STX .dim .DIM .ipf .IPF .m3u .M3U .zip .ZIP .7z .7Z</extension>
+263:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+264:            <platform>atarist</platform>
+285:            <path>/storage/roms/atarijaguar</path>
+286:            <extension>.j64 .jag .J64 .JAG .zip</extension>
+287:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+288:            <platform>atarijaguar</platform>
+304:            <path>/storage/roms/atomiswave</path>
+305:            <extension>.lst .LST .bin .BIN .dat .DAT .zip .ZIP .7z .7Z</extension>
+306:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+307:            <platform>atomiswave</platform>
+330:            <path>/storage/roms/wonderswan</path>
+331:            <extension>.ws .WS .zip .ZIP .7z .7Z</extension>
+332:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+333:            <platform>wonderswan</platform>
+349:            <path>/storage/roms/wonderswancolor</path>
+350:            <extension>.wsc .WSC .zip .ZIP .7z .7Z</extension>
+351:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+352:            <platform>wonderswancolor</platform>
+368:            <path>/storage/roms/cps1</path>
+369:            <extension>.zip .ZIP .7z .7Z .dat .lww .LWW</extension>
+370:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+371:            <platform>arcade</platform>
+405:            <path>/storage/roms/cps2</path>
+406:            <extension>.zip .ZIP .7z .7Z .dat .lww .LWW</extension>
+407:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+408:            <platform>arcade</platform>
+442:            <path>/storage/roms/cps3</path>
+443:            <extension>.zip .ZIP .7z .7Z .dat .lww .LWW</extension>
+444:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+445:            <platform>arcade</platform>
+479:            <path>/storage/roms/coleco</path>
+480:            <extension>.bin .BIN .col .COL .rom .ROM .zip .ZIP .7z .7Z</extension>
+481:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+482:            <platform>colecovision</platform>
+499:            <path>/storage/roms/c128</path>
+500:            <extension>.d64 .D64 .g64 .G64 .t64 .T64 .x64 .X64 .zip .ZIP .7z .7Z .prg .PRG .crt .CRT .m3u .M3U</extension>
+501:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+502:            <platform>c128</platform>
+518:            <path>/storage/roms/c64</path>
+519:            <extension>.tap .TAP .d64 .D64 .zip .ZIP .7z .7Z .t64 .T64 .prg .PRG .crt .CRT .m3u .M3U</extension>
+520:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+521:            <platform>c64</platform>
+538:            <path>/storage/roms/amiga</path>
+539:            <extension>.zip .ZIP .adf .ADF .uae .UAE .ipf .IPF .dms .DMS .adz .ADZ .lha .LHA .hdf .HDF .m3u .M3U</extension>
+540:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+541:            <platform>amiga</platform>
+563:            <path>/storage/roms/amigacd32</path>
+564:            <extension>.iso .ISO .cue .CUE .zip .ZIP .lha .LHA .hdf .HDF</extension>
+565:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+566:            <platform>amigacd32</platform>
+588:            <path>/storage/roms/c16</path>
+589:            <extension>.d64 .g64 .t64 .x64 .zip .D64 .G64 .T64 .X64 .ZIP</extension>
+590:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+591:            <platform>c16</platform>
+607:            <path>/storage/roms/vic20</path>
+608:            <extension>.d64 .g64 .t64 .x64 .zip .D64 .G64 .T64 .X64 .ZIP</extension>
+609:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+610:            <platform>vic20</platform>
+626:            <path>/storage/roms/pc</path>
+627:            <extension>.com .COM .sh .SH .bat .BAT .exe .EXE .zip .ZIP</extension>
+628:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+629:            <platform>pc</platform>
+651:            <path>/storage/roms/pc98</path>
+652:            <extension>.d98 .zip .98d .fdi .fdd .2hd .tfd .d88 .88d .hdm .xdf .dup .hdi .thd .nhd .hdd .hdn </extension>
+653:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+654:            <platform>pc98</platform>
+671:            <path>/storage/roms/daphne</path>
+672:            <extension>.daphne .DAPHNE</extension>
+673:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+674:            <platform>daphne</platform>
+695:            <path>/storage/roms/wii</path>
+696:            <extension>.gcm .GCM .iso .ISO .gcz .GCZ .ciso .CISO .wbfs .WBFS .wad .WAD .rvz .RVZ</extension>
+697:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+698:            <platform>wii</platform>
+714:            <path>/storage/roms/gamecube</path>
+715:            <extension>.gcm .GCM .iso .ISO .gcz .GCZ .ciso .CISO .wbfs .WBFS .rvz .RVZ</extension>
+716:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+717:            <platform>gc</platform>
+732:            <path>/storage/roms/fbneo</path>
+733:            <extension>.7z .zip .7Z .ZIP .dat .lww .LWW .DAT</extension>
+734:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+735:            <platform>arcade</platform>
+764:            <path>/storage/roms/msx</path>
+765:            <extension>.dsk .DSK .mx1 .MX1 .mx2 .MX2 .rom .ROM .zip .ZIP .7z .7Z .m3u .M3U .cas .CAS</extension>
+766:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+767:            <platform>msx</platform>
+784:            <path>/storage/roms/msx2</path>
+785:            <extension>.dsk .DSK .mx1 .MX1 .mx2 .MX2 .rom .ROM .zip .ZIP .7z .7Z .m3u .M3U .cas .CAS</extension>
+786:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+787:            <platform>msx</platform>
+804:            <path>/storage/roms/odyssey</path>
+805:            <extension>.bin .BIN .zip .ZIP .7z .7Z</extension>
+806:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+807:            <platform>odyssey2</platform>
+823:            <path>/storage/roms/intellivision</path>
+824:            <extension>.int .INT .bin .BIN .rom .ROM .zip .ZIP .7z .7Z</extension>
+825:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+826:            <platform>intellivision</platform>
+846:            <path>/storage/roms/mplayer</path>
+847:            <extension>.mp4 .MP4 .mkv .MKV .avi .AVI .mov .MOV .wmv .WMV .m3u .M3U .mpg .MPG .ytb .YTB .twi .TWI .sh .SH</extension>
+848:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+849:            <platform>mplayer</platform>
+870:            <path>/storage/roms/vectrex</path>
+871:            <extension>.bin .BIN .gam .GAM .vec .VEC .zip .ZIP .7z .7Z</extension>
+872:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+873:            <platform>vectrex</platform>
+889:            <path>/storage/roms/pcengine</path>
+890:            <extension>.pce .PCE .bin .BIN .zip .ZIP .7z .7Z</extension>
+891:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+892:            <platform>pcengine</platform>
+909:            <path>/storage/roms/pcenginecd</path>
+910:            <extension>.pce .PCE .cue .CUE .ccd .CCD .iso .ISO .img .IMG .bin .BIN .chd .CHD .zip .ZIP .7z .7Z</extension>
+911:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+912:            <platform>pcenginecd</platform>
+929:            <path>/storage/roms/pcfx</path>
+930:            <extension>.chd .CHD .zip .ZIP .cue .CUE .ccd .CCD .toc .TOC</extension>
+931:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+932:            <platform>pcfx</platform>
+948:            <path>/storage/roms/sgfx</path>
+949:            <extension>.pce .PCE .sgx .SGX .cue .CUE .ccd .CCD .chd .CHD .zip .ZIP .7z .7Z</extension>
+950:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+951:            <platform>supergrafx</platform>
+968:            <path>/storage/roms/tg16</path>
+969:            <extension>.pce .PCE .bin .BIN .zip .ZIP .7z .7Z</extension>
+970:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+971:            <platform>pcengine</platform>
+988:            <path>/storage/roms/tg16cd</path>
+989:            <extension>.pce .PCE .cue .CUE .ccd .CCD .iso .ISO .img .IMG .bin .BIN .chd .CHD .zip .ZIP .7z .7Z</extension>
+990:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+991:            <platform>pcenginecd</platform>
+1008:           <path>/storage/roms/n64</path>
+1009:           <extension>.z64 .Z64 .n64 .N64 .v64 .V64 .zip .ZIP .7z .7Z</extension>
+1010:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1011:           <platform>n64</platform>
+1036:           <path>/storage/roms/nes</path>
+1037:           <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z .dat</extension>
+1038:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1039:           <platform>nes</platform>
+1058:           <path>/storage/roms/nesh</path>
+1059:           <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z .dat</extension>
+1060:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1061:           <platform>nes</platform>
+1080:           <path>/storage/roms/famicom</path>
+1081:           <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z .dat</extension>
+1082:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1083:           <platform>nes</platform>
+1102:           <path>/storage/roms/fds</path>
+1103:           <extension>.fds .FDS .zip .ZIP .7z .7Z</extension>
+1104:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1105:           <platform>fds</platform>
+1124:           <path>/storage/roms/gb</path>
+1125:           <extension>.gb .GB .zip .ZIP .7z .7Z</extension>
+1126:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1127:           <platform>gb</platform>
+1150:           <path>/storage/roms/gba</path>
+1151:           <extension>.gba .GBA .zip .ZIP .7z .7Z</extension>
+1152:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1153:           <platform>gba</platform>
+1172:           <path>/storage/roms/gbah</path>
+1173:           <extension>.gba .GBA .zip .ZIP .7z .7Z</extension>
+1174:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1175:           <platform>gba</platform>
+1194:           <path>/storage/roms/gbc</path>
+1195:           <extension>.gb .GB .gbc .GBC .zip .ZIP .7z .7Z</extension>
+1196:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1197:           <platform>gbc</platform>
+1220:           <path>/storage/roms/gbch</path>
+1221:           <extension>.gb .GB .gbc .GBC .zip .ZIP .7z .7Z</extension>
+1222:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1223:           <platform>gbc</platform>
+1246:           <path>/storage/roms/gbh</path>
+1247:           <extension>.gb .GB .zip .ZIP .7z .7Z</extension>
+1248:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1249:           <platform>gb</platform>
+1272:           <path>/storage/roms/gameandwatch</path>
+1273:           <extension>.mgw .MGW .zip .ZIP .7z .7Z</extension>
+1274:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1275:           <platform>gameandwatch</platform>
+1291:           <path>/storage/roms/sfc</path>
+1292:           <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z .dat</extension>
+1293:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1294:           <platform>snes</platform>
+1314:           <path>/storage/roms/snes</path>
+1315:           <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z .dat</extension>
+1316:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1317:           <platform>snes</platform>
+1337:           <path>/storage/roms/snesh</path>
+1338:           <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z .dat</extension>
+1339:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1340:           <platform>snes</platform>
+1360:           <path>/storage/roms/snesmsu1</path>
+1361:           <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z</extension>
+1362:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1363:           <platform>snes</platform>
+1379:           <path>/storage/roms/virtualboy</path>
+1380:           <extension>.vb .VB .zip .ZIP .7z .7Z</extension>
+1381:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1382:           <platform>virtualboy</platform>
+1398:           <path>/storage/roms/cdi</path>
+1399:           <extension>.chd .CHD .iso .ISO</extension>
+1400:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1401:           <platform>cdi</platform>
+1417:           <path>/storage/roms/pokemini</path>
+1418:           <extension>.min .MIN .zip .ZIP .7z .7Z</extension>
+1419:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1420:           <platform>pokemini</platform>
+1436:           <path>/storage/roms/openbor</path>
+1437:           <extension>.pak .PAK</extension>
+1438:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1439:           <platform>openbor</platform>
+1456:           <path>/storage/roms/videopac</path>
+1457:           <extension>.bin .BIN</extension>
+1458:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1459:           <platform>videopac</platform>
+1475:           <path>/storage/roms/3do</path>
+1476:           <extension>.iso .ISO .bin .BIN .chd .CHD .cue .CUE .zip .ZIP .7z .7Z</extension>
+1477:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1478:           <platform>3do</platform>
+1489:           <name>ports</name>
+1494:           <path>/storage/roms/ports_scripts</path>
+1495:           <extension>.sh .SH</extension>
+1496:           <command>/usr/bin/bash %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1497:           <platform>ports</platform>
+1508:           <name>local ports</name>
+1513:           <path>/storage/roms/ports_local_scripts</path>
+1514:           <extension>.sh .SH</extension>
+1515:           <command>/usr/bin/bash %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1516:           <platform>ports</platform>
+1532:           <path>/storage/roms/neogeo</path>
+1533:           <extension>.7z .7Z .zip .ZIP .dat .DAT</extension>
+1534:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1535:           <platform>neogeo</platform>
+1558:           <path>/storage/roms/neocd</path>
+1559:           <extension>.cue .CUE .iso .ISO .chd .CHD .zip .ZIP .7z .7Z</extension>
+1560:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1561:           <platform>neogeocd</platform>
+1578:           <path>/storage/roms/ngp</path>
+1579:           <extension>.ngp .NGP .zip .ZIP .7z .7Z</extension>
+1580:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1581:           <platform>ngp</platform>
+1597:           <path>/storage/roms/ngpc</path>
+1598:           <extension>.ngc .NGC .zip .ZIP .7z .7Z</extension>
+1599:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1600:           <platform>ngpc</platform>
+1616:           <path>/storage/roms/scummvm</path>
+1617:           <extension>.scummvm</extension>
+1618:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1619:           <platform>pc</platform>
+1640:           <path>/storage/roms/sega32x</path>
+1641:           <extension>.32x .32X .smd .SMD .bin .BIN .md .MD .zip .ZIP .7z .7Z</extension>
+1642:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1643:           <platform>sega32x</platform>
+1659:           <path>/storage/roms/segacd</path>
+1660:           <extension>.m3u .M3U .chd .CHD .cue .CUE .iso .ISO .zip .ZIP .7z .7Z</extension>
+1661:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1662:           <platform>segacd</platform>
+1679:           <path>/storage/roms/dreamcast</path>
+1680:           <extension>.cdi .CDI .gdi .GDI .chd .CHD .zip .ZIP .7z .7Z .m3u .M3U</extension>
+1681:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1682:           <platform>dreamcast</platform>
+1705:           <path>/storage/roms/gamegear</path>
+1706:           <extension>.bin .BIN .gg .GG .zip .ZIP .7z .7Z</extension>
+1707:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1708:           <platform>gamegear</platform>
+1726:           <path>/storage/roms/gamegearh</path>
+1727:           <extension>.bin .BIN .gg .GG .zip .ZIP .7z .7Z</extension>
+1728:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1729:           <platform>gamegear</platform>
+1747:           <path>/storage/roms/genesis</path>
+1748:           <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z .dat</extension>
+1749:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1750:           <platform>genesis</platform>
+1768:           <path>/storage/roms/genh</path>
+1769:           <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z .dat</extension>
+1770:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1771:           <platform>genesis</platform>
+1789:           <path>/storage/roms/mastersystem</path>
+1790:           <extension>.bin .BIN .sms .SMS .zip .ZIP .7z .7Z</extension>
+1791:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1792:           <platform>mastersystem</platform>
+1810:           <path>/storage/roms/megadrive</path>
+1811:           <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z .dat</extension>
+1812:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1813:           <platform>megadrive</platform>
+1831:           <path>/storage/roms/megadrivemsu</path>
+1832:           <extension>.bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+1833:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1834:           <platform>megadrive</platform>
+1851:           <path>/storage/roms/megadrive-japan</path>
+1852:           <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z .dat</extension>
+1853:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1854:           <platform>megadrive</platform>
+1872:           <path>/storage/roms/megaduck</path>
+1873:           <extension>.zip .ZIP .7z .7Z .bin</extension>
+1874:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1875:           <platform>megaduck</platform>
+1891:           <path>/storage/roms/naomi</path>
+1892:           <extension>.lst .LST .bin .BIN .dat .DAT .zip .ZIP .7z .7Z</extension>
+1893:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1894:           <platform>naomi</platform>
+1917:           <path>/storage/roms/sc-3000</path>
+1918:           <extension>.bin .BIN .sg .SG .zip .ZIP .7z .7Z</extension>
+1919:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1920:           <platform>sc-3000</platform>
+1936:           <path>/storage/roms/sg-1000</path>
+1937:           <extension>.bin .BIN .sg .SG .zip .ZIP .7z .7Z</extension>
+1938:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1939:           <platform>sg-1000</platform>
+1957:           <path>/storage/roms/saturn</path>
+1958:           <extension>.cue .CUE .chd .CHD .iso .ISO .zip .ZIP .mds .MDS .bin .BIN</extension>
+1959:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1960:           <platform>saturn</platform>
+1981:           <path>/storage/roms/x68000</path>
+1982:           <extension>.dim .DIM .img .IMG .d88 .D88 .88d .88D .hdm .HDM .dup .DUP .2hd .2HD .xdf .XDF .hdf .HDF .cmd .CMD .m3u .M3U .zip .ZIP .7z .7Z</extension>
+1983:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1984:           <platform>x68000</platform>
+2000:           <path>/storage/roms/x1</path>
+2001:           <extension>.dx1 .DX1 .2d .2D .2hd .2HD .tfd .TFD .d88 .D88 .88d .88D .hdm .HDM .xdf .XDF .dup .DUP .tap .TAP .cmd .CMD .7z .7Z .zip .ZIP</extension>
+2002:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2003:           <platform>x1</platform>
+2019:           <path>/storage/roms/zxspectrum</path>
+2020:           <extension>.tzx .TZX .tap .TAP .z80 .Z80 .rzx .RZX .scl .SCL .trd .TRD .zip .ZIP .7z .7Z</extension>
+2021:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2022:           <platform>zxspectrum</platform>
+2038:           <path>/storage/roms/zx81</path>
+2039:           <extension>.tzx .TZX .p .P .zip .ZIP .7z .7Z</extension>
+2040:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2041:           <platform>zx81</platform>
+2057:           <path>/storage/roms/psx</path>
+2058:           <extension>.bin .BIN .cue .CUE .img .IMG .mdf .MDF .pbp .PBP .toc .TOC .cbn .CBN .m3u .M3U .ccd .CCD .chd .CHD .zip .ZIP .7z .7Z .iso .ISO</extension>
+2059:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2060:           <platform>psx</platform>
+2083:           <path>/storage/roms/psp</path>
+2084:           <extension>.iso .ISO .cso .CSO .pbp .PBP</extension>
+2085:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2086:           <platform>psp</platform>
+2107:           <path>/storage/roms/pspminis</path>
+2108:           <extension>.iso .ISO .cso .CSO .pbp .PBP</extension>
+2109:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2110:           <platform>psp</platform>
+2131:           <path>/storage/roms/uzebox</path>
+2132:           <extension>.uze .UZE .hex .HEX</extension>
+2133:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2134:           <platform>uzebox</platform>
+2150:           <path>/storage/roms/solarus</path>
+2151:           <extension>.solarus</extension>
+2152:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2153:           <platform>solarus</platform>
+2169:           <path>/storage/roms/pico-8</path>
+2170:           <extension>.p8 .P8 .png .PNG</extension>
+2171:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2172:           <platform>pico8</platform>
+2193:           <path>/storage/roms/ports/doom</path>
+2194:           <extension>.wad .WAD .iwad .IWAD .pwad .PWAD .doom</extension>
+2195:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2196:           <platform>pc</platform>
+2222:           <path>/storage/roms/tic-80</path>
+2223:           <extension>.tic .TIC</extension>
+2224:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2225:           <platform>tic-80</platform>
+2241:           <path>/storage/roms/easyrpg</path>
+2242:           <extension>.ldb</extension>
+2243:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2244:           <platform>easyrpg</platform>
+2260:           <path>/storage/roms/ports/ecwolf/games</path>
+2261:           <extension>.SOD .sod .wl6 .WL6 .N3D .n3d .SD2 .sd2 .SD3 .sd3 .ecwolf</extension>
+2262:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2263:           <platform>pc</platform>
+2279:           <path>/storage/roms/supervision</path>
+2280:           <extension>.bin .BIN .sv .SV .zip .ZIP .7z .7Z</extension>
+2281:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2282:           <platform>supervision</platform>
+2298:           <path>/storage/roms/freej2me</path>
+2299:           <extension>.jar .JAR</extension>
+2300:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2301:           <platform>freej2me</platform>
+2322:           <path>/storage/roms/ports/gmloader</path>
+2323:           <extension>.apk .APK .zip .ZIP</extension>
+2324:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2325:           <platform>gmloader</platform>
+2341:           <path>/storage/roms/karaoke</path>
+2342:           <extension>.cdg .CDG</extension>
+2343:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2344:           <platform>karaoke</platform>
+2355:           <name>arcade hack</name>
+2359:           <path>/storage/roms/archack</path>
+2360:           <extension>.7z .zip .7Z .ZIP .dat .lww .LWW .DAT</extension>
+2361:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2362:           <platform>arcade</platform>
+2390:           <path>/storage/roms/fba</path>
+2391:           <extension>.7z .zip .7Z .ZIP .dat .lww .LWW .DAT</extension>
+2392:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2393:           <platform>arcade</platform>
+--- /usr/config/emulationstation/es_systems.cfg ---
+7:              <name>arcade</name>
+8:              <fullname>Arcade</fullname>
+11:             <path>/storage/roms/arcade</path>
+12:             <extension>.zip .ZIP .7z .7Z</extension>
+13:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+14:             <platform>arcade</platform>
+30:             <name>mame</name>
+31:             <fullname>Arcade MAME</fullname>
+34:             <path>/storage/roms/mame</path>
+35:             <extension>.7z .7Z .zip .ZIP</extension>
+36:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+37:             <platform>arcade</platform>
+55:             <path>/storage/roms/fbneo</path>
+56:             <extension>.7z .zip .7Z .ZIP .lww .LWW</extension>
+57:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+58:             <platform>arcade</platform>
+76:             <path>/storage/roms/cps1</path>
+77:             <extension>.zip .ZIP .7z .7Z</extension>
+78:             <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+79:             <platform>arcade</platform>
+100:            <path>/storage/roms/cps2</path>
+101:            <extension>.zip .ZIP .7z .7Z</extension>
+102:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+103:            <platform>arcade</platform>
+124:            <path>/storage/roms/cps3</path>
+125:            <extension>.zip .ZIP .7z .7Z</extension>
+126:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+127:            <platform>arcade</platform>
+148:            <path>/storage/roms/naomi</path>
+149:            <extension>.lst .LST .bin .BIN .dat .DAT .zip .ZIP .7z .7Z</extension>
+150:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+151:            <platform>naomi</platform>
+173:            <path>/storage/roms/atomiswave</path>
+174:            <extension>.lst .LST .bin .BIN .dat .DAT .zip .ZIP .7z .7Z</extension>
+175:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+176:            <platform>atomiswave</platform>
+198:            <path>/storage/roms/famicom</path>
+199:            <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z</extension>
+200:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+201:            <platform>nes</platform>
+220:            <path>/storage/roms/nes</path>
+221:            <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z</extension>
+222:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+223:            <platform>nes</platform>
+242:            <path>/storage/roms/nesh</path>
+243:            <extension>.nes .NES .nesm .NESM .unif .UNIF .unf .UNF .zip .ZIP .7z .7Z</extension>
+244:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+245:            <platform>nes</platform>
+264:            <path>/storage/roms/fds</path>
+265:            <extension>.fds .FDS .zip .ZIP .7z .7Z</extension>
+266:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+267:            <platform>fds</platform>
+286:            <path>/storage/roms/sfc</path>
+287:            <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z</extension>
+288:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+289:            <platform>snes</platform>
+310:            <path>/storage/roms/snes</path>
+311:            <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z</extension>
+312:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+313:            <platform>snes</platform>
+334:            <path>/storage/roms/snesmsu1</path>
+335:            <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z</extension>
+336:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+337:            <platform>snes</platform>
+353:            <path>/storage/roms/snesh</path>
+354:            <extension>.smc .SMC .fig .FIG .bs .BS .st .ST .sfc .SFC .gd3 .GD3 .gd7 .GD7 .dx2 .DX2 .bsx .BSX .swc .SWC .zip .ZIP .7z .7Z</extension>
+355:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+356:            <platform>snes</platform>
+377:            <path>/storage/roms/sg-1000</path>
+378:            <extension>.bin .BIN .sg .SG .zip .ZIP .7z .7Z</extension>
+379:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+380:            <platform>sg-1000</platform>
+398:            <path>/storage/roms/mastersystem</path>
+399:            <extension>.bin .BIN .sms .SMS .zip .ZIP .7z .7Z</extension>
+400:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+401:            <platform>mastersystem</platform>
+419:            <path>/storage/roms/megadrive</path>
+420:            <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+421:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+422:            <platform>megadrive</platform>
+440:            <path>/storage/roms/megadrive-japan</path>
+441:            <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+442:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+443:            <platform>megadrive</platform>
+461:            <path>/storage/roms/genesis</path>
+462:            <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+463:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+464:            <platform>genesis</platform>
+482:            <path>/storage/roms/genh</path>
+483:            <extension>.68k .68K .sgd .SGD .bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+484:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+485:            <platform>genesis</platform>
+503:            <path>/storage/roms/megadrivemsu</path>
+504:            <extension>.bin .BIN .gen .GEN .md .MD .sg .SG .smd .SMD .zip .ZIP .7z .7Z</extension>
+505:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+506:            <platform>megadrive</platform>
+523:            <path>/storage/roms/sega32x</path>
+524:            <extension>.32x .32X .smd .SMD .bin .BIN .md .MD .zip .ZIP .7z .7Z</extension>
+525:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+526:            <platform>sega32x</platform>
+542:            <path>/storage/roms/segacd</path>
+543:            <extension>.m3u .M3U .chd .CHD .cue .CUE .iso .ISO .zip .ZIP .7z .7Z</extension>
+544:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+545:            <platform>segacd</platform>
+562:            <path>/storage/roms/pcengine</path>
+563:            <extension>.pce .PCE .bin .BIN .zip .ZIP .7z .7Z</extension>
+564:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+565:            <platform>pcengine</platform>
+582:            <path>/storage/roms/tg16</path>
+583:            <extension>.pce .PCE .bin .BIN .zip .ZIP .7z .7Z</extension>
+584:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+585:            <platform>pcengine</platform>
+602:            <path>/storage/roms/pcenginecd</path>
+603:            <extension>.pce .PCE .cue .CUE .ccd .CCD .iso .ISO .img .IMG .bin .BIN .chd .CHD .zip .ZIP .7z .7Z</extension>
+604:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+605:            <platform>pcenginecd</platform>
+622:            <path>/storage/roms/tg16cd</path>
+623:            <extension>.pce .PCE .cue .CUE .ccd .CCD .iso .ISO .img .IMG .bin .BIN .chd .CHD .zip .ZIP .7z .7Z</extension>
+624:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+625:            <platform>pcenginecd</platform>
+642:            <path>/storage/roms/neogeo</path>
+643:            <extension>.7z .7Z .zip .ZIP</extension>
+644:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+645:            <platform>neogeo</platform>
+664:            <path>/storage/roms/neocd</path>
+665:            <extension>.cue .CUE .iso .ISO .chd .CHD .zip .ZIP .7z .7Z</extension>
+666:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+667:            <platform>neogeocd</platform>
+684:            <path>/storage/roms/3do</path>
+685:            <extension>.iso .ISO .bin .BIN .chd .CHD .cue .CUE .zip .ZIP .7z .7Z</extension>
+686:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+687:            <platform>3do</platform>
+703:            <path>/storage/roms/saturn</path>
+704:            <extension>.cue .CUE .chd .CHD .iso .ISO .zip .ZIP .mds .MDS</extension>
+705:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+706:            <platform>saturn</platform>
+727:            <path>/storage/roms/psx</path>
+728:            <extension>.bin .BIN .cue .CUE .img .IMG .mdf .MDF .pbp .PBP .toc .TOC .cbn .CBN .m3u .M3U .ccd .CCD .chd .CHD .zip .ZIP .7z .7Z .iso .ISO</extension>
+729:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+730:            <platform>psx</platform>
+753:            <path>/storage/roms/n64</path>
+754:            <extension>.z64 .Z64 .n64 .N64 .v64 .V64 .zip .ZIP .7z .7Z</extension>
+755:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+756:            <platform>n64</platform>
+782:            <path>/storage/roms/dreamcast</path>
+783:            <extension>.cdi .CDI .gdi .GDI .chd .CHD .zip .ZIP .7z .7Z .m3u .M3U</extension>
+784:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+785:            <platform>dreamcast</platform>
+807:            <path>/storage/roms/gamecube</path>
+808:            <extension>.gcm .GCM .iso .ISO .gcz .GCZ .ciso .CISO .wbfs .WBFS .rvz .RVZ</extension>
+809:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+810:            <platform>gc</platform>
+826:            <path>/storage/roms/wii</path>
+827:            <extension>.gcm .GCM .iso .ISO .gcz .GCZ .ciso .CISO .wbfs .WBFS .wad .WAD .rvz .RVZ</extension>
+828:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+829:            <platform>wii</platform>
+845:            <path>/storage/roms/gb</path>
+846:            <extension>.gb .GB .zip .ZIP .7z .7Z</extension>
+847:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+848:            <platform>gb</platform>
+870:            <path>/storage/roms/gbh</path>
+871:            <extension>.gb .GB .zip .ZIP .7z .7Z</extension>
+872:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+873:            <platform>gb</platform>
+895:            <path>/storage/roms/gbc</path>
+896:            <extension>.gb .GB .gbc .GBC .zip .ZIP .7z .7Z</extension>
+897:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+898:            <platform>gbc</platform>
+920:            <path>/storage/roms/gbch</path>
+921:            <extension>.gb .GB .gbc .GBC .zip .ZIP .7z .7Z</extension>
+922:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+923:            <platform>gbc</platform>
+945:            <path>/storage/roms/gba</path>
+946:            <extension>.gba .GBA .zip .ZIP .7z .7Z</extension>
+947:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+948:            <platform>gba</platform>
+967:            <path>/storage/roms/gbah</path>
+968:            <extension>.gba .GBA .zip .ZIP .7z .7Z</extension>
+969:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+970:            <platform>gba</platform>
+989:            <path>/storage/roms/gamegear</path>
+990:            <extension>.bin .BIN .gg .GG .zip .ZIP .7z .7Z</extension>
+991:            <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+992:            <platform>gamegear</platform>
+1010:           <path>/storage/roms/gamegearh</path>
+1011:           <extension>.bin .BIN .gg .GG .zip .ZIP .7z .7Z</extension>
+1012:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1013:           <platform>gamegear</platform>
+1031:           <path>/storage/roms/ngp</path>
+1032:           <extension>.ngp .NGP .zip .ZIP .7z .7Z</extension>
+1033:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1034:           <platform>ngp</platform>
+1050:           <path>/storage/roms/ngpc</path>
+1051:           <extension>.ngc .NGC .zip .ZIP .7z .7Z</extension>
+1052:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1053:           <platform>ngpc</platform>
+1069:           <path>/storage/roms/nds</path>
+1070:           <extension>.nds .zip .NDS .ZIP .7z .7Z</extension>
+1071:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1072:           <platform>nds</platform>
+1093:           <path>/storage/roms/psp</path>
+1094:           <extension>.iso .ISO .cso .CSO .pbp .PBP</extension>
+1095:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1096:           <platform>psp</platform>
+1117:           <path>/storage/roms/pspminis</path>
+1118:           <extension>.iso .ISO .cso .CSO .pbp .PBP</extension>
+1119:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1120:           <platform>psp</platform>
+1141:           <path>/storage/roms/pc</path>
+1142:           <extension>.com .COM .sh .SH .bat .BAT .exe .EXE .zip .ZIP</extension>
+1143:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1144:           <platform>pc</platform>
+1166:           <path>/storage/roms/openbor</path>
+1167:           <extension>.pak .PAK</extension>
+1168:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1169:           <platform>openbor</platform>
+1185:           <name>ports</name>
+1186:           <fullname>Ports</fullname>
+1190:           <path>/storage/roms/ports_scripts</path>
+1191:           <extension>.sh .SH</extension>
+1192:           <command>/usr/bin/bash %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1193:           <platform>ports</platform>
+1202:           <path>/storage/roms/amstradcpc</path>
+1203:           <extension>.dsk .DSK .sna .SNA .tap .TAP .cdt .CDT .voc .VOC .m3u .M3U .zip .ZIP .7z .7Z</extension>
+1204:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1205:           <platform>amstradcpc</platform>
+1221:           <path>/storage/roms/amstradgx4000</path>
+1222:           <extension>.cpr .CPR .dsk .DSK .sna .SNA .tap .TAP .cdt .CDT .voc .VOC .m3u .M3U .zip .ZIP</extension>
+1223:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1224:           <platform>amstradgx4000</platform>
+1240:           <path>/storage/roms/atari2600</path>
+1241:           <extension>.a26 .A26 .bin .BIN .zip .ZIP .7z .7Z</extension>
+1242:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1243:           <platform>atari2600</platform>
+1264:           <path>/storage/roms/atari5200</path>
+1265:           <extension>.rom .ROM .xfd .XFD .atr .ATR .atx .ATX .cdm .CDM .cas .CAS .bin .BIN .a52 .A52 .xex .XEX .zip .ZIP .7z .7Z</extension>
+1266:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1267:           <platform>atari5200</platform>
+1284:           <path>/storage/roms/atari7800</path>
+1285:           <extension>.a78 .A78 .bin .BIN .zip .ZIP .7z .7Z</extension>
+1286:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1287:           <platform>atari7800</platform>
+1303:           <path>/storage/roms/atari800</path>
+1304:           <extension>.rom .ROM .xfd .XFD .atr .ATR .atx .ATX .cdm .CDM .cas .CAS .bin .BIN .a52 .A52 .xex .XEX .zip .ZIP .7z .7Z</extension>
+1305:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1306:           <platform>atari800</platform>
+1322:           <path>/storage/roms/atarilynx</path>
+1323:           <extension>.lnx .LNX .zip .ZIP .7z .7Z</extension>
+1324:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1325:           <platform>atarilynx</platform>
+1342:           <path>/storage/roms/atarist</path>
+1343:           <extension>.st .ST .msa .MSA .stx .STX .dim .DIM .ipf .IPF .m3u .M3U .zip .ZIP .7z .7Z</extension>
+1344:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1345:           <platform>atarist</platform>
+1366:           <path>/storage/roms/atarijaguar</path>
+1367:           <extension>.j64 .jag .J64 .JAG .zip</extension>
+1368:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1369:           <platform>atarijaguar</platform>
+1385:           <path>/storage/roms/wonderswan</path>
+1386:           <extension>.ws .WS .zip .ZIP .7z .7Z</extension>
+1387:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1388:           <platform>wonderswan</platform>
+1404:           <path>/storage/roms/wonderswancolor</path>
+1405:           <extension>.wsc .WSC .zip .ZIP .7z .7Z</extension>
+1406:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1407:           <platform>wonderswancolor</platform>
+1423:           <path>/storage/roms/coleco</path>
+1424:           <extension>.bin .BIN .col .COL .rom .ROM .zip .ZIP .7z .7Z</extension>
+1425:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1426:           <platform>colecovision</platform>
+1443:           <path>/storage/roms/vic20</path>
+1444:           <extension>.d64 .g64 .t64 .x64 .zip .D64 .G64 .T64 .X64 .ZIP</extension>
+1445:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1446:           <platform>vic20</platform>
+1462:           <path>/storage/roms/c16</path>
+1463:           <extension>.d64 .g64 .t64 .x64 .zip .D64 .G64 .T64 .X64 .ZIP</extension>
+1464:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1465:           <platform>c16</platform>
+1481:           <path>/storage/roms/c64</path>
+1482:           <extension>.tap .TAP .d64 .D64 .zip .ZIP .7z .7Z .t64 .T64 .prg .PRG .crt .CRT .m3u .M3U</extension>
+1483:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1484:           <platform>c64</platform>
+1501:           <path>/storage/roms/c128</path>
+1502:           <extension>.d64 .D64 .g64 .G64 .t64 .T64 .x64 .X64 .zip .ZIP .7z .7Z .prg .PRG .crt .CRT .m3u .M3U</extension>
+1503:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1504:           <platform>c128</platform>
+1520:           <path>/storage/roms/amiga</path>
+1521:           <extension>.zip .ZIP .adf .ADF .uae .UAE .ipf .IPF .dms .DMS .adz .ADZ .lha .LHA .hdf .HDF .m3u .M3U</extension>
+1522:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1523:           <platform>amiga</platform>
+1545:           <path>/storage/roms/amigacd32</path>
+1546:           <extension>.iso .ISO .cue .CUE .zip .ZIP .lha .LHA .hdf .HDF</extension>
+1547:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1548:           <platform>amigacd32</platform>
+1570:           <path>/storage/roms/pc98</path>
+1571:           <extension>.d98 .zip .98d .fdi .fdd .2hd .tfd .d88 .88d .hdm .xdf .dup .hdi .thd .nhd .hdd .hdn </extension>
+1572:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1573:           <platform>pc98</platform>
+1590:           <path>/storage/roms/daphne</path>
+1591:           <extension>.daphne .DAPHNE</extension>
+1592:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1593:           <platform>daphne</platform>
+1614:           <path>/storage/roms/msx</path>
+1615:           <extension>.dsk .DSK .mx1 .MX1 .mx2 .MX2 .rom .ROM .zip .ZIP .7z .7Z .m3u .M3U .cas .CAS</extension>
+1616:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1617:           <platform>msx</platform>
+1634:           <path>/storage/roms/msx2</path>
+1635:           <extension>.dsk .DSK .mx1 .MX1 .mx2 .MX2 .rom .ROM .zip .ZIP .7z .7Z .m3u .M3U .cas .CAS</extension>
+1636:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1637:           <platform>msx</platform>
+1654:           <path>/storage/roms/odyssey</path>
+1655:           <extension>.bin .BIN .zip .ZIP .7z .7Z</extension>
+1656:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1657:           <platform>odyssey2</platform>
+1673:           <path>/storage/roms/intellivision</path>
+1674:           <extension>.int .INT .bin .BIN .rom .ROM .zip .ZIP .7z .7Z</extension>
+1675:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1676:           <platform>intellivision</platform>
+1697:           <path>/storage/roms/vectrex</path>
+1698:           <extension>.bin .BIN .gam .GAM .vec .VEC .zip .ZIP .7z .7Z</extension>
+1699:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1700:           <platform>vectrex</platform>
+1716:           <path>/storage/roms/sgfx</path>
+1717:           <extension>.pce .PCE .sgx .SGX .cue .CUE .ccd .CCD .chd .CHD .zip .ZIP .7z .7Z</extension>
+1718:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1719:           <platform>supergrafx</platform>
+1736:           <path>/storage/roms/pcfx</path>
+1737:           <extension>.chd .CHD .zip .ZIP .cue .CUE .ccd .CCD .toc .TOC</extension>
+1738:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1739:           <platform>pcfx</platform>
+1755:           <path>/storage/roms/gameandwatch</path>
+1756:           <extension>.mgw .MGW .zip .ZIP .7z .7Z</extension>
+1757:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1758:           <platform>gameandwatch</platform>
+1774:           <path>/storage/roms/virtualboy</path>
+1775:           <extension>.vb .VB .zip .ZIP .7z .7Z</extension>
+1776:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1777:           <platform>virtualboy</platform>
+1793:           <path>/storage/roms/cdi</path>
+1794:           <extension>.chd .CHD .iso .ISO</extension>
+1795:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1796:           <platform>cdi</platform>
+1812:           <path>/storage/roms/pokemini</path>
+1813:           <extension>.min .MIN .zip .ZIP .7z .7Z</extension>
+1814:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1815:           <platform>pokemini</platform>
+1831:           <path>/storage/roms/videopac</path>
+1832:           <extension>.bin .BIN</extension>
+1833:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1834:           <platform>videopac</platform>
+1850:           <path>/storage/roms/scummvm</path>
+1851:           <extension>.scummvm</extension>
+1852:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1853:           <platform>pc</platform>
+1874:           <path>/storage/roms/sc-3000</path>
+1875:           <extension>.bin .BIN .sg .SG .zip .ZIP .7z .7Z</extension>
+1876:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1877:           <platform>sc-3000</platform>
+1893:           <path>/storage/roms/x68000</path>
+1894:           <extension>.dim .DIM .img .IMG .d88 .D88 .88d .88D .hdm .HDM .dup .DUP .2hd .2HD .xdf .XDF .hdf .HDF .cmd .CMD .m3u .M3U .zip .ZIP .7z .7Z</extension>
+1895:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1896:           <platform>x68000</platform>
+1912:           <path>/storage/roms/x1</path>
+1913:           <extension>.dx1 .DX1 .2d .2D .2hd .2HD .tfd .TFD .d88 .D88 .88d .88D .hdm .HDM .xdf .XDF .dup .DUP .tap .TAP .cmd .CMD .7z .7Z .zip .ZIP</extension>
+1914:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1915:           <platform>x1</platform>
+1931:           <path>/storage/roms/zxspectrum</path>
+1932:           <extension>.tzx .TZX .tap .TAP .z80 .Z80 .rzx .RZX .scl .SCL .trd .TRD .zip .ZIP .7z .7Z</extension>
+1933:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1934:           <platform>zxspectrum</platform>
+1950:           <path>/storage/roms/zx81</path>
+1951:           <extension>.tzx .TZX .p .P .zip .ZIP .7z .7Z</extension>
+1952:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1953:           <platform>zx81</platform>
+1969:           <path>/storage/roms/uzebox</path>
+1970:           <extension>.uze .UZE .hex .HEX</extension>
+1971:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1972:           <platform>uzebox</platform>
+1988:           <path>/storage/roms/solarus</path>
+1989:           <extension>.solarus</extension>
+1990:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+1991:           <platform>solarus</platform>
+2007:           <path>/storage/roms/pico-8</path>
+2008:           <extension>.p8 .P8 .png .PNG</extension>
+2009:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2010:           <platform>pico8</platform>
+2031:           <path>/storage/roms/ports/doom</path>
+2032:           <extension>.wad .WAD .iwad .IWAD .pwad .PWAD .doom</extension>
+2033:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2034:           <platform>pc</platform>
+2060:           <path>/storage/roms/tic-80</path>
+2061:           <extension>.tic .TIC</extension>
+2062:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2063:           <platform>tic-80</platform>
+2079:           <path>/storage/roms/easyrpg</path>
+2080:           <extension>.ldb</extension>
+2081:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2082:           <platform>easyrpg</platform>
+2098:           <path>/storage/roms/ports/ecwolf/games</path>
+2099:           <extension>.SOD .sod .wl6 .WL6 .N3D .n3d .SD2 .sd2 .SD3 .sd3 .ecwolf</extension>
+2100:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2101:           <platform>pc</platform>
+2117:           <path>/storage/roms/supervision</path>
+2118:           <extension>.bin .BIN .sv .SV .zip .ZIP .7z .7Z</extension>
+2119:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2120:           <platform>supervision</platform>
+2136:           <path>/storage/roms/freej2me</path>
+2137:           <extension>.jar .JAR</extension>
+2138:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2139:           <platform>freej2me</platform>
+2155:           <path>/storage/roms/ports/gmloader</path>
+2156:           <extension>.apk .APK .zip .ZIP</extension>
+2157:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2158:           <platform>gmloader</platform>
+2174:           <path>/storage/roms/karaoke</path>
+2175:           <extension>.cdg .CDG</extension>
+2176:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2177:           <platform>karaoke</platform>
+2192:           <path>/storage/roms/mplayer</path>
+2193:           <extension>.mp4 .MP4 .mkv .MKV .avi .AVI .mov .MOV .wmv .WMV .m3u .M3U .mpg .MPG .ytb .YTB .twi .TWI .sh .SH</extension>
+2194:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2195:           <platform>mplayer</platform>
+2214:           <path>/storage/roms/screenshots</path>
+2215:           <extension>.pbm .PBM .jpg .JPG .png .PNG</extension>
+2216:           <command>ignore</command>
+2217:           <platform>ignore</platform>
+2226:           <path>/usr/bin/scripts/setup</path>
+2227:           <extension>.sh</extension>
+2228:           <command>emuelecRunEmu.sh %ROM% -P%SYSTEM% --core=%CORE% --emulator=%EMULATOR% --controllers="%CONTROLLERSCONFIG%"</command>
+2229:           <platform>setup</platform>
