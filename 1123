@@ -1,0 +1,616 @@
+EMUELEC:~ #
+python3 - <<'PY'
+from pathlib import Path
+import xml.etree.ElementTree as ET
+import re
+from collections import defaultdict
+
+ROOT = Path('/storage/roms')
+MULTI = re.compile(r'多人|双人|三人|四人|3\s*(?:人|p|players?)|4\s*(?:人|p|players?)|multiplayer', re.I)
+FOUR = re.compile(r'四人|4\s*(?:人|p|players?)|four\s*players?', re.I)
+THREE = re.compile(r'三人|3\s*(?:人|p|players?)|three\s*players?', re.I)
+EXT = re.compile(r'\.(7z|zip|rar|chd|iso|cue|bin|nes|sfc|smc|gba|gbc|gb|md|gen|pbp|cso|rom|img)$', re.I)
+PREFIX = re.compile(r'^\s*[A-Za-z0-9一-龥]{1,4}\s*[-_、：:]\s*')
+PAREN = re.compile(r'\s*[\(（][^()（）]*[\)）]')
+
+def is_backup(p):
+    return any('backup' in x.lower() or 'gamelist_before' in x.lower()
+               or 'gamelist-before' in x.lower()
+               for x in p.relative_to(ROOT).parts)
+
+def backup_rel(p):
+    parts = p.relative_to(ROOT).parts
+    for i, part in enumerate(parts):
+        low = part.lower()
+        if 'backup' in low or 'gamelist_before' in low or 'gamelist-before' in low:
+            tail = parts[i+1:]
+            if tail and tail[-1] == 'gamelist.xml':
+                return Path(*tail)
+    return None
+
+def read_xml(p):
+    try:
+        root = ET.parse(p).getroot()
+    s = re.sub(r'(世界版|日版|美版|欧版|中文版|汉化版|修正版|改版|加强版|最终版|特别版|合集)$', 'PYint('注意：第6项是同名候选，仍需排除误合并；不同名称的同一游戏也可能不会被自动归为一组。')
+
+========== 1. 当前 XML 总览 ==========
+当前 XML 文件: 24
+当前游戏记录: 7751
+不同且真实存在的 ROM 文件: 3860
+XML 解析失败: 0
+引用 ROM 不存在/路径未匹配: 1233
+缺失文件候选: | arcade/gamelist.xml | M-梦幻冒险(MHMX) | ./动作射击街机/nemo.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 简化版(QH97JHB) | ./格斗拳皇合集/kof97j/kof97.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 周年纪念(QH97ZNJN) | ./格斗拳皇合集/kof97ae.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 进化平衡(QH97JHPH) | ./格斗拳皇合集/kof97eb.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 梦回(QH97MH) | ./格斗拳皇合集/kof97m.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 特别版(QH97TBB) | ./格斗拳皇合集/kof97sp.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 狂龙版2023(QH97KLB2023) | ./格斗拳皇合集/kof97kl2023/kof97xt.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 狂龙版2023 简化版(QH97KLB2023JHB) | ./格斗拳皇合集/kof97kl2023j/kof97xt.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 天国神族 简化版(QH97TGSZJHB) | ./格斗拳皇合集/kof97orhj/kof97xt.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 无限梦幻 简化版(QH97WXMHJHB) | ./格斗拳皇合集/kof97mugen/kof97xt.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2(QH97TS) | ./格斗拳皇合集/kof97ts.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2 简化版(QH97TSJHB) | ./格斗拳皇合集/kof97tsj/kof97ts.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 最终决战(QH97ZZJZ) | ./格斗拳皇合集/kof97xt.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 所向披靡(QH97SXPM) | ./格斗拳皇合集/kof97inv.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 所向披靡 简化版(QH97SXPMJHB) | ./格斗拳皇合集/kof97invj/kof97inv.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 重出江湖加强版2003(QH97ZCJHJQB2003) | ./格斗拳皇合集/kof97oro.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 乱击2010 简化版(QH97LJ2010JHB) | ./格斗拳皇合集/kof97rcj/kof97rc.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 风云再起Plus(QH97FYZQ) | ./格斗拳皇合集/kof97pls.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 格斗之王(QH97GDZW) | ./格斗拳皇合集/kog.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇97 格斗之王风云再起Plus(QH97GDZWFYZQ) | ./格斗拳皇合集/kogplus.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 Combo Plus(QH98) | ./格斗拳皇合集/kof98cp.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 Boss汉化版(QH98HHB) | ./格斗拳皇合集/kof98bsc.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 Boss Plus 汉化简化版(QH98HHJHB) | ./格斗拳皇合集/kof98plc.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 简化版(QH98JHB) | ./格斗拳皇合集/kof98h.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 无极限 简化版(QH98WJXJHB) | ./格斗拳皇合集/kof98mixj/kof98mix.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 终极比赛(QH98ZJBS) | ./格斗拳皇合集/kof98ult.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 终极比赛 简化版(QH98ZJBSJHB) | ./格斗拳皇合集/kof98ultj/kof98ult.7z
+缺失文件候选: | arcade/gamelist.xml | Q-拳皇98 BC 02风格版(QH98FGB) | ./格斗拳皇合集/kof98bc2k2.7z
+其余未列出: 1203
+
+========== 2. 备份中存在、当前缺失的多人关键词记录 ==========
+候选数: 8
+arcade/gamelist.xml | C-赤色要塞(CSYS) | ./动作射击街机 小游戏/jackal.7z
+  说明: 《赤色要塞：街机版（Jackal）》是由KONAMI公司制作发行的一款枪战街机游戏，和“魂斗罗”、“绿色兵团”、“沙罗曼蛇”誉为“四强”，风靡80年代到九十年代的街机市场，原本是街机上的作品，在红白机上进行了移植，本来游戏的整体难度比较高，FC版本难度有所降低，好多玩家在第一个关卡就会卡在那里过不去，整个游戏非常简单，就是开着一辆吉普车与敌人作战，解救人质，炸开敌人的牢房，拯救人质的时候火力会加强，游戏紧张刺激，难度比较高。玩过街机版赤色要塞后，你会发现，当年你先接触了FC的赤色要塞是多么的幸运。当然，这并不是说街
+arcade/gamelist.xml | P-泡泡龙2(弹球)(PPL2DQ) | ./休闲娱乐街机/pbobbl2n.7z
+  说明: 布布和鲍勃回来了！就像在相反的俄罗斯方块中一样，你向粘在不断下降的天花板上的一系列不同颜色的气泡发射气泡，试图将它们三三个匹配以使它们消失。此版本包含解谜挑战、多人游戏和正常的渐进阶段。
+arcade/gamelist.xml | P-泡泡龙3(平台)(PPL3PT) | ./休闲娱乐街机/bubblem.7z
+  说明: Bubble Memories - 泡泡龙的故事 III 是 Bub 和 Bob 的第三次也是最后一次街机游戏（不包括“泡泡龙”系列），Bubble Memories 再次回归该系列传奇第一款的经典单屏游戏玩法郊游。 从图像上看，该游戏与一年前发布的“Bobble Bobble II”非常相似。两者之间唯一真正的视觉差异是后者使用了一些毫无魅力的数字化动物照片来构成游戏的背景。
+arcade/gamelist.xml | Q-球拍也疯狂(QPYFK) | ./运动街机/paddlema.7z
+  说明: Paddle Mania 是一款具有奥林匹克风格的俯视网球游戏。在玩游戏的单人和合作模式时，玩家将交替在花哨的球场上与其他网球运动员交手，以及与其他运动项目的运动员竞争。尽管以网球为主题，但计分方式与空气曲棍球更相似，球场两侧都有一个目标，球队需要防守并瞄准目标。你面对的奥林匹克运动员从排球队到冲浪运动员再到单个相扑选手，而与网球运动员对抗的噱头包括定期打开和关闭的球门，一个有障碍物防止你站在里面的东西，还有一个球门的一部分被移动的墙挡住了。通过左右挥动球拍，您需要获得比对手更多的分数才能移动到下一个运动员。有一个
+arcade/gamelist.xml | Z-战王之王(ZWZW) | ./动作闯关街机/astyanax.7z
+  说明: Jaleco于1989年出品的动作过关游戏，又名斧王，也有人叫它战斧4代，fc有同名移植作。但是它和战斧却没有多少关系，大家有口皆碑的战斧是SEGA出的。古时候，有一个魔王一直和众神为敌，由于双方力量不相上下，众神费尽心思锤炼了一把无敌的战斧，终于战胜了魔王，并将其灵魂封印在战斧内，战斧成了捍卫和平的法宝。不知过了多少年，人类在大地繁殖，逐渐取代了众神在大陆的统治地位，战斧也由人类来保管。但是魔王的法力在一天天地恢复，他召唤了大量的魔物，兽人，和不死系战士在大陆四处破坏。乘人类忙于对付手下之时，好让自己的离开战斧的
+genesis/gamelist.xml | Z-中国象棋(ZGXQ) | ./中国象棋.zip
+  说明: 中国象棋是一款棋牌类游戏，游戏难度分为三级：简单、普通、困难，还可以实现和双人对战。该游戏可以培养你玩象棋的技术，如果你一不小心，将会被在两三步后就解决了。
+snes/gamelist.xml | B-蝙蝠侠与罗宾(BFXYLB) | ./蝙蝠侠与罗宾.zip
+  说明: 1994年，分别在SFC和MD上发行一款同名游戏，那就是《蝙蝠侠与罗宾大冒险》。由于制作公司不同和平台不同，SFC版看起来更像动作类游戏，而MD版更像射击游戏，游戏内容也完全不同。这两款游戏难度都高，关卡丰富，画面都很棒，玩SFC版就像看一部动画，MD版则运用了大量伪3D特效。美中不足的是SFC版没法双人一起玩，而MD版以射击为主，关卡冗长。SFC版基本操作设置为：A跳跃，B攻击，Y使用道具，X选择道具，LR格挡。
+snes/gamelist.xml | H-荒野双枪(HYSQ) | ./荒野双枪.zip
+  说明: Natsume，从FC时代一路过来的老玩家看到这几个字样绝对会肃然起敬。《赤影战士》是无数玩家心目中的经典，其快速的节奏以及爽快的操作手感令人至今难以忘怀，而FC上的另一款优秀动作游戏《最终任务》同样也出自该公司。而到了SFC时代，Natsume又为玩家带来了这款爽快的动作游戏——荒野双枪。在游戏中玩家扮演一对亡命鸳鸯在西部险恶的世界火爆厮杀。游戏内容简单明了，不用费尽心思的去破解谜题，只要让枪里的子弹准确的击中目标就好了，是比较优秀的动作游戏值得尝试。《荒野双枪》是试玩后感觉应该会有很多人都会玩的一款游戏。而且是
+
+========== 3. 当前明确标注四人/4P ==========
+数量: 128
+arcade/gamelist.xml | Q-拳皇2004 风云再起(QH2004FYZQ) | ./格斗拳皇合集/kf2k4pls.7z
+arcade/gamelist.xml | Q-拳皇99(QH99) | ./格斗拳皇合集/kof99.7z
+arcade/gamelist.xml | Q-拳皇94 Plus 简化版(QH94JHB) | ./格斗拳皇合集/kof94pem/kof94.7z
+arcade/gamelist.xml | Q-拳皇2001(QH2001) | ./格斗拳皇合集/kof2001.7z
+arcade/gamelist.xml | M-魔域战线(MYZX) | ./动作射击街机/dmnfrnt.7z
+arcade/gamelist.xml | S-圣铠传说(SKCS) | ./动作射击街机/gauntlet.7z
+arcade/gamelist.xml | Y-眼镜蛇特种部队(YJSTZBD) | ./动作射击街机/gijoe.7z
+arcade/gamelist.xml | N-怒之忍者(NZRZ) | ./动作射击街机/mystwarr.7z
+arcade/gamelist.xml | X-星战四人组(XZSRZ) | ./动作射击街机/quartet.7z
+arcade/gamelist.xml | L-落日骑士(LRQS) | ./动作射击街机/ssriders.7z
+arcade/gamelist.xml | L-雷霆地带(LTDD) | ./动作射击街机/thndzone.7z
+arcade/gamelist.xml | Y-月华剑士1(YHJS1) | ./格斗对战街机/lastblad.7z
+arcade/gamelist.xml | S-摔角霸王2 最终之战(SJBW2ZZZZ) | ./格斗对战街机/mbombrd.7z
+arcade/gamelist.xml | E-饿狼传说RB 特别版(ELCSTBB) | ./格斗对战街机/rbffspec.7z
+arcade/gamelist.xml | S-侍魂零(SHL) | ./格斗对战街机/samsho5.7z
+arcade/gamelist.xml | S-摔角霸王1(SJBW1) | ./格斗对战街机/slammast.7z
+arcade/gamelist.xml | S-世界英雄2(SJYX2) | ./格斗对战街机/wh2.7z
+arcade/gamelist.xml | Y-越野沙滩车(YYSTC) | ./赛车街机/fourtrax.7z
+arcade/gamelist.xml | J-极速马力(JSML) | ./赛车街机/hotrod.7z
+arcade/gamelist.xml | B-暴力冰上曲棍球(BLBSQGQ) | ./运动街机/hitice.7z
+arcade/gamelist.xml | M-美国马蹄铁比赛(MGMTTBS) | ./运动街机/horshoes.7z
+arcade/gamelist.xml | 2-2对2冰上曲棍球公开赛(D2BSQGQGKS) | ./运动街机/openice.7z
+arcade/gamelist.xml | Y-游泳大赛(YYDS) | ./运动街机/wmatch.7z
+arcade/gamelist.xml | A-阿拉丁传奇(ALDCQ) | ./动作闯关街机/arabfgt.7z
+arcade/gamelist.xml | Z-战斗回路(ZDHL) | ./动作闯关街机/batcir.7z
+arcade/gamelist.xml | Y-宇宙野兔(YZYT) | ./动作闯关街机/bucky.7z
+arcade/gamelist.xml | R-热血快打(RXKD) | ./动作闯关街机/burningf.7z
+arcade/gamelist.xml | S-森林守护神(SLSHS) | ./动作闯关街机/growl.7z
+arcade/gamelist.xml | D-斗神光辉(DSGH) | ./动作闯关街机/karatblz.7z
+arcade/gamelist.xml | C-沉默之龙(CMZL) | ./动作闯关街机/silentd.7z
+arcade/gamelist.xml | S-神剑伏魔录(SJFML) | ./动作闯关街机/theglad.7z
+arcade/gamelist.xml | Z-罪恶战士2(ZEZS2) | ./动作闯关街机/vendetta.7z
+arcade/gamelist.xml | M-名将 1V4(MJ1) | ./动作闯关改版/captc1v4.7z
+arcade/gamelist.xml | M-名将(MJ) | ./动作闯关改版/captcomm.7z
+arcade/gamelist.xml | M-名将 加强版2(MJJQB2) | ./动作闯关改版/captcommr1.7z
+arcade/gamelist.xml | L-龙与地下城2 暗黑秘影 加强版(LYDXC2AHMYJQB) | ./动作闯关改版/ddsomud.7z
+arcade/gamelist.xml | T-吞食天地1 王朝战争(TSTD1WCZZ) | ./动作闯关改版/dynwarj.7z
+arcade/gamelist.xml | T-铁钩船长(TGCC) | ./动作闯关改版/hook.7z
+arcade/gamelist.xml | X-西游释厄传2(XYSEZ2) | ./动作闯关改版/orleg2_104cn.7z
+arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强最终版(XYSEZ1QMLW211ZJJQZZB) | ./动作闯关改版/oldsplus211926/oldsplus.7z
+arcade/gamelist.xml | T-吞食天地2 曹仁版(TSTD2CRB) | ./动作闯关改版/wof曹仁/wofj.7z
+arcade/gamelist.xml | H-豪血寺 新豪血寺一族 全人物版(HXSXHXSYZQRWB) | ./格斗对战改版/matrim.7z
+arcade/gamelist.xml | E-饿狼传说RB 简化特别版(ELCSJHTBB) | ./格斗对战改版/rbffspec.7z
+arcade/gamelist.xml | H-合金弹头2(HJDT2) | ./合金弹头合集/mslug2.zip
+arcade/gamelist.xml | Z-战斧后传(ZFHC) | ./动作闯关街机/ga2j.7z
+arcade/动作闯关街机/gamelist.xml | S-神剑伏魔录 | ./theglad.7z
+arcade/动作闯关街机/gamelist.xml | Z-罪恶战士2 | ./vendetta.7z
+arcade/动作闯关街机/gamelist.xml | Z-战斧后传 | ./ga2j.7z
+arcade/动作闯关街机/gamelist.xml | S-森林守护神 | ./growl.7z
+arcade/动作闯关街机/gamelist.xml | C-沉默之龙 | ./silentd.7z
+arcade/动作闯关街机/gamelist.xml | R-热血快打 | ./burningf.7z
+arcade/动作闯关街机/gamelist.xml | Z-战斗回路 | ./动作闯关街机/batcir.7z
+arcade/动作闯关街机/gamelist.xml | D-斗神光辉 | ./karatblz.7z
+arcade/动作闯关街机/gamelist.xml | A-阿拉丁传奇 | ./arabfgt.7z
+arcade/动作闯关街机/gamelist.xml | Y-宇宙野兔 | ./bucky.7z
+arcade/动作射击街机/gamelist.xml | L-雷霆地带 | ./thndzone.7z
+arcade/动作射击街机/gamelist.xml | Y-眼镜蛇特种部队 | ./gijoe.7z
+arcade/动作射击街机/gamelist.xml | L-落日骑士 | ./ssriders.7z
+arcade/动作射击街机/gamelist.xml | N-怒之忍者 | ./mystwarr.7z
+arcade/动作射击街机/gamelist.xml | X-星战四人组 | ./quartet.7z
+arcade/动作射击街机/gamelist.xml | M-魔域战线 | ./dmnfrnt.7z
+arcade/动作射击街机/gamelist.xml | S-圣铠传说 | ./gauntlet.7z
+arcade/格斗对战街机/gamelist.xml | S-摔角霸王1 | ./slammast.7z
+arcade/格斗对战街机/gamelist.xml | S-摔角霸王2 最终之战 | ./mbombrd.7z
+arcade/格斗对战街机/gamelist.xml | E-饿狼传说RB 特别版 | ./rbffspec.7z
+arcade/格斗对战街机/gamelist.xml | S-世界英雄2 | ./wh2.7z
+arcade/格斗对战街机/gamelist.xml | S-侍魂零 | ./samsho5.7z
+arcade/格斗对战街机/gamelist.xml | Y-月华剑士1 | ./lastblad.7z
+arcade/赛车街机/gamelist.xml | J-极速马力 | ./hotrod.7z
+arcade/赛车街机/gamelist.xml | Y-越野沙滩车 | ./fourtrax.7z
+arcade/运动街机/gamelist.xml | Y-游泳大赛 | ./wmatch.7z
+arcade/运动街机/gamelist.xml | 2-2对2冰上曲棍球公开赛 | ./openice.7z
+arcade/运动街机/gamelist.xml | B-暴力冰上曲棍球 | ./hitice.7z
+arcade/运动街机/gamelist.xml | M-美国马蹄铁比赛 | ./horshoes.7z
+arcade/动作闯关改版/gamelist.xml | M-名将 | ./captcomm.7z
+arcade/动作闯关改版/gamelist.xml | M-名将 加强版2 | ./captcommr1.7z
+arcade/动作闯关改版/gamelist.xml | M-名将 1V4 | ./captc1v4.7z
+arcade/动作闯关改版/gamelist.xml | L-龙与地下城2 暗黑秘影 加强版 | ./ddsomud.7z
+arcade/动作闯关改版/gamelist.xml | T-吞食天地1 王朝战争 | ./dynwarj.7z
+arcade/动作闯关改版/gamelist.xml | T-吞食天地2 曹仁版 | ./动作闯关街机 魔改/wof曹仁/wofj.7z
+arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强最终版 | ./oldsplus.7z
+arcade/动作闯关改版/gamelist.xml | X-西游释厄传2 | ./orleg2_104cn.7z
+arcade/动作闯关改版/gamelist.xml | T-铁钩船长 | ./hook.7z
+ports_scripts/gamelist.xml | X-仙剑奇侠传联盟幻妖版[XJQXZLMHYB] | ./04pallmhy.sh
+ports_scripts/gamelist.xml | X-星露谷物语[XLGWY] | ./StardewValley.sh
+genesis/gamelist.xml | N-怒之铁拳1(NZTQ1) | ./怒之铁拳1.zip
+genesis/gamelist.xml | N-怒之铁拳2(NZTQ2) | ./怒之铁拳2.zip
+genesis/gamelist.xml | Y-幽游白书-魔强统一战(YYBSMQTYZ) | ./幽游白书-魔强统一战(简).zip
+genesis/gamelist.xml | Z-战斧3(ZF3) | ./战斧3.zip
+genesis/gamelist.xml | N-NHL94 | ./NHL94.zip
+genesis/gamelist.xml | S-圣铠IV(SK) | ./圣铠IV.zip
+genesis/gamelist.xml | S-摔跤霸王(SJBW) | ./摔跤霸王.zip
+genh/gamelist.xml | H-魂斗罗 - 铁血兵团 (中文版)(HDLTXBTZWB) | ./魂斗罗 - 铁血兵团(中).zip
+nes/gamelist.xml | Z-最终幻想1+2(ZZHX1) | ./最终幻想1+2.zip
+nes/gamelist.xml | H-魂斗罗3 力量(HDL3LL) | ./魂斗罗3 力量.zip
+nes/gamelist.xml | J-家庭赛马(JTSM) | ./家庭赛马.zip
+nes/gamelist.xml | J-街霸 4人街霸(JB4RJB) | ./街霸 4人街霸.zip
+nes/gamelist.xml | R-热血高校躲避球(RXGXDBQ) | ./热血高校躲避球.zip
+nes/gamelist.xml | R-热血足球联盟(RXZQLM) | ./热血足球联盟.zip
+nes/gamelist.xml | S-双月传说(SYCS) | ./双月传说.zip
+nes/gamelist.xml | Y-眼镜蛇特种部队1(YJSTZBD1) | ./眼镜蛇特种部队1.zip
+nes/gamelist.xml | Y-勇者斗恶龙3(YZDEL3) | ./勇者斗恶龙3.zip
+nesh/gamelist.xml | T-坦克大战4人版(TKDZ4RB) | ./坦克大战4人版.nes
+openbor/gamelist.xml | F-复仇者 4人版本[F-fcz 4rbb] | ./F-复仇者 4人版本.pak
+snes/gamelist.xml | Z-真女神转生if(ZNSZS) | ./真女神转生if.zip
+snes/gamelist.xml | C-超级炸弹人1(CJZDR1) | ./超级炸弹人1.zip
+snes/gamelist.xml | R-日落骑士(RLQS) | ./日落骑士.zip
+snes/gamelist.xml | X-幸运的卢克(XYDLK) | ./幸运的卢克.zip
+fbneo/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+fbneo/gamelist.xml | T-铁钩船长 | ./hook.zip
+fbneo/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+fbneo/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+fbneo/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+fbneo/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+fbneo/gamelist.xml | captcomm 四人模式的挑战 | ./ips/captcomm/captcomm 四人模式的挑战.dat
+fbneo/gamelist.xml | captcomm 四人模式的挑战v2 | ./ips/captcomm/captcomm 四人模式的挑战v2.dat
+fbneo/gamelist.xml | T-T-铁钩船长 | ./hook.zip
+fbneo/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+fbneo/images/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+fbneo/images/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+fbneo/images/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+fbneo/images/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+fbneo/images/gamelist.xml | T-铁钩船长 | ./hook.zip
+fbneo/images/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+fbneo/images/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+fbneo/images/gamelist.xml | T-T-铁钩船长 | ./hook.zip
+fbneo/videos/gamelist.xml | captcomm 四人模式的挑战 | ./ips\captcomm/captcomm 四人模式的挑战.dat
+fbneo/videos/gamelist.xml | captcomm 四人模式的挑战v2 | ./ips\captcomm/captcomm 四人模式的挑战v2.dat
+
+========== 4. 当前明确标注三人/3P ==========
+数量: 119
+arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇2004 加强版(QH2004JQB) | ./格斗拳皇合集/kf2k3pl.7z
+arcade/gamelist.xml | Q-拳皇2002 Remix Ultra 3.5(QH2002) | ./格斗拳皇合集/kof2k2ru.7z
+arcade/gamelist.xml | W-卧龙列传(WLLZ) | ./动作射击街机/garyoret.7z
+arcade/gamelist.xml | J-艰难时世(JNSS) | ./动作射击街机/hrdtimes.7z
+arcade/gamelist.xml | T-太空哈利(TKHL) | ./动作射击街机/sharrier.7z
+arcade/gamelist.xml | T-突击奇兵2(TJQB2) | ./动作射击街机/shocktr2.7z
+arcade/gamelist.xml | S-时空英雄(SKYX) | ./动作射击街机/spinlbrk.7z
+arcade/gamelist.xml | S-S.P.Y特别计划(TBJH) | ./动作射击街机/spy.7z
+arcade/gamelist.xml | M-迷宫任务(MGRW) | ./动作射击街机/xybots.7z
+arcade/gamelist.xml | F-疯狂警察(FKJC) | ./动作射击街机 小游戏/gbusters.7z
+arcade/gamelist.xml | Z-战场之狼2(ZCZL2) | ./动作射击街机 小游戏/mercs.7z
+arcade/gamelist.xml | X-行星飞行(XXFX) | ./飞行射击街机/buckrog.7z
+arcade/gamelist.xml | W-武装飞鸟2(WZFN2) | ./飞行射击街机 V/gunbird2.7z
+arcade/gamelist.xml | A-傲剑狂刀 加强版(AJKDJQB) | ./格斗对战街机/killbldp.7z
+arcade/gamelist.xml | H-豪血寺一族2(HXSYZ2) | ./格斗对战街机/pwrinst2.7z
+arcade/gamelist.xml | Y-异形风暴(YXFB) | ./动作闯关街机/astorm.7z
+arcade/gamelist.xml | R-忍者蛙(RZW) | ./动作闯关街机/btoads.7z
+arcade/gamelist.xml | X-西游降魔录(XYJML) | ./动作闯关街机/chinagat.7z
+arcade/gamelist.xml | J-究极战队(JJZD) | ./动作闯关街机/mmaulers.7z
+arcade/gamelist.xml | X-西游降魔录 日(XYJMLR) | ./动作闯关街机/saiyugoub2.7z
+arcade/gamelist.xml | S-索尼克闯关(SNKCG) | ./动作闯关街机/sonic.7z
+arcade/gamelist.xml | D-电神魔傀1(DSMK1) | ./动作闯关改版/denjinmk.7z
+arcade/gamelist.xml | K-恐龙新世纪 2022框架系列(KLXSJ2022KJXL) | ./动作闯关改版/dinofw.7z
+arcade/gamelist.xml | K-恐龙新世纪 赛事版(KLXSJSSB) | ./动作闯关改版/dinojj.7z
+arcade/gamelist.xml | D-电神魔傀2(DSMK2) | ./动作闯关改版/grdians.7z
+arcade/gamelist.xml | Y-圆桌骑士(YZQS) | ./动作闯关改版/knights.7z
+arcade/gamelist.xml | K-恐龙新世纪 三叠纪(KLXSJSDJ) | ./动作闯关改版/dinosdj.zip
+arcade/gamelist.xml | T-吞食天地2 蓝色标题版(TSTD2LSBTB) | ./动作闯关改版/wofchls/wofch.7z
+arcade/gamelist.xml | T-吞食天地2 超级加强版(TSTD2CJJQB) | ./动作闯关改版/wof超级加强版/wofj.7z
+arcade/gamelist.xml | H-合金弹头3 肉鸽版(HJDT3RGB) | ./合金弹头合集/mslug3ps.7z
+arcade/gamelist.xml | H-合金弹头4 最后的弹头（去防弹衣版）(HJDT4ZHDDTQFDYB) | ./合金弹头合集/mslug4lq.7z
+arcade/gamelist.xml | H-合金弹头4 最后的弹头(HJDT4ZHDDT) | ./合金弹头合集/mslug4lw.7z
+arcade/gamelist.xml | H-合金弹头5 多功能版(HJDT5DGNB) | ./合金弹头合集/mslug5dg.7z
+arcade/gamelist.xml | H-合金弹头X 传奇版(HJDTCQB) | ./合金弹头合集/mslugxcq.7z
+arcade/gamelist.xml | H-合金弹头X 传奇版火力对决(HJDTCQBHLDJ) | ./合金弹头合集/mslugxfs.7z
+arcade/gamelist.xml | H-合金弹头X 极度空间(HJDTJDKJ) | ./合金弹头合集/mslugxlb.7z
+arcade/gamelist.xml | H-合金弹头X 生存版(HJDTSCB) | ./合金弹头合集/mslugxsc.7z
+arcade/gamelist.xml | H-合金弹头4 随机弹药版(HJDT4SJDYB) | ./合金弹头合集/mslug4ar.zip
+arcade/gamelist.xml | A-傲剑狂刀(AJKD) | ./格斗对战街机/killbld.7z
+arcade/gamelist.xml | C-城市大金刚(CSDJG) | ./休闲娱乐街机/rampage.7z
+arcade/动作闯关街机/gamelist.xml | Y-异形风暴 | ./动作闯关街机/astorm.7z
+arcade/动作闯关街机/gamelist.xml | J-究极战队 | ./动作闯关街机/mmaulers.7z
+arcade/动作闯关街机/gamelist.xml | S-索尼克闯关 | ./动作闯关街机/sonic.7z
+arcade/动作闯关街机/gamelist.xml | X-西游降魔录 | ./动作闯关街机/chinagat.7z
+arcade/动作闯关街机/gamelist.xml | X-西游降魔录 日 | ./动作闯关街机/saiyugoub2.7z
+arcade/动作闯关街机/gamelist.xml | R-忍者蛙 | ./动作闯关街机/btoads.7z
+arcade/动作射击街机/gamelist.xml | T-突击奇兵2 | ./shocktr2.7z
+arcade/动作射击街机/gamelist.xml | W-卧龙列传 | ./garyoret.7z
+arcade/动作射击街机/gamelist.xml | S-S.P.Y特别计划 | ./spy.7z
+arcade/动作射击街机/gamelist.xml | T-太空哈利 | ./sharrier.7z
+arcade/动作射击街机/gamelist.xml | S-时空英雄 | ./spinlbrk.7z
+arcade/动作射击街机/gamelist.xml | M-迷宫任务 | ./xybots.7z
+arcade/动作射击街机/gamelist.xml | J-艰难时世 | ./hrdtimes.7z
+arcade/动作射击街机 小游戏/gamelist.xml | Z-战场之狼2 | ./mercs.7z
+arcade/动作射击街机 小游戏/gamelist.xml | F-疯狂警察 | ./gbusters.7z
+arcade/飞行射击街机/gamelist.xml | X-行星飞行 | ./buckrog.7z
+arcade/飞行射击街机 V/gamelist.xml | W-武装飞鸟2 | ./gunbird2.7z
+arcade/格斗对战街机/gamelist.xml | H-豪血寺一族2 | ./pwrinst2.7z
+arcade/格斗对战街机/gamelist.xml | A-傲剑狂刀 | ./killbld.7z
+arcade/格斗对战街机/gamelist.xml | A-傲剑狂刀 加强版 | ./killbldp.7z
+arcade/休闲娱乐街机/gamelist.xml | C-城市大金刚 | ./rampage.7z
+arcade/动作闯关改版/gamelist.xml | K-恐龙新世纪 2022框架系列 | ./动作闯关街机 魔改/dinofw.7z
+arcade/动作闯关改版/gamelist.xml | K-恐龙新世纪 赛事版 | ./动作闯关街机 魔改/dinojj.7z
+arcade/动作闯关改版/gamelist.xml | K-恐龙新世纪 三叠纪 | ./动作闯关街机 魔改/dinosdj.7z
+arcade/动作闯关改版/gamelist.xml | T-吞食天地2 蓝色标题版 | ./动作闯关街机 魔改/wofchls/wofch.7z
+arcade/动作闯关改版/gamelist.xml | T-吞食天地2 超级加强版 | ./动作闯关街机 魔改/wof超级加强版/wofj.7z
+arcade/动作闯关改版/gamelist.xml | T-吞食天地2 1V3加强版 | ./动作闯关街机 魔改/wof1v3p.7z
+arcade/动作闯关改版/gamelist.xml | Y-圆桌骑士 | ./动作闯关街机 魔改/knights.7z
+arcade/动作闯关改版/gamelist.xml | D-电神魔傀1 | ./动作闯关街机 魔改/denjinmk.7z
+arcade/动作闯关改版/gamelist.xml | D-电神魔傀2 | ./grdians.7z
+ports_scripts/gamelist.xml | X-仙剑奇侠传魂牵梦萦1.67[XJQXZHQMY1.67] | ./03palhqmy.sh
+genesis/gamelist.xml | Z-战斧1(ZF1) | ./战斧1.zip
+genesis/gamelist.xml | B-爆破公爵(BPGJ) | ./爆破公爵.zip
+genesis/gamelist.xml | C-超重量级拳击赛(CZLJQJS) | ./超重量级拳击赛.zip
+genesis/gamelist.xml | J-街头轮滑(JTLH) | ./街头轮滑.zip
+genesis/gamelist.xml | L-兰博3(LB3) | ./兰博3.zip
+genesis/gamelist.xml | S-三国演义-火烧赤壁(SGYYHSCB) | ./三国演义-火烧赤壁.zip
+genesis/gamelist.xml | W-悟空外传(WKWZ) | ./悟空外传(修正版).zip
+nes/gamelist.xml | B-兵蜂2(BF2) | ./兵蜂2.zip
+nes/gamelist.xml | J-荆轲新传(JKXC) | ./荆轲新传.zip
+nes/gamelist.xml | K-柯纳米世界2(KNMSJ2) | ./柯纳米世界2.zip
+nes/gamelist.xml | N-怒1(N1) | ./怒1.zip
+nes/gamelist.xml | T-太阳系战机(TYXZJ) | ./太阳系战机.zip
+nes/gamelist.xml | T-铁面无私(TMWS) | ./铁面无私.zip
+nes/gamelist.xml | T-吞食天地2 诸葛孔明传(TSTD2ZGKMC) | ./吞食天地2 诸葛孔明传.zip
+nes/gamelist.xml | Y-勇士们(YSM) | ./勇士们.zip
+nes/gamelist.xml | Y-勇者斗恶龙1(YZDEL1) | ./勇者斗恶龙1.zip
+openbor/gamelist.xml | R-热血进行曲13人版本[R-rxjxq13rbb] | ./R-热血进行曲13人版本.pak
+openbor/gamelist.xml | X-形意拳—新的传奇 | ./Martial Masters [Ver. 2.0][v.3.0 Build 4086].pak
+snes/gamelist.xml | K-快打旋风1(KDXF1) | ./快打旋风1.zip
+snes/gamelist.xml | S-SD英雄之挑战4(YXZTZ4) | ./SD英雄之挑战4.zip
+snes/gamelist.xml | C-超级坦克2(CJTK2) | ./超级坦克2.zip
+snes/gamelist.xml | D-电精(DJ) | ./电精.zip
+snes/gamelist.xml | L-旅梦人 盗不走的宝石汉化(LMRDBZDBSHH) | ./旅梦人 盗不走的宝石汉化.zip
+snes/gamelist.xml | M-美少女战士-另一个故事(MSNZSLYGGS) | ./美少女战士-另一个故事.zip
+snes/gamelist.xml | X-星间游侠2(XJYX2) | ./星间游侠2.zip
+snes/gamelist.xml | Z-智王传说之公主战士(ZWCSZGZZS) | ./智王传说之公主战士.zip
+snesh/gamelist.xml | G-怪物三人行(GWSRX) | ./怪物三人行.zip
+fbneo/gamelist.xml | Q-拳皇 2002 (解密版) | ./kof2k2fd.zip
+fbneo/gamelist.xml | kof2003 Plus - 20140916 | ./ips\kof2003/kof2003 Plus - 20140916.dat
+fbneo/gamelist.xml | dino 锁定三人模式 2009-1-15 | ./ips\dino/恐龙快打 锁定三人模式 2009-1-15.dat
+fbneo/gamelist.xml | Q-拳皇 2003 (解密版) | ./kof2k3fd.zip
+fbneo/gamelist.xml | Q-拳皇 2003 | ./kof2003.zip
+fbneo/gamelist.xml | T-吞食天地 II-赤壁之战 (CPS转换版) | ./wofch.zip
+fbneo/gamelist.xml | T-吞食天地 II-赤壁之战 (日版)降龙版(TSTD2JLB) | ./wofj.zip
+fbneo/gamelist.xml | Q-拳皇 2002 | ./kof2002.zip
+fbneo/gamelist.xml | dino 锁定三人模式 | ./ips/dino/恐龙快打 锁定三人模式.dat
+fbneo/gamelist.xml | 恐龙快打锁定三人模式 2009-1-15 | ./ips/dino/恐龙快打锁定三人模式 2009-1-15.dat
+fbneo/images/gamelist.xml | Q-拳皇 2002 | ./kof2002.zip
+fbneo/images/gamelist.xml | T-吞食天地 II-赤壁之战 (CPS转换版) | ./wofch.zip
+fbneo/images/gamelist.xml | Q-拳皇 2003 | ./kof2003.zip
+fbneo/images/gamelist.xml | Q-拳皇 2003 (解密版) | ./kof2k3fd.zip
+fbneo/images/gamelist.xml | Q-拳皇 2002 (解密版) | ./kof2k2fd.zip
+fbneo/images/gamelist.xml | T-吞食天地 II-赤壁之战 (日版) | ./wofj.zip
+fbneo/videos/gamelist.xml | kof2003 Plus - 20140916 | ./ips\kof2003/kof2003 Plus - 20140916.dat
+fbneo/videos/gamelist.xml | dino 锁定三人模式 2009-1-15 | ./ips\dino/dino 锁定三人模式 2009-1-15.dat
+fbneo/videos/gamelist.xml | dino 锁定三人模式 | ./ips\dino/dino 锁定三人模式.dat
+
+========== 5. 当前其他多人/双人标记（仅统计，不自动判定四人） ==========
+数量: 195
+arcade/gamelist.xml | Q-拳皇2000(QH2000) | ./格斗拳皇合集/kof2000.7z
+arcade/gamelist.xml | Q-拳皇97(QH97) | ./格斗拳皇合集/kof97.zip
+arcade/gamelist.xml | X-希魔复活(XMFH) | ./动作射击街机/bionicc.7z
+arcade/gamelist.xml | B-爆裂激战(BLJZ) | ./动作射击街机/crkdown.7z
+arcade/gamelist.xml | Z-最后的幸存者(ZHDXCZ) | ./动作射击街机/lastsurv.7z
+arcade/gamelist.xml | W-午夜抵抗(WYDK) | ./动作射击街机/midres.7z
+arcade/gamelist.xml | R-忍者小子2(RZXZ2) | ./动作射击街机/ninjakd2.7z
+arcade/gamelist.xml | S-闪亮之星(SLZX) | ./飞行射击街机/blazstar.7z
+arcade/gamelist.xml | C-雌虎战机(CHZJ) | ./飞行射击街机/cawing.7z
+arcade/gamelist.xml | S-死亡微笑(SWWX) | ./飞行射击街机/deathsml.7z
+arcade/gamelist.xml | Y-原始岛1(YSD1) | ./飞行射击街机/prehisle.7z
+arcade/gamelist.xml | Y-异形战机Leo(YXZJ) | ./飞行射击街机/rtypeleo.7z
+arcade/gamelist.xml | C-超级合体(CJHT) | ./飞行射击街机/sidearms.7z
+arcade/gamelist.xml | S-时间到了(SJDL) | ./飞行射击街机/timesup.7z
+arcade/gamelist.xml | 8-8号火力(HHL) | ./飞行射击街机 V/eightfrc.7z
+arcade/gamelist.xml | X-星球卫士(XQWS) | ./飞行射击街机 V/starfigh.7z
+arcade/gamelist.xml | L-龙虎之拳1(LHZQ1) | ./格斗对战街机/aof.7z
+arcade/gamelist.xml | X-血腥暴风(XXBF) | ./格斗对战街机/bloodstm.7z
+arcade/gamelist.xml | Z-真人快打1(ZRKD1) | ./格斗对战街机/mk.7z
+arcade/gamelist.xml | C-超级漫画英雄对街头霸王(CJMHYXDJTBW) | ./格斗对战街机/mshvsf.7z
+arcade/gamelist.xml | Y-异种角斗士(YZJDS) | ./格斗对战街机/mutantf.7z
+arcade/gamelist.xml | H-豪血寺一族2 外传(HXSYZ2WZ) | ./格斗对战街机/plegends.7z
+arcade/gamelist.xml | D-道家格斗(DJGD) | ./格斗对战街机/taotaido.7z
+arcade/gamelist.xml | E-恶魔救世主 吸血鬼贵族(EMJSZXXGGZ) | ./格斗对战街机/vsav.7z
+arcade/gamelist.xml | X-X战警对街头霸王(ZJDJTBW) | ./格斗对战街机/xmvsf.7z
+arcade/gamelist.xml | Y-越野房车大赛(YYFCDS) | ./赛车街机/backfire.7z
+arcade/gamelist.xml | B-飙风拉力(BBFLL) | ./赛车街机/radr.7z
+arcade/gamelist.xml | F-风速英雄(FSYX) | ./赛车街机/ridhero.7z
+arcade/gamelist.xml | B-棒球之星2(BQZX2) | ./运动街机/bstars2.7z
+arcade/gamelist.xml | S-摔跤锦标赛(SJJBS) | ./运动街机/champwr.7z
+arcade/gamelist.xml | P-破纪录者(PJLZ) | ./运动街机/recordbr.7z
+arcade/gamelist.xml | D-点球大战V2(DQDZ) | ./运动街机/wpksocv2.7z
+arcade/gamelist.xml | B-暴力克星(BLKX) | ./动作闯关街机/cbuster.7z
+arcade/gamelist.xml | S-双截龙1(SJL1) | ./动作闯关街机/ddragon.7z
+arcade/gamelist.xml | F-疯狂摩托车(FKMTC) | ./动作闯关街机/madmotor.7z
+arcade/gamelist.xml | B-暴乱之城(BLZC) | ./动作闯关街机/riotcity.7z
+arcade/gamelist.xml | X-X战警(ZJ) | ./动作闯关街机/xmen.7z
+arcade/gamelist.xml | S-三国战纪1(SGZJ1) | ./动作闯关改版/kov.7z
+arcade/gamelist.xml | M-美少女战士 月兔版(MSNZSYTB) | ./动作闯关改版/sailmnyy.7z
+arcade/gamelist.xml | Z-战国传承1(ZGCC1) | ./动作闯关改版/sengoku.7z
+arcade/gamelist.xml | Y-圆桌骑士 1V3全随机全屏攻击版(YZQS1QSJQPGJB) | ./动作闯关改版/knightsrr/knights.7z
+arcade/gamelist.xml | E-饿狼传说1 简化版(ELCS1JHB) | ./格斗对战改版/fatfury1.7z
+arcade/gamelist.xml | C-超级漫画英雄对街头霸王 简化版(CJMHYXDJTBWJHB) | ./格斗对战改版/mshvsf.7z
+arcade/gamelist.xml | J-街头霸王2 天下斗士(JTBW2TXDS) | ./格斗街霸合集/sf2.7z
+arcade/gamelist.xml | H-合金弹头2 1v2模式(HJDT21MS) | ./合金弹头合集/ms21v2.7z
+arcade/gamelist.xml | H-合金弹头3 1v2模式(HJDT31MS) | ./合金弹头合集/ms31v2.7z
+arcade/gamelist.xml | H-合金弹头4 1v2模式(HJDT41MS) | ./合金弹头合集/ms41v2.7z
+arcade/gamelist.xml | H-合金弹头5 1v2模式(HJDT51MS) | ./合金弹头合集/ms51v2.7z
+arcade/gamelist.xml | H-合金弹头1 1V2模式(HJDT11MS) | ./合金弹头合集/mslug1v2.7z
+arcade/gamelist.xml | H-合金弹头2 生存版(HJDT2SCB) | ./合金弹头合集/mslug2ct.7z
+arcade/gamelist.xml | H-合金弹头3(HJDT3) | ./合金弹头合集/mslug3.7z
+arcade/gamelist.xml | H-合金弹头3 多功能版(HJDT3DGNB) | ./合金弹头合集/mslug3g.7z
+arcade/gamelist.xml | H-合金弹头5 BOSS战(HJDT5Z) | ./合金弹头合集/mslug5bs.7z
+arcade/gamelist.xml | H-合金弹头1 多功能版(HJDT1DGNB) | ./合金弹头合集/mslugdg.7z
+arcade/gamelist.xml | H-合金弹头X 2代Remix(HJDTD) | ./合金弹头合集/mslugx2r.7z
+arcade/gamelist.xml | H-合金弹头X 敌兵重置版(HJDTDBZZB) | ./合金弹头合集/mslugxc2.7z
+arcade/gamelist.xml | H-合金弹头X 无极版(HJDTWJB) | ./合金弹头合集/mslugxsv.7z
+arcade/gamelist.xml | H-合金弹头X 无双版(HJDTWSB) | ./合金弹头合集/mslugxxr.7z
+arcade/gamelist.xml | H-合金弹头X 1v2模式(HJDTMS) | ./合金弹头合集/msx1v2.7z
+arcade/gamelist.xml | H-合金弹头X AzStar汽水混合版(HJDTQSHHB) | ./合金弹头合集/msxsrf.7z
+其余未显示: 135
+
+========== 6. 同名标题对应至少4个不同真实 ROM 文件的候选 ==========
+候选组数: 36
+--- 7 个不同文件 ---
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (L735 Test Rom, 盗版 第三套)(JTBWGJBDBDST) | ./格斗街霸合集/sf2amf10.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第二套, 920313 etc)(JTBWGJBAEFMGBDBDET) | ./格斗街霸合集/sf2amf4.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第三套, 920313 etc)(JTBWGJBAEFMGBDBDST) | ./格斗街霸合集/sf2amf5.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第四套, 920313 etc)(JTBWGJBAEFMGBDBDST) | ./格斗街霸合集/sf2amf6.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第五套, 920313 etc)(JTBWGJBAEFMGBDBDWT) | ./格斗街霸合集/sf2amf7.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第六套, 920313 etc)(JTBWGJBAEFMGBDBDLT) | ./格斗街霸合集/sf2amf8.7z
+arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第七套, 920313 etc)(JTBWGJBAEFMGBDBDQT) | ./格斗街霸合集/sf2amf9.7z
+--- 6 个不同文件 ---
+genesis/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+genh/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+nes/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+nesh/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+snes/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+snesh/gamelist.xml | A-阿拉丁(ALD) | ./阿拉丁.zip
+--- 6 个不同文件 ---
+genesis/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+genh/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+nes/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+nesh/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+snes/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+snesh/gamelist.xml | J-机械战警3(JXZJ3) | ./机械战警3.zip
+--- 6 个不同文件 ---
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 欧版)(MSNZSSSYLBB95OB) | ./动作闯关改版/sailormn.7z
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 港版)(MSNZSSSYLBB95GB) | ./动作闯关改版/sailormnh.7z
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 日版)(MSNZSSSYLBB95RB) | ./动作闯关改版/sailormnj.7z
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 韩版)(MSNZSSSYLBB95HB) | ./动作闯关改版/sailormnk.7z
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 台版)(MSNZSSSYLBB95TB) | ./动作闯关改版/sailormnt.7z
+arcade/gamelist.xml | 美少女战士 - 水手月亮 (版本 95/03/22B, 美版)(MSNZSSSYLBB95MB) | ./动作闯关改版/sailormnu.7z
+--- 6 个不同文件 ---
+arcade/gamelist.xml | 街头霸王 II' - 四大天王 (Alpha Magic-F, 盗版)(JTBWSDTWDB) | ./格斗街霸合集/sf2amf.7z
+arcade/gamelist.xml | 街头霸王 II' - 四大天王 (L735 Test Rom, 盗版, 第 1 套)(JTBWSDTWDBD1T) | ./格斗街霸合集/sf2amf2.7z
+arcade/gamelist.xml | 街头霸王 II' - 四大天王 (L735 Test Rom, 盗版, 第 2 套)(JTBWSDTWDBD2T) | ./格斗街霸合集/sf2amf3.7z
+arcade/gamelist.xml | 街头霸王 II' - 四大天王 (美版 920513)(JTBWSDTWMB920513) | ./格斗街霸合集/sf2ceub.7z
+fbneo/gamelist.xml | J-街头霸王 II': 四大天王 | ./sf2ce.zip
+fbneo/gamelist.xml | J-街头霸王 II': 四大天王 (赤色波动 第一套) | ./sf2red.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | C-惩罚者(CFZ) | ./动作闯关改版/punisher.7z
+fbneo/gamelist.xml | C-惩罚者 (世界版) | ./punisher.zip
+genesis/gamelist.xml | C-惩罚者(CFZ) | ./惩罚者.zip
+nes/gamelist.xml | C-惩罚者(CFZ) | ./惩罚者.zip
+nesh/gamelist.xml | C-惩罚者(CFZ) | ./惩罚者.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | H-魂斗罗1(HDL1) | ./动作射击街机 小游戏/contra.7z
+arcade/gamelist.xml | H-魂斗罗1 汉化版(HDL1HHB) | ./动作射击街机 小游戏/contraj.7z
+nes/gamelist.xml | H-魂斗罗1(USA) | ./Contra (USA).zip
+nes/gamelist.xml | H-魂斗罗1(HDL1) | ./魂斗罗1.zip
+nes/gamelist.xml | H-魂斗罗1日版(完全版) | ./魂斗罗日版(完全版).zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | M-名将(MJ) | ./动作闯关改版/captcomm.7z
+arcade/gamelist.xml | M-名将 中文版(MJZWB) | ./动作闯关改版/captcommc/captcomm.7z
+fbneo/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+snes/gamelist.xml | M-名将(MJ) | ./名将.zip
+snesh/gamelist.xml | M-名将(MJ) | ./名将.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | R-忍者神龟1(RZSG1) | ./动作闯关街机/tmnt.7z
+genesis/gamelist.xml | R-忍者神龟1(RZSG1) | ./忍者神龟1.zip
+nes/gamelist.xml | R-忍者神龟1(RZSG1) | ./忍者神龟1.zip
+nesh/gamelist.xml | R-忍者神龟1(RZSG1) | ./忍者神龟1.zip
+nesh/gamelist.xml | R-忍者神龟1汉化版(RZSG1HHB) | ./忍者神龟1汉化版.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | R-忍者神龟2(RZSG2) | ./动作闯关街机/tmnt2.7z
+genesis/gamelist.xml | R-忍者神龟2(RZSG2) | ./忍者神龟2.zip
+nes/gamelist.xml | R-忍者神龟2(RZSG2) | ./忍者神龟2.zip
+nesh/gamelist.xml | R-忍者神龟2(RZSG2) | ./忍者神龟2.zip
+nesh/gamelist.xml | R-忍者神龟2汉化版(RZSG2HHB) | ./忍者神龟2汉化版.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | R-忍者蛙(RZW) | ./动作闯关街机/btoads.7z
+genesis/gamelist.xml | R-忍者蛙(RZW) | ./忍者蛙.zip
+nes/gamelist.xml | R-忍者蛙(RZW) | ./忍者蛙.zip
+nesh/gamelist.xml | R-忍者蛙(RZW) | ./忍者蛙.zip
+snes/gamelist.xml | R-忍者蛙(RZW) | ./忍者蛙.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | S-杀虫战记(SCZJ) | ./飞行射击街机/insectx.7z
+arcade/gamelist.xml | S-杀虫战记 汉化版(SCZJHHB) | ./飞行射击街机/insectx/insectx.7z
+genh/gamelist.xml | S-杀虫战记(SCZJ) | ./杀虫战记.zip
+nes/gamelist.xml | S-杀虫战记(SCZJ) | ./杀虫战记.zip
+nesh/gamelist.xml | S-杀虫战记(SCZJ) | ./杀虫战记.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | T-铁钩船长(TGCC) | ./动作闯关改版/hook.7z
+arcade/gamelist.xml | T-铁钩船长日版(TGCCRB) | ./动作闯关改版/hookj.7z
+fbneo/gamelist.xml | T-铁钩船长 | ./hook.zip
+genh/gamelist.xml | T-铁钩船长(TGCC) | ./铁钩船长.zip
+snesh/gamelist.xml | T-铁钩船长(TGCC) | ./铁钩船长.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | Y-圆桌骑士(YZQS) | ./动作闯关改版/knights.7z
+arcade/gamelist.xml | Y-圆桌骑士 汉化版(YZQSHHB) | ./动作闯关改版/knightsc.7z
+arcade/gamelist.xml | Y-圆桌骑士 加强版(YZQSJQB) | ./动作闯关改版/knightsp.7z
+snes/gamelist.xml | Y-圆桌骑士(YZQS) | ./圆桌骑士.zip
+snesh/gamelist.xml | Y-圆桌骑士(YZQS) | ./圆桌骑士.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | Z-中东战争(ZDZZ) | ./飞行射击街机/silkworm.7z
+arcade/gamelist.xml | Z-中东战争 汉化版(ZDZZHHB) | ./飞行射击街机/silkworm/silkworm.7z
+nes/gamelist.xml | Z-中东战争(ZDZZ) | ./中东战争.zip
+nesh/gamelist.xml | Z-中东战争(ZDZZ) | ./中东战争.zip
+nesh/gamelist.xml | Z-中东战争汉化版(ZDZZHHB) | ./中东战争汉化版.zip
+--- 5 个不同文件 ---
+arcade/gamelist.xml | 西游释厄传 特别版 (版本. 101, 韩国基板)(XYSEZTBBBB.101HGJB) | ./动作闯关改版/olds.zip
+arcade/gamelist.xml | 西游释厄传 (版本. 126)(XYSEZBB.126) | ./动作闯关改版/orlegend.zip
+arcade/gamelist.xml | 西游释厄传 (版本. 112, 中国基板)(XYSEZBB.112ZGJB) | ./动作闯关改版/orlegendc.zip
+fbneo/gamelist.xml | X-西游释厄传 特别版 (版本. 101, 韩国基板)(XYSEZ) | ./olds.zip
+fbneo/gamelist.xml | X-西游释厄传 (版本. 126) | ./orlegend.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | H-花式撞球(HSZQ) | ./花式撞球.zip
+genh/gamelist.xml | H-花式撞球(HSZQ) | ./花式撞球.zip
+nes/gamelist.xml | H-花式撞球(HSZQ) | ./花式撞球.zip
+nesh/gamelist.xml | H-花式撞球汉化版(HSZQHHB) | ./花式撞球汉化版.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | J-JUJU传说(CS) | ./动作闯关街机/toki.7z
+genh/gamelist.xml | J-JUJU传说(CS) | ./JUJU传说.zip
+nes/gamelist.xml | J-JuJu传说(CS) | ./JuJu传说.zip
+nesh/gamelist.xml | J-JUJU传说(CS) | ./JUJU传说.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | L-绿色兵团(LSBT) | ./动作射击街机/gberet.7z
+nes/gamelist.xml | L-绿色兵团(LSBT) | ./绿色兵团.zip
+nesh/gamelist.xml | L-绿色兵团改版(LSBTGB) | ./绿色兵团改版.zip
+nesh/gamelist.xml | L-绿色兵团汉化版(LSBTHHB) | ./绿色兵团汉化版.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | L-落日骑士(LRQS) | ./动作射击街机/ssriders.7z
+genesis/gamelist.xml | L-落日骑士(LRQS) | ./落日骑士.zip
+genh/gamelist.xml | L-落日骑士(LRQS) | ./落日骑士.zip
+snesh/gamelist.xml | L-落日骑士(LRQS) | ./落日骑士.zip
+--- 4 个不同文件 ---
+nes/gamelist.xml | M-梦之勇士(MZYS) | ./梦之勇士.zip
+nesh/gamelist.xml | M-梦之勇士(MZYS) | ./Little Nemo - The Dream Master (USA).zip
+nesh/gamelist.xml | M-梦之勇士(MZYS) | ./梦之勇士.zip
+nesh/gamelist.xml | M-梦之勇士汉化版(MZYSHHB) | ./梦之勇士汉化版.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | P-霹雳神兵(PLSB) | ./动作射击街机 小游戏/hbarrel.7z
+nes/gamelist.xml | P-霹雳神兵(PLSB) | ./霹雳神兵.zip
+nesh/gamelist.xml | P-霹雳神兵(PLSB) | ./霹雳神兵.zip
+nesh/gamelist.xml | P-霹雳神兵汉化版(PLSBHHB) | ./霹雳神兵汉化版.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | R-忍者蛙和双截龙(RZWHSJL) | ./忍者蛙和双截龙.zip
+nes/gamelist.xml | R-忍者蛙和双截龙(RZWHSJL) | ./忍者蛙和双截龙.zip
+nesh/gamelist.xml | R-忍者蛙和双截龙(RZWHSJL) | ./忍者蛙和双截龙.zip
+snes/gamelist.xml | R-忍者蛙和双截龙(RZWHSJL) | ./忍者蛙和双截龙.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | S-双截龙1(SJL1) | ./动作闯关街机/ddragon.7z
+genesis/gamelist.xml | S-双截龙1(SJL1) | ./双截龙1.zip
+nes/gamelist.xml | S-双截龙1(SJL1) | ./双截龙1.zip
+nesh/gamelist.xml | S-双截龙1(SJL1) | ./双截龙1.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | S-双截龙2(SJL2) | ./动作闯关街机/ddragon2.7z
+genesis/gamelist.xml | S-双截龙2(SJL2) | ./双截龙2.zip
+nes/gamelist.xml | S-双截龙2(SJL2) | ./双截龙2.zip
+nesh/gamelist.xml | S-双截龙2汉化版(SJL2HHB) | ./双截龙2汉化版.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | S-双截龙3(SJL3) | ./动作闯关街机/ddragon3.7z
+genesis/gamelist.xml | S-双截龙3(SJL3) | ./双截龙3.zip
+nes/gamelist.xml | S-双截龙3(SJL3) | ./双截龙3.zip
+nesh/gamelist.xml | S-双截龙3汉化版(SJL3HHB) | ./双截龙3汉化版.zip
+--- 4 个不同文件 ---
+nes/gamelist.xml | S-松鼠大战1(SSDZ1) | ./松鼠大战1.zip
+nesh/gamelist.xml | S-松鼠大战1(SSDZ1) | ./松鼠大战1.zip
+nesh/gamelist.xml | S-松鼠大战1改版(SSDZ1GB) | ./松鼠大战1改版.zip
+nesh/gamelist.xml | S-松鼠大战1汉化版(SSDZ1HHB) | ./松鼠大战1汉化版.zip
+--- 4 个不同文件 ---
+nes/gamelist.xml | T-特救指令(TJZL) | ./特救指令.zip
+nesh/gamelist.xml | T-特救指令(TJZL) | ./Shatterhand (U).zip
+nesh/gamelist.xml | T-特救指令汉化版(TJZLHHB) | ./特救指令汉化版.zip
+nesh/gamelist.xml | T-特救指令美版(TJZLMB) | ./特救指令美版.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | Y-宇宙巡航机2(YZXHJ2) | ./飞行射击街机/gradius2.7z
+nes/gamelist.xml | Y-宇宙巡航机2(YZXHJ2) | ./宇宙巡航机2.zip
+nesh/gamelist.xml | Y-宇宙巡航机2(YZXHJ2) | ./宇宙巡航机2.zip
+nesh/gamelist.xml | Y-宇宙巡航机2汉化版(YZXHJ2HHB) | ./宇宙巡航机2汉化版.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | Y-异形3(YX3) | ./异形3.zip
+genh/gamelist.xml | Y-异形3(YX3) | ./异形3.zip
+nes/gamelist.xml | Y-异形3(YX3) | ./异形3.zip
+snesh/gamelist.xml | Y-异形3(YX3) | ./异形3.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | Y-翼人(YR) | ./翼人.zip
+genh/gamelist.xml | Y-翼人(YR) | ./翼人.zip
+nes/gamelist.xml | Y-翼人(YR) | ./翼人.zip
+nesh/gamelist.xml | Y-翼人(YR) | ./翼人.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | Z-战场之狼(ZCZL) | ./战场之狼.zip
+genh/gamelist.xml | Z-战场之狼(ZCZL) | ./战场之狼.zip
+nes/gamelist.xml | Z-战场之狼(ZCZL) | ./战场之狼.zip
+nesh/gamelist.xml | Z-战场之狼(ZCZL) | ./战场之狼.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | Z-战斗原始人(ZDYSR) | ./动作射击街机/cninja.7z
+genh/gamelist.xml | Z-战斗原始人(ZDYSR) | ./战斗原始人.zip
+nes/gamelist.xml | Z-战斗原始人(ZDYSR) | ./战斗原始人.zip
+nesh/gamelist.xml | Z-战斗原始人(ZDYSR) | ./战斗原始人.zip
+--- 4 个不同文件 ---
+genesis/gamelist.xml | Z-终结者2(ZJZ2) | ./终结者2.zip
+genh/gamelist.xml | Z-终结者2(ZJZ2) | ./终结者2.zip
+nesh/gamelist.xml | Z-终结者2(ZJZ2) | ./终结者2.zip
+snesh/gamelist.xml | Z-终结者2(ZJZ2) | ./终结者2.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | Z-蜘蛛侠(ZZX) | ./动作闯关街机/spidman.7z
+genesis/gamelist.xml | Z-蜘蛛侠(ZZX) | ./蜘蛛侠.zip
+nesh/gamelist.xml | Z-蜘蛛侠(ZZX) | ./蜘蛛侠.zip
+snesh/gamelist.xml | Z-蜘蛛侠(ZZX) | ./蜘蛛侠.zip
+--- 4 个不同文件 ---
+arcade/gamelist.xml | 三国志 II (世界版 921031)(SGZSJB921031) | ./动作闯关改版/wof.zip
+arcade/gamelist.xml | 三国志 II (亚版 921005)(SGZYB921005) | ./动作闯关改版/wofa.zip
+fbneo/gamelist.xml | S-三国志 II (世界版) | ./wof.zip
+fbneo/gamelist.xml | S-三国志 II (亚洲版) | ./wofa.zip
+
+核查结束：只读操作，没有修改 XML 或 ROM。
+注意：第6项是同名候选，仍需排除误合并；不同名称的同一游戏也可能不会被自动归为一组。
