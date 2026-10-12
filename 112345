@@ -1,0 +1,1596 @@
+EMUELEC:~ #
+python3 - <<'PY'
+from pathlib import Path
+from collections import defaultdict, Counter
+import xml.etree.ElementTree as ET
+import re
+import os
+
+ROOT = Path('/storage/roms')
+
+# 第一组：只允许出现在 nes / nesh
+FIRST = [
+    '蝙蝠侠', '彩虹岛', '赤影战士', '赤色要塞', '恶魔城',
+    'FC原人', '斧王', '古巴英雄', '怪鸭历险记', '冒险岛',
+    '马戏团', '泡泡龙', '七宝奇谋', '敲冰块', '人间兵器',
+    '淘金者', '五子棋', '网球', '小美人鱼', '雪人兄弟',
+    '影子传说', '中国象棋'
+]
+
+# 第二组：全局保留名单，用于检查，不会自动删除或恢复
+SECOND = [
+    '超级漫画英雄', '炸弹人', '超级玛丽', '超级马里奥',
+    '街霸', '超级魂斗罗', 'CAPTCOMM', '动荡之塔', '哆啦A梦',
+    '地狱极乐丸', '地狱英雄', '大力水手', '大航海时代',
+    '大蜜蜂', '大金刚', '电梯大战', 'DINO', '合金弹头',
+    '火焰之纹章', '花式撞球', '荒野大镖客', '魂斗罗',
+    '黑白棋', '筋肉人摔跤', '街头快打', '街头格斗',
+    '街头霸王', '快打旋风', '恐龙快打', 'KOF', '洛克人',
+    '绿色军团', '龙珠', 'MSLUG', 'ORLEGEND', '拳皇',
+    '忍者神龟', '热血新纪录', '热血时代剧', '热血曲棍球',
+    '热血格斗', '热血物语', '热血硬派', '热血篮球',
+    '热血足球', '热血进行曲', '热血高校躲避球', '三国志',
+    '三国战记', '三目童子', '双截龙', '塞尔达传说',
+    '松鼠大战', '兔宝宝', '吞食天地', '坦克大战', '西游',
+PYint('全部检查结束：本脚本只读，没有修改 XML 或 ROM。')子目录列表或路径格式差异。')
+========================================================================
+A. 总体与 XML 完整性
+当前 gamelist.xml 数量: 24
+找到的历史备份 gamelist.xml 数量: 89
+当前 XML 游戏记录总数: 7751
+XML 解析错误数: 0
+
+========================================================================
+B. 第一组游戏是否出现在 nes / nesh 以外
+未发现名称命中第一组关键词的目录外记录。
+
+========================================================================
+C. 第二组保留名单：当前各平台命中数量
+超级漫画英雄: arcade=12
+炸弹人: arcade=10, nes=3, nesh=7, snes=5, snesh=2
+超级玛丽: nesh=1
+超级马里奥: nes=13, nesh=15, openbor=1, ports_scripts=1, snes=6, snesh=4
+街霸: arcade=16, fbneo=5, genh=1, nes=14, nesh=1, openbor=8
+超级魂斗罗: nes=1
+CAPTCOMM: fbneo=34
+动荡之塔: nes=1
+哆啦A梦: genesis=1, genh=1, nes=2, nesh=1, snes=1, snesh=1
+地狱极乐丸: nes=1, nesh=1
+地狱英雄: arcade=5
+大力水手: nes=1, nesh=1, snesh=1
+大航海时代: genesis=2, genh=1, snesh=1
+大蜜蜂: arcade=4, nes=1, nesh=3
+大金刚: arcade=4, nes=1, nesh=8, snes=3, snesh=3
+电梯大战: arcade=6
+DINO: fbneo=504
+合金弹头: arcade=98, fbneo=22, openbor=1
+火焰之纹章: nes=2, snes=3, snesh=5
+花式撞球: genesis=1, genh=1, nes=1, nesh=3
+荒野大镖客: arcade=2, nes=1, nesh=3
+魂斗罗: arcade=8, genesis=3, genh=3, nes=11, nesh=10, openbor=1, snes=1, snesh=2
+黑白棋: nes=1
+当前未命中: 筋肉人摔跤
+街头快打: arcade=2
+街头格斗: nes=1
+街头霸王: arcade=62, fbneo=8, genesis=2, genh=4, openbor=1, snes=3, snesh=4
+快打旋风: arcade=19, fbneo=1, genh=1, nes=2, nesh=2, openbor=28, snes=3, snesh=4
+恐龙快打: arcade=1, fbneo=209, genesis=1, openbor=3
+KOF: arcade=1, fbneo=245
+洛克人: arcade=4, genesis=1, nes=6, nesh=8, openbor=1, snes=5, snesh=5
+当前未命中: 绿色军团
+龙珠: arcade=8, genesis=1, nes=5, nesh=2, openbor=3, snes=3, snesh=4
+MSLUG: fbneo=206
+ORLEGEND: fbneo=14
+拳皇: arcade=152, fbneo=38, openbor=3, pgm2=2
+忍者神龟: arcade=6, genesis=2, genh=3, nes=4, nesh=9, openbor=8, ports_scripts=1, snes=2, snesh=1
+当前未命中: 热血新纪录
+热血时代剧: nes=1
+热血曲棍球: nes=1, nesh=1
+热血格斗: nes=1, nesh=1
+热血物语: nes=1, nesh=1, openbor=2
+热血硬派: arcade=2, nes=1, nesh=1, openbor=1, snes=1, snesh=1
+热血篮球: nes=1, nesh=1
+热血足球: nes=1, nesh=2
+热血进行曲: nes=1, nesh=1, openbor=1
+热血高校躲避球: arcade=4, nes=2, nesh=1, snes=1
+三国志: arcade=8, fbneo=8, genesis=4, genh=1, nes=3, nesh=2, openbor=1, snes=3, snesh=4
+三国战记: fbneo=4
+三目童子: nes=1, nesh=4
+双截龙: arcade=13, fbneo=1, genesis=5, genh=2, nes=4, nesh=9, openbor=19, snes=3, snesh=3
+塞尔达传说: nes=3, nesh=2, snes=1, snesh=1
+松鼠大战: nes=2, nesh=5, snesh=1
+兔宝宝: genesis=1, genh=1, nes=3, nesh=4, snes=2, snesh=1
+吞食天地: arcade=100, fbneo=7, genesis=1, genh=1, nes=5, snes=1
+坦克大战: arcade=2, nes=2, nesh=4
+西游: arcade=55, fbneo=14, nes=2, nesh=5, pgm2=5
+真人快打: arcade=8, genh=1, openbor=1, snes=2
+蜘蛛侠: arcade=2, genesis=1, nesh=1, snesh=3
+
+========================================================================
+D. 当前 XML 中明确标注多人 / 3P / 4P 的候选
+多人标记候选: 729
+明确4人/4P标记候选: 126
+[4P] arcade/gamelist.xml | Q-拳皇99(QH99) | ./格斗拳皇合集/kof99.7z
+[4P] arcade/gamelist.xml | Q-拳皇94 Plus 简化版(QH94JHB) | ./格斗拳皇合集/kof94pem/kof94.7z
+[4P] arcade/gamelist.xml | Q-拳皇2001(QH2001) | ./格斗拳皇合集/kof2001.7z
+[4P] arcade/gamelist.xml | M-魔域战线(MYZX) | ./动作射击街机/dmnfrnt.7z
+[4P] arcade/gamelist.xml | S-圣铠传说(SKCS) | ./动作射击街机/gauntlet.7z
+[4P] arcade/gamelist.xml | Y-眼镜蛇特种部队(YJSTZBD) | ./动作射击街机/gijoe.7z
+[4P] arcade/gamelist.xml | N-怒之忍者(NZRZ) | ./动作射击街机/mystwarr.7z
+[4P] arcade/gamelist.xml | X-星战四人组(XZSRZ) | ./动作射击街机/quartet.7z
+[4P] arcade/gamelist.xml | L-落日骑士(LRQS) | ./动作射击街机/ssriders.7z
+[4P] arcade/gamelist.xml | L-雷霆地带(LTDD) | ./动作射击街机/thndzone.7z
+[4P] arcade/gamelist.xml | Y-月华剑士1(YHJS1) | ./格斗对战街机/lastblad.7z
+[4P] arcade/gamelist.xml | S-摔角霸王2 最终之战(SJBW2ZZZZ) | ./格斗对战街机/mbombrd.7z
+[4P] arcade/gamelist.xml | E-饿狼传说RB 特别版(ELCSTBB) | ./格斗对战街机/rbffspec.7z
+[4P] arcade/gamelist.xml | S-侍魂零(SHL) | ./格斗对战街机/samsho5.7z
+[4P] arcade/gamelist.xml | S-摔角霸王1(SJBW1) | ./格斗对战街机/slammast.7z
+[4P] arcade/gamelist.xml | S-世界英雄2(SJYX2) | ./格斗对战街机/wh2.7z
+[4P] arcade/gamelist.xml | Y-越野沙滩车(YYSTC) | ./赛车街机/fourtrax.7z
+[4P] arcade/gamelist.xml | J-极速马力(JSML) | ./赛车街机/hotrod.7z
+[4P] arcade/gamelist.xml | B-暴力冰上曲棍球(BLBSQGQ) | ./运动街机/hitice.7z
+[4P] arcade/gamelist.xml | M-美国马蹄铁比赛(MGMTTBS) | ./运动街机/horshoes.7z
+[4P] arcade/gamelist.xml | 2-2对2冰上曲棍球公开赛(D2BSQGQGKS) | ./运动街机/openice.7z
+[4P] arcade/gamelist.xml | Y-游泳大赛(YYDS) | ./运动街机/wmatch.7z
+[4P] arcade/gamelist.xml | A-阿拉丁传奇(ALDCQ) | ./动作闯关街机/arabfgt.7z
+[4P] arcade/gamelist.xml | Z-战斗回路(ZDHL) | ./动作闯关街机/batcir.7z
+[4P] arcade/gamelist.xml | Y-宇宙野兔(YZYT) | ./动作闯关街机/bucky.7z
+[4P] arcade/gamelist.xml | R-热血快打(RXKD) | ./动作闯关街机/burningf.7z
+[4P] arcade/gamelist.xml | S-森林守护神(SLSHS) | ./动作闯关街机/growl.7z
+[4P] arcade/gamelist.xml | D-斗神光辉(DSGH) | ./动作闯关街机/karatblz.7z
+[4P] arcade/gamelist.xml | C-沉默之龙(CMZL) | ./动作闯关街机/silentd.7z
+[4P] arcade/gamelist.xml | S-神剑伏魔录(SJFML) | ./动作闯关街机/theglad.7z
+[4P] arcade/gamelist.xml | Z-罪恶战士2(ZEZS2) | ./动作闯关街机/vendetta.7z
+[4P] arcade/gamelist.xml | M-名将 1V4(MJ1) | ./动作闯关改版/captc1v4.7z
+[4P] arcade/gamelist.xml | M-名将(MJ) | ./动作闯关改版/captcomm.7z
+[4P] arcade/gamelist.xml | M-名将 加强版2(MJJQB2) | ./动作闯关改版/captcommr1.7z
+[4P] arcade/gamelist.xml | L-龙与地下城2 暗黑秘影 加强版(LYDXC2AHMYJQB) | ./动作闯关改版/ddsomud.7z
+[4P] arcade/gamelist.xml | T-吞食天地1 王朝战争(TSTD1WCZZ) | ./动作闯关改版/dynwarj.7z
+[4P] arcade/gamelist.xml | T-铁钩船长(TGCC) | ./动作闯关改版/hook.7z
+[4P] arcade/gamelist.xml | X-西游释厄传2(XYSEZ2) | ./动作闯关改版/orleg2_104cn.7z
+[4P] arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强最终版(XYSEZ1QMLW211ZJJQZZB) | ./动作闯关改版/oldsplus211926/oldsplus.7z
+[4P] arcade/gamelist.xml | T-吞食天地2 曹仁版(TSTD2CRB) | ./动作闯关改版/wof曹仁/wofj.7z
+[4P] arcade/gamelist.xml | H-豪血寺 新豪血寺一族 全人物版(HXSXHXSYZQRWB) | ./格斗对战改版/matrim.7z
+[4P] arcade/gamelist.xml | E-饿狼传说RB 简化特别版(ELCSJHTBB) | ./格斗对战改版/rbffspec.7z
+[4P] arcade/gamelist.xml | H-合金弹头2(HJDT2) | ./合金弹头合集/mslug2.zip
+[4P] arcade/gamelist.xml | Z-战斧后传(ZFHC) | ./动作闯关街机/ga2j.7z
+[4P] arcade/动作闯关街机/gamelist.xml | S-神剑伏魔录 | ./theglad.7z
+[4P] arcade/动作闯关街机/gamelist.xml | Z-罪恶战士2 | ./vendetta.7z
+[4P] arcade/动作闯关街机/gamelist.xml | Z-战斧后传 | ./ga2j.7z
+[4P] arcade/动作闯关街机/gamelist.xml | S-森林守护神 | ./growl.7z
+[4P] arcade/动作闯关街机/gamelist.xml | C-沉默之龙 | ./silentd.7z
+[4P] arcade/动作闯关街机/gamelist.xml | R-热血快打 | ./burningf.7z
+[4P] arcade/动作闯关街机/gamelist.xml | Z-战斗回路 | ./动作闯关街机/batcir.7z
+[4P] arcade/动作闯关街机/gamelist.xml | D-斗神光辉 | ./karatblz.7z
+[4P] arcade/动作闯关街机/gamelist.xml | A-阿拉丁传奇 | ./arabfgt.7z
+[4P] arcade/动作闯关街机/gamelist.xml | Y-宇宙野兔 | ./bucky.7z
+[4P] arcade/动作射击街机/gamelist.xml | L-雷霆地带 | ./thndzone.7z
+[4P] arcade/动作射击街机/gamelist.xml | Y-眼镜蛇特种部队 | ./gijoe.7z
+[4P] arcade/动作射击街机/gamelist.xml | L-落日骑士 | ./ssriders.7z
+[4P] arcade/动作射击街机/gamelist.xml | N-怒之忍者 | ./mystwarr.7z
+[4P] arcade/动作射击街机/gamelist.xml | X-星战四人组 | ./quartet.7z
+[4P] arcade/动作射击街机/gamelist.xml | M-魔域战线 | ./dmnfrnt.7z
+[4P] arcade/动作射击街机/gamelist.xml | S-圣铠传说 | ./gauntlet.7z
+[4P] arcade/格斗对战街机/gamelist.xml | S-摔角霸王1 | ./slammast.7z
+[4P] arcade/格斗对战街机/gamelist.xml | S-摔角霸王2 最终之战 | ./mbombrd.7z
+[4P] arcade/格斗对战街机/gamelist.xml | E-饿狼传说RB 特别版 | ./rbffspec.7z
+[4P] arcade/格斗对战街机/gamelist.xml | S-世界英雄2 | ./wh2.7z
+[4P] arcade/格斗对战街机/gamelist.xml | S-侍魂零 | ./samsho5.7z
+[4P] arcade/格斗对战街机/gamelist.xml | Y-月华剑士1 | ./lastblad.7z
+[4P] arcade/赛车街机/gamelist.xml | J-极速马力 | ./hotrod.7z
+[4P] arcade/赛车街机/gamelist.xml | Y-越野沙滩车 | ./fourtrax.7z
+[4P] arcade/运动街机/gamelist.xml | Y-游泳大赛 | ./wmatch.7z
+[4P] arcade/运动街机/gamelist.xml | 2-2对2冰上曲棍球公开赛 | ./openice.7z
+[4P] arcade/运动街机/gamelist.xml | B-暴力冰上曲棍球 | ./hitice.7z
+[4P] arcade/运动街机/gamelist.xml | M-美国马蹄铁比赛 | ./horshoes.7z
+[4P] arcade/动作闯关改版/gamelist.xml | M-名将 | ./captcomm.7z
+[4P] arcade/动作闯关改版/gamelist.xml | M-名将 加强版2 | ./captcommr1.7z
+[4P] arcade/动作闯关改版/gamelist.xml | M-名将 1V4 | ./captc1v4.7z
+[4P] arcade/动作闯关改版/gamelist.xml | L-龙与地下城2 暗黑秘影 加强版 | ./ddsomud.7z
+[4P] arcade/动作闯关改版/gamelist.xml | T-吞食天地1 王朝战争 | ./dynwarj.7z
+[4P] arcade/动作闯关改版/gamelist.xml | T-吞食天地2 曹仁版 | ./动作闯关街机 魔改/wof曹仁/wofj.7z
+[4P] arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强最终版 | ./oldsplus.7z
+[4P] arcade/动作闯关改版/gamelist.xml | X-西游释厄传2 | ./orleg2_104cn.7z
+[4P] arcade/动作闯关改版/gamelist.xml | T-铁钩船长 | ./hook.7z
+[4P] ports_scripts/gamelist.xml | X-星露谷物语[XLGWY] | ./StardewValley.sh
+[4P] genesis/gamelist.xml | N-怒之铁拳1(NZTQ1) | ./怒之铁拳1.zip
+[4P] genesis/gamelist.xml | N-怒之铁拳2(NZTQ2) | ./怒之铁拳2.zip
+[4P] genesis/gamelist.xml | Y-幽游白书-魔强统一战(YYBSMQTYZ) | ./幽游白书-魔强统一战(简).zip
+[4P] genesis/gamelist.xml | Z-战斧3(ZF3) | ./战斧3.zip
+[4P] genesis/gamelist.xml | N-NHL94 | ./NHL94.zip
+[4P] genesis/gamelist.xml | S-圣铠IV(SK) | ./圣铠IV.zip
+[4P] genesis/gamelist.xml | S-摔跤霸王(SJBW) | ./摔跤霸王.zip
+[4P] genh/gamelist.xml | H-魂斗罗 - 铁血兵团 (中文版)(HDLTXBTZWB) | ./魂斗罗 - 铁血兵团(中).zip
+[4P] nes/gamelist.xml | Z-最终幻想1+2(ZZHX1) | ./最终幻想1+2.zip
+[4P] nes/gamelist.xml | H-魂斗罗3 力量(HDL3LL) | ./魂斗罗3 力量.zip
+[4P] nes/gamelist.xml | J-家庭赛马(JTSM) | ./家庭赛马.zip
+[4P] nes/gamelist.xml | J-街霸 4人街霸(JB4RJB) | ./街霸 4人街霸.zip
+[4P] nes/gamelist.xml | R-热血高校躲避球(RXGXDBQ) | ./热血高校躲避球.zip
+[4P] nes/gamelist.xml | R-热血足球联盟(RXZQLM) | ./热血足球联盟.zip
+[4P] nes/gamelist.xml | S-双月传说(SYCS) | ./双月传说.zip
+[4P] nes/gamelist.xml | Y-眼镜蛇特种部队1(YJSTZBD1) | ./眼镜蛇特种部队1.zip
+[4P] nes/gamelist.xml | Y-勇者斗恶龙3(YZDEL3) | ./勇者斗恶龙3.zip
+[4P] nesh/gamelist.xml | T-坦克大战4人版(TKDZ4RB) | ./坦克大战4人版.nes
+[4P] openbor/gamelist.xml | F-复仇者 4人版本[F-fcz 4rbb] | ./F-复仇者 4人版本.pak
+[4P] snes/gamelist.xml | Z-真女神转生if(ZNSZS) | ./真女神转生if.zip
+[4P] snes/gamelist.xml | C-超级炸弹人1(CJZDR1) | ./超级炸弹人1.zip
+[4P] snes/gamelist.xml | R-日落骑士(RLQS) | ./日落骑士.zip
+[4P] snes/gamelist.xml | X-幸运的卢克(XYDLK) | ./幸运的卢克.zip
+[4P] fbneo/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+[4P] fbneo/gamelist.xml | T-铁钩船长 | ./hook.zip
+[4P] fbneo/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+[4P] fbneo/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+[4P] fbneo/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+[4P] fbneo/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+[4P] fbneo/gamelist.xml | captcomm 四人模式的挑战 | ./ips/captcomm/captcomm 四人模式的挑战.dat
+[4P] fbneo/gamelist.xml | captcomm 四人模式的挑战v2 | ./ips/captcomm/captcomm 四人模式的挑战v2.dat
+[4P] fbneo/gamelist.xml | T-T-铁钩船长 | ./hook.zip
+[4P] fbneo/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+[4P] fbneo/images/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+[4P] fbneo/images/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+[4P] fbneo/images/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+[4P] fbneo/images/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+[4P] fbneo/images/gamelist.xml | T-铁钩船长 | ./hook.zip
+[4P] fbneo/images/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+[4P] fbneo/images/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+[4P] fbneo/images/gamelist.xml | T-T-铁钩船长 | ./hook.zip
+[4P] fbneo/videos/gamelist.xml | captcomm 四人模式的挑战 | ./ips\captcomm/captcomm 四人模式的挑战.dat
+[4P] fbneo/videos/gamelist.xml | captcomm 四人模式的挑战v2 | ./ips\captcomm/captcomm 四人模式的挑战v2.dat
+-- 其他多人/双人/3P候选（最多100条）--
+arcade/gamelist.xml | Q-拳皇97 梦回(QH97MH) | ./格斗拳皇合集/kof97m.7z
+arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇2000(QH2000) | ./格斗拳皇合集/kof2000.7z
+arcade/gamelist.xml | Q-拳皇2002 Remix Ultra 3.5(QH2002) | ./格斗拳皇合集/kof2k2ru.7z
+arcade/gamelist.xml | Q-拳皇2003 风云再起 简化版(QH2003FYZQJHB) | ./格斗拳皇合集/kof2003fyzq/kof2003.7z
+arcade/gamelist.xml | Q-拳皇97(QH97) | ./格斗拳皇合集/kof97.zip
+arcade/gamelist.xml | X-希魔复活(XMFH) | ./动作射击街机/bionicc.7z
+arcade/gamelist.xml | C-冲击步枪(CJBQ) | ./动作射击街机/blasted.7z
+arcade/gamelist.xml | B-爆裂激战(BLJZ) | ./动作射击街机/crkdown.7z
+arcade/gamelist.xml | M-魔兽王国(MSWG) | ./动作射击街机/devilw.7z
+arcade/gamelist.xml | W-卧龙列传(WLLZ) | ./动作射击街机/garyoret.7z
+arcade/gamelist.xml | D-大地枪声(DDQS) | ./动作射击街机/gground.7z
+arcade/gamelist.xml | Q-枪火大师(QHDS) | ./动作射击街机/gunmast.7z
+arcade/gamelist.xml | J-艰难时世(JNSS) | ./动作射击街机/hrdtimes.7z
+arcade/gamelist.xml | Z-最后的幸存者(ZHDXCZ) | ./动作射击街机/lastsurv.7z
+arcade/gamelist.xml | W-午夜抵抗(WYDK) | ./动作射击街机/midres.7z
+arcade/gamelist.xml | Y-越战1975(YZ1975) | ./动作射击街机/nam1975.7z
+arcade/gamelist.xml | R-忍者小子2(RZXZ2) | ./动作射击街机/ninjakd2.7z
+arcade/gamelist.xml | T-太空哈利(TKHL) | ./动作射击街机/sharrier.7z
+arcade/gamelist.xml | T-突击奇兵2(TJQB2) | ./动作射击街机/shocktr2.7z
+arcade/gamelist.xml | X-西游记(XYJ) | ./动作射击街机/sonson.7z
+arcade/gamelist.xml | S-时空英雄(SKYX) | ./动作射击街机/spinlbrk.7z
+arcade/gamelist.xml | S-S.P.Y特别计划(TBJH) | ./动作射击街机/spy.7z
+arcade/gamelist.xml | L-雷狐行动(LHXD) | ./动作射击街机/thundfox.7z
+arcade/gamelist.xml | M-迷宫任务(MGRW) | ./动作射击街机/xybots.7z
+arcade/gamelist.xml | F-疯狂警察(FKJC) | ./动作射击街机 小游戏/gbusters.7z
+arcade/gamelist.xml | Z-战场之狼2(ZCZL2) | ./动作射击街机 小游戏/mercs.7z
+arcade/gamelist.xml | D-地狱英雄前传异域战将(DYYXQCYYZJ) | ./动作射击街机 小游戏/outzone.7z
+arcade/gamelist.xml | S-闪亮之星(SLZX) | ./飞行射击街机/blazstar.7z
+arcade/gamelist.xml | X-行星飞行(XXFX) | ./飞行射击街机/buckrog.7z
+arcade/gamelist.xml | C-雌虎战机(CHZJ) | ./飞行射击街机/cawing.7z
+arcade/gamelist.xml | S-死亡微笑(SWWX) | ./飞行射击街机/deathsml.7z
+arcade/gamelist.xml | O-欧坦救美(OTJM) | ./飞行射击街机/ordyne.7z
+arcade/gamelist.xml | Y-原始岛1(YSD1) | ./飞行射击街机/prehisle.7z
+arcade/gamelist.xml | Y-异形战机Leo(YXZJ) | ./飞行射击街机/rtypeleo.7z
+arcade/gamelist.xml | C-超级合体(CJHT) | ./飞行射击街机/sidearms.7z
+arcade/gamelist.xml | T-太阳表决(TYBJ) | ./飞行射击街机/soldivid.7z
+arcade/gamelist.xml | S-四国战机2(SGZJ2) | ./飞行射击街机/sonicwi2.7z
+arcade/gamelist.xml | Z-战国之刃(ZGZR) | ./飞行射击街机/tengaij.7z
+arcade/gamelist.xml | S-时间到了(SJDL) | ./飞行射击街机/timesup.7z
+arcade/gamelist.xml | F-疯狂枪支(FKQZ) | ./飞行射击街机 V/batsugun.7z
+arcade/gamelist.xml | K-空刃(KR) | ./飞行射击街机 V/cairblad.7z
+arcade/gamelist.xml | 8-8号火力(HHL) | ./飞行射击街机 V/eightfrc.7z
+arcade/gamelist.xml | C-长空超翼神2(CKCYS2) | ./飞行射击街机 V/espgal2.7z
+arcade/gamelist.xml | W-武装飞鸟2(WZFN2) | ./飞行射击街机 V/gunbird2.7z
+arcade/gamelist.xml | X-星球卫士(XQWS) | ./飞行射击街机 V/starfigh.7z
+arcade/gamelist.xml | L-雷龙2(LL2) | ./飞行射击街机 V/tdragon2.7z
+arcade/gamelist.xml | W-威虎战机 2P自动版(WHZJ2ZDB) | ./飞行射击街机 V/varthj.7z
+arcade/gamelist.xml | L-龙虎之拳1(LHZQ1) | ./格斗对战街机/aof.7z
+arcade/gamelist.xml | X-血腥暴风(XXBF) | ./格斗对战街机/bloodstm.7z
+arcade/gamelist.xml | B-爆裂人(BLR) | ./格斗对战街机/breakers.7z
+arcade/gamelist.xml | B-爆裂人复仇(BLRFC) | ./格斗对战街机/breakrev.7z
+arcade/gamelist.xml | E-饿狼传说 狼之印记(ELCSLZYJ) | ./格斗对战街机/garou.7z
+arcade/gamelist.xml | A-傲剑狂刀 加强版(AJKDJQB) | ./格斗对战街机/killbldp.7z
+arcade/gamelist.xml | F-风云默示录2(FYMSL2) | ./格斗对战街机/kizuna.7z
+arcade/gamelist.xml | L-洛克人2 强大的战士(LKR2QDDZS) | ./格斗对战街机/megaman2.7z
+arcade/gamelist.xml | Z-真人快打1(ZRKD1) | ./格斗对战街机/mk.7z
+arcade/gamelist.xml | C-超级漫画英雄对街头霸王(CJMHYXDJTBW) | ./格斗对战街机/mshvsf.7z
+arcade/gamelist.xml | Y-异种角斗士(YZJDS) | ./格斗对战街机/mutantf.7z
+arcade/gamelist.xml | H-豪血寺一族2 外传(HXSYZ2WZ) | ./格斗对战街机/plegends.7z
+arcade/gamelist.xml | H-豪血寺一族2(HXSYZ2) | ./格斗对战街机/pwrinst2.7z
+arcade/gamelist.xml | E-饿狼传说RB1(ELCS) | ./格斗对战街机/rbff1a.7z
+arcade/gamelist.xml | L-龙吼(LH) | ./格斗对战街机/rotd.7z
+arcade/gamelist.xml | D-道家格斗(DJGD) | ./格斗对战街机/taotaido.7z
+arcade/gamelist.xml | E-恶魔救世主 吸血鬼贵族(EMJSZXXGGZ) | ./格斗对战街机/vsav.7z
+arcade/gamelist.xml | S-世界英雄2喷射版(SJYX2PSB) | ./格斗对战街机/wh2j.7z
+arcade/gamelist.xml | X-X战警对街头霸王(ZJDJTBW) | ./格斗对战街机/xmvsf.7z
+arcade/gamelist.xml | Y-越野房车大赛(YYFCDS) | ./赛车街机/backfire.7z
+arcade/gamelist.xml | B-飙风拉力(BBFLL) | ./赛车街机/radr.7z
+arcade/gamelist.xml | F-风速英雄(FSYX) | ./赛车街机/ridhero.7z
+arcade/gamelist.xml | S-世界拉力赛1(SJLLS1) | ./赛车街机/wrally.7z
+arcade/gamelist.xml | D-打砖块回归(DZKHG) | ./休闲娱乐街机/arkretrn.7z
+arcade/gamelist.xml | L-立体空间方块(LTKJFK) | ./休闲娱乐街机/blockout.7z
+arcade/gamelist.xml | M-魔法气泡海中对战(MFQPHZDZ) | ./休闲娱乐街机/chokchok.7z
+arcade/gamelist.xml | T-鸵鸟骑士(TNQS) | ./休闲娱乐街机/joust.7z
+arcade/gamelist.xml | P-泡泡鱼2(PPY2) | ./休闲娱乐街机/puzzli2.7z
+arcade/gamelist.xml | F-伐木工(FMG) | ./休闲娱乐街机/timber.7z
+arcade/gamelist.xml | T-童话世界(THSJ) | ./休闲娱乐街机/toypop.7z
+arcade/gamelist.xml | Y-原子超人(YZCR) | ./休闲娱乐街机 V/atombjt.7z
+arcade/gamelist.xml | F-疯狂吃豆人(FKCDR) | ./休闲娱乐街机 V/pacmania.7z
+arcade/gamelist.xml | Y-摇滚舞台4(YGWT4) | ./休闲娱乐街机 V/rockn4.7z
+arcade/gamelist.xml | B-棒球之星2(BQZX2) | ./运动街机/bstars2.7z
+arcade/gamelist.xml | S-摔跤锦标赛(SJJBS) | ./运动街机/champwr.7z
+arcade/gamelist.xml | P-破纪录者(PJLZ) | ./运动街机/recordbr.7z
+arcade/gamelist.xml | N-NEO大联盟高尔夫(DLMGEF) | ./运动街机/turfmast.7z
+arcade/gamelist.xml | D-点球大战V2(DQDZ) | ./运动街机/wpksocv2.7z
+arcade/gamelist.xml | Y-异形风暴(YXFB) | ./动作闯关街机/astorm.7z
+arcade/gamelist.xml | Y-异形大战铁血战士(YXDZTXZS) | ./动作闯关街机/avsp.7z
+arcade/gamelist.xml | D-刀锋领主(DFLZ) | ./动作闯关街机/bmaster.7z
+arcade/gamelist.xml | R-忍者蛙(RZW) | ./动作闯关街机/btoads.7z
+arcade/gamelist.xml | B-暴力克星(BLKX) | ./动作闯关街机/cbuster.7z
+arcade/gamelist.xml | X-西游降魔录(XYJML) | ./动作闯关街机/chinagat.7z
+arcade/gamelist.xml | S-双截龙1(SJL1) | ./动作闯关街机/ddragon.7z
+arcade/gamelist.xml | F-疯狂摩托车(FKMTC) | ./动作闯关街机/madmotor.7z
+arcade/gamelist.xml | J-究极战队(JJZD) | ./动作闯关街机/mmaulers.7z
+arcade/gamelist.xml | R-热血硬派(RXYP) | ./动作闯关街机/renegade.7z
+arcade/gamelist.xml | B-暴乱之城(BLZC) | ./动作闯关街机/riotcity.7z
+arcade/gamelist.xml | X-西游降魔录 日(XYJMLR) | ./动作闯关街机/saiyugoub2.7z
+arcade/gamelist.xml | S-索尼克闯关(SNKCG) | ./动作闯关街机/sonic.7z
+其余未显示: 503
+
+========================================================================
+E. 当前同平台系列记录数 >= 4（提示：主列表和子列表可能重复）
+
+[arcade / 三国战纪] 101 条 XML 记录
+  arcade/gamelist.xml | S-三国战纪1(SGZJ1) | ./动作闯关改版/kov.7z
+  arcade/gamelist.xml | S-三国战纪2(SGZJ2) | ./动作闯关改版/kov2.7z
+  arcade/gamelist.xml | 三国战纪 2 (版本. 107, 102, 100港版)(SGZJ2BB.107GB) | ./动作闯关改版/kov2.zip
+  arcade/gamelist.xml | S-三国战纪2 斗转星旋(SGZJ2DZXX) | ./动作闯关改版/kov2dzxx.7z
+  arcade/gamelist.xml | 三国战纪 2 - 盖世英雄 (V302, 海外版)(SGZJ2GSYXHWB) | ./动作闯关改版/kov2nl.7z
+  arcade/gamelist.xml | S-三国战纪2 盖世英雄(SGZJ2GSYX) | ./动作闯关改版/kov2nl_302cn.7z
+  arcade/gamelist.xml | S-三国战纪2 群雄争霸(SGZJ2QXZB) | ./动作闯关改版/kov2p.7z
+  arcade/gamelist.xml | 三国战纪 2 - 群雄争霸 / 三国战纪 2 飞龙在天 (版本. M205XX, 200, 100中国版)(SGZJ2QXZBSGZJ2FLZTBB.ZGB) | ./动作闯关改版/kov2p.zip
+  arcade/gamelist.xml | 三国战纪 2 - 群雄争霸 / 三国战纪 2 飞龙在天 (版本. M204XX, 200, 100中国版)(SGZJ2QXZBSGZJ2FLZTBB.ZGB) | ./动作闯关改版/kov2p204.zip
+  arcade/gamelist.xml | S-三国战纪2 Plus 魔法加强版(SGZJ2MFJQB) | ./动作闯关改版/kov2pemp.7z
+  arcade/gamelist.xml | S-三国战纪2 Plus 凤舞龙吟(SGZJ2FWLY) | ./动作闯关改版/kov2pfwll.7z
+  arcade/gamelist.xml | S-三国战纪2 Plus 邪风天炽(SGZJ2XFTC) | ./动作闯关改版/kov2pshpd.7z
+  arcade/gamelist.xml | S-三国战纪1 傲世三国(SGZJ1ASSG) | ./动作闯关改版/kovassg.7z
+  arcade/gamelist.xml | S-三国战纪1 傲世三国新版(SGZJ1ASSGXB) | ./动作闯关改版/kovassgn.7z
+  arcade/gamelist.xml | S-三国战纪1 乱世拳皇特别版(SGZJ1LSQHTBB) | ./动作闯关改版/kovlsqho.7z
+  arcade/gamelist.xml | S-三国战纪1 乱世英雄(SGZJ1LSYX) | ./动作闯关改版/kovlsyx.7z
+  arcade/gamelist.xml | S-三国战纪1 群雄逐鹿Plus(SGZJ1QXZL) | ./动作闯关改版/kovlsyxqxzlp.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus 战神无双(SGZJ1ZSWS) | ./动作闯关改版/kovp12dw.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus 2012 梦魇版(SGZJ1MYB) | ./动作闯关改版/kovp12em.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus(SGZJ1) | ./动作闯关改版/kovplus.7z
+  arcade/gamelist.xml | 三国战纪 - 正宗加强版 (版本. 119, 第 1 套)(SGZJZZJQBBB.119D1T) | ./动作闯关改版/kovplus.zip
+  arcade/gamelist.xml | S-三国战纪1 Plus 群雄乱舞2020(SGZJ1QXLW2020) | ./动作闯关改版/kovplus20tx.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus 横扫千军(SGZJ1HSQJ) | ./动作闯关改版/kovplushsqj.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus 新英雄传(SGZJ1XYXZ) | ./动作闯关改版/kovplusq.7z
+  arcade/gamelist.xml | S-三国战纪1 Plus 真吞食天地(SGZJ1ZTSTD) | ./动作闯关改版/kovpluststd.7z
+  arcade/gamelist.xml | S-三国战纪1 拳皇三国特别版(SGZJ1QHSGTBB) | ./动作闯关改版/kovqhsgsd.7z
+  arcade/gamelist.xml | S-三国战纪1 群雄争霸无双(SGZJ1QXZBWS) | ./动作闯关改版/kovqxzbws.7z
+  arcade/gamelist.xml | S-三国战纪1 群英传(SGZJ1QYC) | ./动作闯关改版/kovsgqyzd.7z
+  arcade/gamelist.xml | S-三国战纪1 风云再起(SGZJ1FYZQ) | ./动作闯关改版/kovsh.7z
+  arcade/gamelist.xml | 三国战纪 - 风云再起 (版本. 104, 中国版)(SGZJFYZQBB.104ZGB) | ./动作闯关改版/kovsh.zip
+  arcade/gamelist.xml | S-三国战纪1 乱世枭雄(SGZJ1LSXX) | ./动作闯关改版/kovshp.7z
+  arcade/gamelist.xml | 三国战纪 - 乱世枭雄 (版本. 101)(SGZJLSXXBB.101) | ./动作闯关改版/kovshp.zip
+  arcade/gamelist.xml | S-三国战纪1 群雄逐鹿无双版(SGZJ1QXZLWSB) | ./动作闯关改版/kovshpd3dw.7z
+  arcade/gamelist.xml | S-三国战纪1 最强火力Plus(SGZJ1ZQHL) | ./动作闯关改版/kovshpzqhl.7z
+  arcade/gamelist.xml | S-三国战纪1 一统中原无双青版(SGZJ1YTZYWSQB) | ./动作闯关改版/kovytzyce.7z
+  其余未显示: 66
+
+[arcade / 双截龙] 13 条 XML 记录
+  arcade/gamelist.xml | S-双截龙格斗(SJLGD) | ./格斗对战街机/doubledr.7z
+  arcade/gamelist.xml | S-双截龙1(SJL1) | ./动作闯关街机/ddragon.7z
+  arcade/gamelist.xml | S-双截龙2(SJL2) | ./动作闯关街机/ddragon2.7z
+  arcade/gamelist.xml | S-双截龙3(SJL3) | ./动作闯关街机/ddragon3.7z
+  arcade/gamelist.xml | S-双截龙格斗 SP(SJLGD) | ./格斗对战改版/doubldsp.7z
+  arcade/gamelist.xml | S-双截龙格斗 PLUS(SJLGD) | ./格斗对战改版/doubledp.7z
+  arcade/gamelist.xml | S-双截龙格斗 简化版(SJLGDJHB) | ./格斗对战改版/doubledr.7z
+  arcade/gamelist.xml | S-双截龙格斗 BOSS版(SJLGDB) | ./格斗对战改版/doubledrbh.7z
+  arcade/gamelist.xml | S-双截龙格斗 优化版(SJLGDYHB) | ./格斗对战改版/doubledt.7z
+  arcade/动作闯关街机/gamelist.xml | S-双截龙1 | ./动作闯关街机/ddragon.7z
+  arcade/动作闯关街机/gamelist.xml | S-双截龙2 | ./动作闯关街机/ddragon2.7z
+  arcade/动作闯关街机/gamelist.xml | S-双截龙3 | ./动作闯关街机/ddragon3.7z
+  arcade/格斗对战街机/gamelist.xml | S-双截龙格斗 | ./doubledr.7z
+
+[arcade / 合金弹头] 98 条 XML 记录
+  arcade/gamelist.xml | H-合金弹头X 疯狂火力版(HJDTFKHLB) | ./合金弹头合集/合金弹头疯狂火力.lww
+  arcade/gamelist.xml | H-合金弹头2 混合子弹版(HJDT2HHZDB) | ./合金弹头合集/合金弹头 2 子弹混合.lww
+  arcade/gamelist.xml | H-合金弹头2 1v2模式(HJDT21MS) | ./合金弹头合集/ms21v2.7z
+  arcade/gamelist.xml | H-合金弹头3 1v2模式(HJDT31MS) | ./合金弹头合集/ms31v2.7z
+  arcade/gamelist.xml | H-合金弹头4 1v2模式(HJDT41MS) | ./合金弹头合集/ms41v2.7z
+  arcade/gamelist.xml | H-合金弹头5 1v2模式(HJDT51MS) | ./合金弹头合集/ms51v2.7z
+  arcade/gamelist.xml | H-合金弹头5 敌兵加倍版(HJDT5DBJBB) | ./合金弹头合集/ms5esr.7z
+  arcade/gamelist.xml | H-合金弹头5 PLUS(HJDT5) | ./合金弹头合集/ms5plush.7z
+  arcade/gamelist.xml | H-合金弹头1(HJDT1) | ./合金弹头合集/mslug.zip
+  arcade/gamelist.xml | H-合金弹头1 1V2模式(HJDT11MS) | ./合金弹头合集/mslug1v2.7z
+  arcade/gamelist.xml | H-合金弹头2(HJDT2) | ./合金弹头合集/mslug2.zip
+  arcade/gamelist.xml | H-合金弹头2 生存版(HJDT2SCB) | ./合金弹头合集/mslug2ct.7z
+  arcade/gamelist.xml | H-合金弹头2 初夏繁星点点(HJDT2CXFXDD) | ./合金弹头合集/mslug2dd.7z
+  arcade/gamelist.xml | H-合金弹头2 多功能版(HJDT2DGNB) | ./合金弹头合集/mslug2dg.7z
+  arcade/gamelist.xml | H-合金弹头2 青版加速版(HJDT2QBJSB) | ./合金弹头合集/mslug2eg.7z
+  arcade/gamelist.xml | H-合金弹头2 友伤版(HJDT2YSB) | ./合金弹头合集/mslug2fm.7z
+  arcade/gamelist.xml | H-合金弹头2 存枪版(HJDT2CQB) | ./合金弹头合集/mslug2p.7z
+  arcade/gamelist.xml | H-合金弹头2 加速版(HJDT2JSB) | ./合金弹头合集/mslug2t.7z
+  arcade/gamelist.xml | H-合金弹头2 计时版(HJDT2JSB) | ./合金弹头合集/mslug2unity.7z
+  arcade/gamelist.xml | H-合金弹头3(HJDT3) | ./合金弹头合集/mslug3.7z
+  arcade/gamelist.xml | H-合金弹头6 (3代hack)(HJDT6D) | ./合金弹头合集/mslug3b6.7z
+  arcade/gamelist.xml | H-合金弹头3 敌兵重置版(HJDT3DBZZB) | ./合金弹头合集/mslug3c.7z
+  arcade/gamelist.xml | H-合金弹头3 传奇版(HJDT3CQB) | ./合金弹头合集/mslug3cq.7z
+  arcade/gamelist.xml | H-合金弹头3 初夏繁星点点(HJDT3CXFXDD) | ./合金弹头合集/mslug3dd.7z
+  arcade/gamelist.xml | H-合金弹头3 青版(HJDT3QB) | ./合金弹头合集/mslug3eb.7z
+  arcade/gamelist.xml | H-合金弹头3 多功能版(HJDT3DGNB) | ./合金弹头合集/mslug3g.7z
+  arcade/gamelist.xml | H-合金弹头3 鬼武左马介(HJDT3GWZMJ) | ./合金弹头合集/mslug3gw.7z
+  arcade/gamelist.xml | H-合金弹头3 加强版(HJDT3JQB) | ./合金弹头合集/mslug3h.7z
+  arcade/gamelist.xml | H-合金弹头3 无限火力版(HJDT3WXHLB) | ./合金弹头合集/mslug3i.7z
+  arcade/gamelist.xml | H-合金弹头3 Komorebi版(HJDT3B) | ./合金弹头合集/mslug3ki.7z
+  arcade/gamelist.xml | H-合金弹头3 最后的弹头(HJDT3ZHDDT) | ./合金弹头合集/mslug3lw.7z
+  arcade/gamelist.xml | H-合金弹头3 肉鸽版(HJDT3RGB) | ./合金弹头合集/mslug3ps.7z
+  arcade/gamelist.xml | H-合金弹头3 生存版(HJDT3SCB) | ./合金弹头合集/mslug3sc.7z
+  arcade/gamelist.xml | H-合金弹头3 商店版(HJDT3SDB) | ./合金弹头合集/mslug3sd.7z
+  arcade/gamelist.xml | H-合金弹头3 SE特别版(HJDT3TBB) | ./合金弹头合集/mslug3se.7z
+  其余未显示: 63
+
+[arcade / 名将] 38 条 XML 记录
+  arcade/gamelist.xml | M-名将 1V4(MJ1) | ./动作闯关改版/captc1v4.7z
+  arcade/gamelist.xml | M-名将 大师版(MJDSB) | ./动作闯关改版/captcm2y.7z
+  arcade/gamelist.xml | M-名将 精英版(MJJYB) | ./动作闯关改版/captcmcr.7z
+  arcade/gamelist.xml | M-名将 无双版(MJWSB) | ./动作闯关改版/captcmdw.7z
+  arcade/gamelist.xml | M-名将 精英赛(MJJYS) | ./动作闯关改版/captcmjy.7z
+  arcade/gamelist.xml | M-名将 梦魇版(MJMYB) | ./动作闯关改版/captcmmy.7z
+  arcade/gamelist.xml | M-名将 换人版(MJHRB) | ./动作闯关改版/captcmsc.7z
+  arcade/gamelist.xml | M-名将 赛事版(MJSSB) | ./动作闯关改版/captcmsh.7z
+  arcade/gamelist.xml | M-名将 无限弹(MJWXD) | ./动作闯关改版/captcmwx.7z
+  arcade/gamelist.xml | M-名将 战神版(MJZSB) | ./动作闯关改版/captcmzs.7z
+  arcade/gamelist.xml | M-名将 征途版(MJZTB) | ./动作闯关改版/captcmzt.7z
+  arcade/gamelist.xml | M-名将(MJ) | ./动作闯关改版/captcomm.7z
+  arcade/gamelist.xml | M-名将 加强版2(MJJQB2) | ./动作闯关改版/captcommr1.7z
+  arcade/gamelist.xml | M-名将 重制版(MJZZB) | ./动作闯关改版/captre.7z
+  arcade/gamelist.xml | M-名将 梦魇 全屏攻击版(MJMYQPGJB) | ./动作闯关改版/captcmmyqp/captcmmy.7z
+  arcade/gamelist.xml | M-名将 加强版3(MJJQB3) | ./动作闯关改版/captcomm3/captcomm.7z
+  arcade/gamelist.xml | M-名将 中文版(MJZWB) | ./动作闯关改版/captcommc/captcomm.7z
+  arcade/gamelist.xml | M-名将 加强版1(MJJQB1) | ./动作闯关改版/captcommjq/captcomm.7z
+  arcade/gamelist.xml | M-名将 全屏攻击版(MJQPGJB) | ./动作闯关改版/captcommqp/captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 | ./captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 中文版 | ./动作闯关街机 魔改/captcommc/captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 全屏攻击版 | ./动作闯关街机 魔改/captcommqp/captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 加强版1 | ./动作闯关街机 魔改/captcommjq/captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 加强版2 | ./captcommr1.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 加强版3 | ./动作闯关街机 魔改/captcomm3/captcomm.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 1V4 | ./captc1v4.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 大师版 | ./动作闯关街机 魔改/captcm2y.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 精英版 | ./动作闯关街机 魔改/captcmcr.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 无双版 | ./动作闯关街机 魔改/captcmdw.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 精英赛 | ./动作闯关街机 魔改/captcmjy.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 梦魇版 | ./动作闯关街机 魔改/captcmmy.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 梦魇 全屏攻击版 | ./动作闯关街机 魔改/captcmmyqp/captcmmy.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 换人版 | ./动作闯关街机 魔改/captcmsc.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 赛事版 | ./动作闯关街机 魔改/captcmsh.7z
+  arcade/动作闯关改版/gamelist.xml | M-名将 无限弹 | ./动作闯关街机 魔改/captcmwx.7z
+  其余未显示: 3
+
+[arcade / 吞食天地] 98 条 XML 记录
+  arcade/gamelist.xml | T-吞食天地1 王朝战争(TSTD1WCZZ) | ./动作闯关改版/dynwarj.7z
+  arcade/gamelist.xml | T-吞食天地2 世界版(TSTD2SJB) | ./动作闯关改版/wof.7z
+  arcade/gamelist.xml | T-吞食天地2 三剑圣版(TSTD2SJSB) | ./动作闯关改版/wof3js.7z
+  arcade/gamelist.xml | T-吞食天地2 圣剑版(TSTD2SJB) | ./动作闯关改版/wof3sj.7z
+  arcade/gamelist.xml | T-吞食天地2 亚洲版(TSTD2YZB) | ./动作闯关改版/wofa.7z
+  arcade/gamelist.xml | T-吞食天地2 盗版音效版(TSTD2DBYXB) | ./动作闯关改版/wofabl.7z
+  arcade/gamelist.xml | T-吞食天地2 亚改(TSTD2YG) | ./动作闯关改版/wofah.7z
+  arcade/gamelist.xml | T-吞食天地2 汉化版(TSTD2HHB) | ./动作闯关改版/wofc.7z
+  arcade/gamelist.xml | 吞食天地 II - 赤壁之战 (CPS 替换版, 日版 921031)(TSTDCBZZTHBRB921031) | ./动作闯关改版/wofch.zip
+  arcade/gamelist.xml | T-吞食天地2 夏侯恩复仇DX(TSTD2XHEFC) | ./动作闯关改版/wofchdx.7z
+  arcade/gamelist.xml | T-吞食天地2 PS/SS版(TSTD2B) | ./动作闯关改版/wofchp.7z
+  arcade/gamelist.xml | T-吞食天地2 达人版(TSTD2DRB) | ./动作闯关改版/wofdr.7z
+  arcade/gamelist.xml | T-吞食天地2 达人版2020(TSTD2DRB2020) | ./动作闯关改版/wofdr20.7z
+  arcade/gamelist.xml | T-吞食天地2 三国英雄传(TSTD2SGYXZ) | ./动作闯关改版/wofh.7z
+  arcade/gamelist.xml | T-吞食天地2 火凤凰(TSTD2HFH) | ./动作闯关改版/wofhfh.7z
+  arcade/gamelist.xml | 吞食天地 II - 赤壁之战 (日版 921031)(TSTDCBZZRB921031) | ./动作闯关改版/wofj.zip
+  arcade/gamelist.xml | T-吞食天地2 日改(TSTD2RG) | ./动作闯关改版/wofjh.7z
+  arcade/gamelist.xml | T-吞食天地2 科目三(TSTD2KMS) | ./动作闯关改版/wofkm3.7z
+  arcade/gamelist.xml | T-吞食天地2 三美无双版(TSTD2SMWSB) | ./动作闯关改版/wofmws.7z
+  arcade/gamelist.xml | T-吞食天地2 换人版(TSTD2HRB) | ./动作闯关改版/wofsc.7z
+  arcade/gamelist.xml | T-吞食天地2 三国争霸(TSTD2SGZB) | ./动作闯关改版/wofsgzb.7z
+  arcade/gamelist.xml | T-吞食天地2 圣剑三国(TSTD2SJSG) | ./动作闯关改版/wofsj.7z
+  arcade/gamelist.xml | T-吞食天地2 三美版(TSTD2SMB) | ./动作闯关改版/wofsm.7z
+  arcade/gamelist.xml | T-吞食天地2 无双增强版(TSTD2WSZQB) | ./动作闯关改版/wofwjq.7z
+  arcade/gamelist.xml | T-吞食天地2 无双加强版(TSTD2WSJQB) | ./动作闯关改版/wofwp.7z
+  arcade/gamelist.xml | T-吞食天地2 战狼版(TSTD2ZLB) | ./动作闯关改版/wofzl.7z
+  arcade/gamelist.xml | T-吞食天地2 夏侯惇无双版(TSTD2XHDWSB) | ./动作闯关改版/10/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 许褚版(TSTD2XCB) | ./动作闯关改版/11/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 晕锤拳版(TSTD2YCQB) | ./动作闯关改版/12/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 飞刀版(TSTD2FDB) | ./动作闯关改版/13/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 张飞冲拳飞箭版(TSTD2ZFCQFJB) | ./动作闯关改版/2/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 多功能加强版(TSTD2DGNJQB) | ./动作闯关改版/4/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 蓝色标题版(TSTD2LSBTB) | ./动作闯关改版/wofchls/wofch.7z
+  arcade/gamelist.xml | T-吞食天地2 赵威三美版(TSTD2ZWSMB) | ./动作闯关改版/wofjhe/wofj.7z
+  arcade/gamelist.xml | T-吞食天地2 张辽强化版(TSTD2ZLQHB) | ./动作闯关改版/wofjxc/wofj.7z
+  其余未显示: 63
+
+[arcade / 忍者神龟] 6 条 XML 记录
+  arcade/gamelist.xml | R-忍者神龟2(RZSG2) | ./动作闯关街机/tmnt2.7z
+  arcade/gamelist.xml | R-忍者神龟2 ExSuper(RZSG2) | ./动作闯关街机/tmnt2a.7z
+  arcade/gamelist.xml | R-忍者神龟1(RZSG1) | ./动作闯关街机/tmnt.7z
+  arcade/动作闯关街机/gamelist.xml | R-忍者神龟1 | ./动作闯关街机/tmnt.7z
+  arcade/动作闯关街机/gamelist.xml | R-忍者神龟2 | ./动作闯关街机/tmnt2.7z
+  arcade/动作闯关街机/gamelist.xml | R-忍者神龟2 ExSuper | ./动作闯关街机/tmnt2a.7z
+
+[arcade / 快打旋风] 19 条 XML 记录
+  arcade/gamelist.xml | K-快打旋风 1V2(KDXF1) | ./动作闯关改版/ffigh1v2.7z
+  arcade/gamelist.xml | K-快打旋风(KDXF) | ./动作闯关改版/ffight.7z
+  arcade/gamelist.xml | K-快打旋风 30周年纪念版(KDXF30ZNJNB) | ./动作闯关改版/ffightae.7z
+  arcade/gamelist.xml | K-快打旋风 CPS2版(KDXFB) | ./动作闯关改版/ffightaec2.7z
+  arcade/gamelist.xml | K-快打旋风CPS2 致命街道(KDXFZMJD) | ./动作闯关改版/ffightaec2ds.7z
+  arcade/gamelist.xml | K-快打旋风 AE DIY版(KDXFB) | ./动作闯关改版/ffightaemgc.7z
+  arcade/gamelist.xml | K-快打旋风 无双版(KDXFWSB) | ./动作闯关改版/ffightdw.7z
+  arcade/gamelist.xml | K-快打旋风 框架版(KDXFKJB) | ./动作闯关改版/ffightfw.7z
+  arcade/gamelist.xml | K-快打旋风 boss版(KDXFB) | ./动作闯关改版/ffightjh.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 | ./动作闯关街机 魔改/ffight.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 CPS2版 | ./动作闯关街机 魔改/ffightaec2.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 30周年纪念版 | ./动作闯关街机 魔改/ffightae.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 AE DIY版 | ./动作闯关街机 魔改/ffightaemgc.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风CPS2 致命街道 | ./动作闯关街机 魔改/ffightaec2ds.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 boss版 | ./动作闯关街机 魔改/ffightjh.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 1V2 | ./动作闯关街机 魔改/ffigh1v2.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 无双版 | ./动作闯关街机 魔改/ffightdw.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风 框架版 | ./动作闯关街机 魔改/ffightfw.7z
+  arcade/动作闯关改版/gamelist.xml | K-快打旋风3 盗版 | ./动作闯关街机 魔改/ffight3b.7z
+
+[arcade / 拳皇] 148 条 XML 记录
+  arcade/gamelist.xml | Q-拳皇97 简化版(QH97JHB) | ./格斗拳皇合集/kof97j/kof97.7z
+  arcade/gamelist.xml | Q-拳皇97 周年纪念(QH97ZNJN) | ./格斗拳皇合集/kof97ae.7z
+  arcade/gamelist.xml | Q-拳皇97 进化平衡(QH97JHPH) | ./格斗拳皇合集/kof97eb.7z
+  arcade/gamelist.xml | Q-拳皇97 梦回(QH97MH) | ./格斗拳皇合集/kof97m.7z
+  arcade/gamelist.xml | Q-拳皇97 特别版(QH97TBB) | ./格斗拳皇合集/kof97sp.7z
+  arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+  arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+  arcade/gamelist.xml | Q-拳皇97 狂龙版2023(QH97KLB2023) | ./格斗拳皇合集/kof97kl2023/kof97xt.7z
+  arcade/gamelist.xml | Q-拳皇97 狂龙版2023 简化版(QH97KLB2023JHB) | ./格斗拳皇合集/kof97kl2023j/kof97xt.7z
+  arcade/gamelist.xml | Q-拳皇97 天国神族 简化版(QH97TGSZJHB) | ./格斗拳皇合集/kof97orhj/kof97xt.7z
+  arcade/gamelist.xml | Q-拳皇97 无限梦幻 简化版(QH97WXMHJHB) | ./格斗拳皇合集/kof97mugen/kof97xt.7z
+  arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2(QH97TS) | ./格斗拳皇合集/kof97ts.7z
+  arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2 简化版(QH97TSJHB) | ./格斗拳皇合集/kof97tsj/kof97ts.7z
+  arcade/gamelist.xml | Q-拳皇97 最终决战(QH97ZZJZ) | ./格斗拳皇合集/kof97xt.7z
+  arcade/gamelist.xml | Q-拳皇97 所向披靡(QH97SXPM) | ./格斗拳皇合集/kof97inv.7z
+  arcade/gamelist.xml | Q-拳皇97 所向披靡 简化版(QH97SXPMJHB) | ./格斗拳皇合集/kof97invj/kof97inv.7z
+  arcade/gamelist.xml | Q-拳皇97 重出江湖加强版2003(QH97ZCJHJQB2003) | ./格斗拳皇合集/kof97oro.7z
+  arcade/gamelist.xml | Q-拳皇97 乱击2010 简化版(QH97LJ2010JHB) | ./格斗拳皇合集/kof97rcj/kof97rc.7z
+  arcade/gamelist.xml | Q-拳皇97 风云再起Plus(QH97FYZQ) | ./格斗拳皇合集/kof97pls.7z
+  arcade/gamelist.xml | Q-拳皇97 格斗之王(QH97GDZW) | ./格斗拳皇合集/kog.7z
+  arcade/gamelist.xml | Q-拳皇97 格斗之王风云再起Plus(QH97GDZWFYZQ) | ./格斗拳皇合集/kogplus.7z
+  arcade/gamelist.xml | Q-拳皇98 Combo Plus(QH98) | ./格斗拳皇合集/kof98cp.7z
+  arcade/gamelist.xml | Q-拳皇98 Boss汉化版(QH98HHB) | ./格斗拳皇合集/kof98bsc.7z
+  arcade/gamelist.xml | Q-拳皇98 Boss Plus 汉化简化版(QH98HHJHB) | ./格斗拳皇合集/kof98plc.7z
+  arcade/gamelist.xml | Q-拳皇98 简化版(QH98JHB) | ./格斗拳皇合集/kof98h.7z
+  arcade/gamelist.xml | Q-拳皇98 无极限 简化版(QH98WJXJHB) | ./格斗拳皇合集/kof98mixj/kof98mix.7z
+  arcade/gamelist.xml | Q-拳皇98 终极比赛(QH98ZJBS) | ./格斗拳皇合集/kof98ult.7z
+  arcade/gamelist.xml | Q-拳皇98 终极比赛 简化版(QH98ZJBSJHB) | ./格斗拳皇合集/kof98ultj/kof98ult.7z
+  arcade/gamelist.xml | Q-拳皇98 BC 02风格版(QH98FGB) | ./格斗拳皇合集/kof98bc2k2.7z
+  arcade/gamelist.xml | Q-拳皇98 BC 二度冲击(QH98EDCJ) | ./格斗拳皇合集/kof98bc2nd.7z
+  arcade/gamelist.xml | Q-拳皇98 BC 二度冲击 简化版(QH98EDCJJHB) | ./格斗拳皇合集/kof98bc2ndj/kof98bc2nd.7z
+  arcade/gamelist.xml | Q-拳皇98 轻松连击王(QH98QSLJW) | ./格斗拳皇合集/kof98eck.7z
+  arcade/gamelist.xml | Q-拳皇99 Plus(QH99) | ./格斗拳皇合集/kof99t.7z
+  arcade/gamelist.xml | Q-拳皇99 Plus 简化版(QH99JHB) | ./格斗拳皇合集/kof99tj/kof99t.7z
+  arcade/gamelist.xml | Q-拳皇99 Remix Pro Final(QH99) | ./格斗拳皇合集/kof99rp.7z
+  其余未显示: 113
+
+[arcade / 热血] 10 条 XML 记录
+  arcade/gamelist.xml | R-热血对决(RXDJ) | ./格斗对战街机/brival.7z
+  arcade/gamelist.xml | X-新热血高校躲避球(XRXGXDBQ) | ./运动街机/sdodgeb.7z
+  arcade/gamelist.xml | R-热血高校躲避球(RXGXDBQ) | ./运动街机/spdodgeb.7z
+  arcade/gamelist.xml | R-热血快打(RXKD) | ./动作闯关街机/burningf.7z
+  arcade/gamelist.xml | R-热血硬派(RXYP) | ./动作闯关街机/renegade.7z
+  arcade/动作闯关街机/gamelist.xml | R-热血硬派 | ./动作闯关街机/renegade.7z
+  arcade/动作闯关街机/gamelist.xml | R-热血快打 | ./burningf.7z
+  arcade/格斗对战街机/gamelist.xml | R-热血对决 | ./brival.7z
+  arcade/运动街机/gamelist.xml | R-热血高校躲避球 | ./spdodgeb.7z
+  arcade/运动街机/gamelist.xml | X-新热血高校躲避球 | ./sdodgeb.7z
+
+[arcade / 街头霸王] 62 条 XML 记录
+  arcade/gamelist.xml | J-街头霸王2 四大天王 惩罚版(JTBW2SDTWCFB) | ./格斗街霸合集/街头霸王2 惩罚版 2.lww
+  arcade/gamelist.xml | 街头霸王2 惩罚版 2(JTBW2CFB2) | ./格斗街霸合集/街头霸王2 惩罚版 2.lww
+  arcade/gamelist.xml | 街头霸王2 Mix1.3j简化(JTBW2JH) | ./格斗街霸合集/街头霸王2 Mix1.3j简化.lww
+  arcade/gamelist.xml | 街头霸王2 眼镜蛇(JTBW2YJS) | ./格斗街霸合集/街头霸王2 眼镜蛇.lww
+  arcade/gamelist.xml | 街头霸王2 简化版(JTBW2JHB) | ./格斗街霸合集/街头霸王2 简化版.lww
+  arcade/gamelist.xml | 街头霸王2 豪华金色简化版(JTBW2HHJSJHB) | ./格斗街霸合集/街头霸王2 豪华金色简化版.lww
+  arcade/gamelist.xml | C-超级漫画英雄对街头霸王(CJMHYXDJTBW) | ./格斗对战街机/mshvsf.7z
+  arcade/gamelist.xml | X-X战警对街头霸王(ZJDJTBW) | ./格斗对战街机/xmvsf.7z
+  arcade/gamelist.xml | C-超级漫画英雄对街头霸王 简化版(CJMHYXDJTBWJHB) | ./格斗对战改版/mshvsf.7z
+  arcade/gamelist.xml | X-X战警对街头霸王 简化版(ZJDJTBWJHB) | ./格斗对战改版/xmvsf.7z
+  arcade/gamelist.xml | Z-终极街头霸王2(ZJJTBW2) | ./格斗街霸合集/hsf2.7z
+  arcade/gamelist.xml | Z-终极街头霸王2 简化版(ZJJTBW2JHB) | ./格斗街霸合集/hsf2j.7z
+  arcade/gamelist.xml | Z-终极街头霸王2 Plus Plus(ZJJTBW2) | ./格斗街霸合集/hsf2pp.7z
+  arcade/gamelist.xml | J-街头霸王1(JTBW1) | ./格斗街霸合集/sf.7z
+  arcade/gamelist.xml | J-街头霸王2 天下斗士(JTBW2TXDS) | ./格斗街霸合集/sf2.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王 彩虹1 简化版(JTBW2SDTWCH1JHB) | ./格斗街霸合集/sf2accp2.7z
+  arcade/gamelist.xml | 街头霸王 II' - 四大天王 (Alpha Magic-F, 盗版)(JTBWSDTWDB) | ./格斗街霸合集/sf2amf.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (L735 Test Rom, 盗版 第三套)(JTBWGJBDBDST) | ./格斗街霸合集/sf2amf10.7z
+  arcade/gamelist.xml | 街头霸王 II' - 四大天王 (L735 Test Rom, 盗版, 第 1 套)(JTBWSDTWDBD1T) | ./格斗街霸合集/sf2amf2.7z
+  arcade/gamelist.xml | 街头霸王 II' - 四大天王 (L735 Test Rom, 盗版, 第 2 套)(JTBWSDTWDBD2T) | ./格斗街霸合集/sf2amf3.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第二套, 920313 etc)(JTBWGJBAEFMGBDBDET) | ./格斗街霸合集/sf2amf4.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第三套, 920313 etc)(JTBWGJBAEFMGBDBDST) | ./格斗街霸合集/sf2amf5.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第四套, 920313 etc)(JTBWGJBAEFMGBDBDST) | ./格斗街霸合集/sf2amf6.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第五套, 920313 etc)(JTBWGJBAEFMGBDBDWT) | ./格斗街霸合集/sf2amf7.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第六套, 920313 etc)(JTBWGJBAEFMGBDBDLT) | ./格斗街霸合集/sf2amf8.7z
+  arcade/gamelist.xml | 街头霸王 II' - 冠军版 (阿尔法魔改版-F 盗版 第七套, 920313 etc)(JTBWGJBAEFMGBDBDQT) | ./格斗街霸合集/sf2amf9.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王(JTBW2SDTW) | ./格斗街霸合集/sf2ce.7z
+  arcade/gamelist.xml | 街头霸王 II' - 四大天王 (美版 920513)(JTBWSDTWMB920513) | ./格斗街霸合集/sf2ceub.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王 加速KO版(JTBW2SDTWJSB) | ./格斗街霸合集/sf2dkot2.7z
+  arcade/gamelist.xml | J-街头霸王2 加速版(JTBW2JSB) | ./格斗街霸合集/sf2hf.7z
+  arcade/gamelist.xml | J-街头霸王2 天下斗士 中文简化版(JTBW2TXDSZWJHB) | ./格斗街霸合集/sf2j.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王 (降龙)(JTBW2SDTWJL) | ./格斗街霸合集/sf2koryu.7z
+  arcade/gamelist.xml | J-街头霸王2 MIX(JTBW2) | ./格斗街霸合集/sf2mix.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王 彩虹3 简化版(JTBW2SDTWCH3JHB) | ./格斗街霸合集/sf2rb3.7z
+  arcade/gamelist.xml | J-街头霸王2 四大天王 新彩虹版(JTBW2SDTWXCHB) | ./格斗街霸合集/sf2rb6.7z
+  其余未显示: 27
+
+[arcade / 街霸] 16 条 XML 记录
+  arcade/gamelist.xml | S-少年街霸A1(SNJB) | ./格斗街霸合集/sfa.7z
+  arcade/gamelist.xml | S-少年街霸A2(SNJB) | ./格斗街霸合集/sfa2.7z
+  arcade/gamelist.xml | S-少年街霸A2 Ultra(SNJB) | ./格斗街霸合集/sfa2ultra.7z
+  arcade/gamelist.xml | S-少年街霸A3(SNJB) | ./格斗街霸合集/sfa3.7z
+  arcade/gamelist.xml | S-少年街霸A3 CE(SNJB) | ./格斗街霸合集/sfa3ce.7z
+  arcade/gamelist.xml | S-少年街霸A3 降龙版(SNJBJLB) | ./格斗街霸合集/sfa3xl.7z
+  arcade/gamelist.xml | S-少年街霸A1 降龙 简化版(SNJBJLJHB) | ./格斗街霸合集/sfar2.7z
+  arcade/gamelist.xml | S-少年街霸Z2 简化版(SNJBJHB) | ./格斗街霸合集/sfz2al.7z
+  arcade/gamelist.xml | S-少年街霸Z2 降龙 简化版(SNJBJLJHB) | ./格斗街霸合集/sfz2alj.7z
+  arcade/gamelist.xml | S-少年街霸Z3 MIX(SNJB) | ./格斗街霸合集/sfz3mix.7z
+  arcade/gamelist.xml | S-少年街霸Z3 MIX 0.13(SNJB) | ./格斗街霸合集/sfz3mix13.7z
+  arcade/gamelist.xml | S-少年街霸Z3 TE(SNJB) | ./格斗街霸合集/sfz3te.7z
+  arcade/gamelist.xml | S-少年街霸Z1(SNJB) | ./格斗街霸合集/sfzch.7z
+  arcade/gamelist.xml | S-少年街霸Z1 降龙 简化版(SNJBJLJHB) | ./格斗街霸合集/sfzj.7z
+  arcade/gamelist.xml | S-少年街霸A3 降龙 简化版(SNJBJLJHB) | ./格斗街霸合集/sfa3jh/sfa3xl.7z
+  arcade/gamelist.xml | S-少年街霸Z3 MIX 简化版(SNJBJHB) | ./格斗街霸合集/sfz3mixj/sfz3mix.7z
+
+[arcade / 西游释厄传] 49 条 XML 记录
+  arcade/gamelist.xml | 西游释厄传 2 - 新群魔乱舞 (修改版)(XYSEZ2XQMLWXGB) | ./动作闯关改版/orlegendjj/oldsplusnr.7z
+  arcade/gamelist.xml | X-西游释厄传1 SUPER 加强版(XYSEZ1JQB) | ./动作闯关改版/olds.7z
+  arcade/gamelist.xml | 西游释厄传 特别版 (版本. 101, 韩国基板)(XYSEZTBBBB.101HGJB) | ./动作闯关改版/olds.zip
+  arcade/gamelist.xml | X-西游释厄传1 SUPER 唐僧版(XYSEZ1TSB) | ./动作闯关改版/olds100a.7z
+  arcade/gamelist.xml | X-西游释厄传1 大圣归来(XYSEZ1DSGL) | ./动作闯关改版/oldsdsgl.7z
+  arcade/gamelist.xml | X-西游释厄传1 梦寻灵山(XYSEZ1MXLS) | ./动作闯关改版/oldsmx.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞(XYSEZ1QMLW) | ./动作闯关改版/oldsplus.7z
+  arcade/gamelist.xml | 西游释厄传 2 (韩版) / 西游释厄传 - 群魔乱舞 (世界版, 中国版, 日版, 港版, 台版) (版本. 205) [Oriental Ex](XYSEZ2HBXYSEZQMLWSJBZGBRBGBTBBB.205) | ./动作闯关改版/oldsplus.zip
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211(XYSEZ1QMLW211) | ./动作闯关改版/oldsplusnr.7z
+  arcade/gamelist.xml | 西游释厄传 2 - 新群魔乱舞 (修改版)(XYSEZ2XQMLWXGB) | ./动作闯关改版/oldsplusnr.zip
+  arcade/gamelist.xml | X-西游释厄传1 一键版(XYSEZ1YJB) | ./动作闯关改版/oldsplusok.7z
+  arcade/gamelist.xml | 西游释厄传 2 (一键版, 修改版)(XYSEZ2YJBXGB) | ./动作闯关改版/oldsplusok.zip
+  arcade/gamelist.xml | X-西游释厄传2(XYSEZ2) | ./动作闯关改版/orleg2_104cn.7z
+  arcade/gamelist.xml | X-西游释厄传1(XYSEZ1) | ./动作闯关改版/orlegend.7z
+  arcade/gamelist.xml | 西游释厄传 (版本. 126)(XYSEZBB.126) | ./动作闯关改版/orlegend.zip
+  arcade/gamelist.xml | 西游释厄传 (版本. 112, 中国基板)(XYSEZBB.112ZGJB) | ./动作闯关改版/orlegendc.zip
+  arcade/gamelist.xml | X-西游释厄传1 ZERO(XYSEZ1) | ./动作闯关改版/zerofxz.7z
+  arcade/gamelist.xml | X-西游释厄传1 SUPER 简化版(XYSEZ1JHB) | ./动作闯关改版/oldsl/olds103t.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞2016修订版(XYSEZ1QMLW2016XDB) | ./动作闯关改版/oldsplus2016/oldsplus.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强最终版(XYSEZ1QMLW211ZJJQZZB) | ./动作闯关改版/oldsplus211926/oldsplus.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211简化版(XYSEZ1QMLW211JHB) | ./动作闯关改版/oldsplusnr211jh/oldsplusnr.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211加强版(XYSEZ1QMLW211JQB) | ./动作闯关改版/oldsplusnr211jq/oldsplus.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞211终极加强版(XYSEZ1QMLW211ZJJQB) | ./动作闯关改版/oldsplusnr211zj/oldsplusnr.7z
+  arcade/gamelist.xml | X-西游释厄传1 群魔乱舞 加强版(XYSEZ1QMLWJQB) | ./动作闯关改版/oldsplusqmlw/oldsplus.7z
+  arcade/gamelist.xml | X-西游释厄传1 SUPER 天下无双(XYSEZ1TXWS) | ./动作闯关改版/oldssw/olds100a.7z
+  arcade/gamelist.xml | X-西游释厄传2 加强版(XYSEZ2JQB) | ./动作闯关改版/orleg2_104h/orleg2_104cn.7z
+  arcade/gamelist.xml | X-西游释厄传1 加强版(XYSEZ1JQB) | ./动作闯关改版/orlegendjq/orlegend.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 | ./动作闯关街机 魔改/orlegend.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 加强版 | ./动作闯关街机 魔改/orlegendjq/orlegend.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 金角传说 | ./动作闯关街机 魔改/orlegendjj/orlegend.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 一键版 | ./动作闯关街机 魔改/oldsplusok.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 ZERO | ./动作闯关街机 魔改/zerofxz.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 大圣归来 | ./动作闯关街机 魔改/oldsdsgl.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 梦寻灵山 | ./动作闯关街机 魔改/oldsmx.7z
+  arcade/动作闯关改版/gamelist.xml | X-西游释厄传1 SUPER | ./动作闯关街机 魔改/olds103t.7z
+  其余未显示: 14
+
+[arcade / 西游降魔录] 4 条 XML 记录
+  arcade/gamelist.xml | X-西游降魔录(XYJML) | ./动作闯关街机/chinagat.7z
+  arcade/gamelist.xml | X-西游降魔录 日(XYJMLR) | ./动作闯关街机/saiyugoub2.7z
+  arcade/动作闯关街机/gamelist.xml | X-西游降魔录 | ./动作闯关街机/chinagat.7z
+  arcade/动作闯关街机/gamelist.xml | X-西游降魔录 日 | ./动作闯关街机/saiyugoub2.7z
+
+[arcade / 魂斗罗] 8 条 XML 记录
+  arcade/gamelist.xml | H-魂斗罗2(HDL2) | ./动作射击街机 小游戏/scontra.7z
+  arcade/gamelist.xml | K-恐龙新世纪 血腥魂斗罗(KLXSJXXHDL) | ./动作闯关改版/dino blood/dino.7z
+  arcade/gamelist.xml | H-魂斗罗1(HDL1) | ./动作射击街机 小游戏/contra.7z
+  arcade/gamelist.xml | H-魂斗罗1 汉化版(HDL1HHB) | ./动作射击街机 小游戏/contraj.7z
+  arcade/动作射击街机 小游戏/gamelist.xml | H-魂斗罗1 | ./contra.7z
+  arcade/动作射击街机 小游戏/gamelist.xml | H-魂斗罗1 汉化版 | ./contraj.7z
+  arcade/动作射击街机 小游戏/gamelist.xml | H-魂斗罗2 | ./scontra.7z
+  arcade/动作闯关改版/gamelist.xml | K-恐龙新世纪 血腥魂斗罗 | ./动作闯关街机 魔改/dino blood/dino.7z
+
+[fbneo / kof] 243 条 XML 记录
+  fbneo/gamelist.xml | kof2003 Plus - 20140916 | ./ips\kof2003/kof2003 Plus - 20140916.dat
+  fbneo/gamelist.xml | dino KOF连击版 | ./ips\dino/恐龙快打 KOF连击版.dat
+  fbneo/gamelist.xml | dino 连技 KOF 版 | ./ips\dino/恐龙快打 连技 KOF 版.dat
+  fbneo/gamelist.xml | kof2000 kof2000n (未加密) | ./ips/kof2000/kof2000 kof2000n (未加密).dat
+  fbneo/gamelist.xml | kof2000 OTC (GOTVG) - 20231031 | ./ips/kof2000/kof2000 OTC (GOTVG) - 20231031.dat
+  fbneo/gamelist.xml | kof2000 OTC (YZKOF) - 20220720 | ./ips/kof2000/kof2000 OTC (YZKOF) - 20220720.dat
+  fbneo/gamelist.xml | kof2000 优化 - 20130910 | ./ips/kof2000/kof2000 优化 - 20130910.dat
+  fbneo/gamelist.xml | kof2000 特别 - 20230306 | ./ips/kof2000/kof2000 特别 - 20230306.dat
+  fbneo/gamelist.xml | kof2000 特别版 - 20210304 | ./ips/kof2000/kof2000 特别版 - 20210304.dat
+  fbneo/gamelist.xml | kof2000 风云再起 - 20220621 | ./ips/kof2000/kof2000 风云再起 - 20220621.dat
+  fbneo/gamelist.xml | kof2000 风云再起蓝版 - 20180309 | ./ips/kof2000/kof2000 风云再起蓝版 - 20180309.dat
+  fbneo/gamelist.xml | kof2001 Boss - 20101223 | ./ips/kof2001/kof2001 Boss - 20101223.dat
+  fbneo/gamelist.xml | kof2001 kof2001h (NGH-2621) | ./ips/kof2001/kof2001 kof2001h (NGH-2621).dat
+  fbneo/gamelist.xml | kof2001 PS2 Krizalid - 20210130 | ./ips/kof2001/kof2001 PS2 Krizalid - 20210130.dat
+  fbneo/gamelist.xml | kof2001 终极 - 20240611 | ./ips/kof2001/kof2001 终极 - 20240611.dat
+  fbneo/gamelist.xml | kof2002 10 周年纪念 2005 Unique - 20190619 | ./ips/kof2002/kof2002 10 周年纪念 2005 Unique - 20190619.dat
+  fbneo/gamelist.xml | kof2002 10 周年纪念 2020 版 - 未知 | ./ips/kof2002/kof2002 10 周年纪念 2020 版 - 未知.dat
+  fbneo/gamelist.xml | kof2002 PlayStation 2 - 20180000 | ./ips/kof2002/kof2002 PlayStation 2 - 20180000.dat
+  fbneo/gamelist.xml | kof2002 PlayStation 2 v1.0 公众测试版 - 20181217 | ./ips/kof2002/kof2002 PlayStation 2 v1.0 公众测试版 - 20181217.dat
+  fbneo/gamelist.xml | kof2002 Plus - 20141209 | ./ips/kof2002/kof2002 Plus - 20141209.dat
+  fbneo/gamelist.xml | kof2002 加强版 2017 - 20201029 | ./ips/kof2002/kof2002 加强版 2017 - 20201029.dat
+  fbneo/gamelist.xml | kof2002 天国神族 - 20221102 | ./ips/kof2002/kof2002 天国神族 - 20221102.dat
+  fbneo/gamelist.xml | kof2002 屠蛇 - 20210330 | ./ips/kof2002/kof2002 屠蛇 - 20210330.dat
+  fbneo/gamelist.xml | kof2002 无限 v0.26 - 20230120 | ./ips/kof2002/kof2002 无限 v0.26 - 20230120.dat
+  fbneo/gamelist.xml | kof2002 简化 - 20130402 | ./ips/kof2002/kof2002 简化 - 20130402.dat
+  fbneo/gamelist.xml | kof2002 集气版 - 20220502 | ./ips/kof2002/kof2002 集气版 - 20220502.dat
+  fbneo/gamelist.xml | kof2002 风云再起 Plus - 20220803 | ./ips/kof2002/kof2002 风云再起 Plus - 20220803.dat
+  fbneo/gamelist.xml | kof2002 风云再起 Plus - 20220923 | ./ips/kof2002/kof2002 风云再起 Plus - 20220923.dat
+  fbneo/gamelist.xml | kof2002 高潮版 - 20161214 | ./ips/kof2002/kof2002 高潮版 - 20161214.dat
+  fbneo/gamelist.xml | kof2002 魔法加强版 III - 20101120 | ./ips/kof2002/kof2002 魔法加强版 III - 20101120.dat
+  fbneo/gamelist.xml | kof94 Boss - 20150331 | ./ips/kof94/kof94 Boss - 20150331.dat
+  fbneo/gamelist.xml | kof94 爆衣 - 20130521 | ./ips/kof94/kof94 爆衣 - 20130521.dat
+  fbneo/gamelist.xml | kof94 冰蓝版 | ./ips/kof94/kof94 冰蓝版.dat
+  fbneo/gamelist.xml | kof94 可选隐藏人物第二版 | ./ips/kof94/kof94 可选隐藏人物第二版.dat
+  fbneo/gamelist.xml | kof94 能量模式加强 | ./ips/kof94/kof94 能量模式加强.dat
+  其余未显示: 208
+
+[fbneo / 三国战纪] 45 条 XML 记录
+  fbneo/gamelist.xml | S-三国战纪 傲世三国 (V202CN, 中国版) | ./kovassg.zip
+  fbneo/gamelist.xml | S-三国战纪 乱世英雄 | ./kovlsyx.zip
+  fbneo/gamelist.xml | S-三国战纪 一统中原-无双（内测版） | ./kovytzywscw.zip
+  fbneo/gamelist.xml | S-三国战纪 2 (V107, 香港版) | ./kov2.zip
+  fbneo/gamelist.xml | S-三国战纪 2-群雄争霸 (V205) | ./kov2p.zip
+  fbneo/gamelist.xml | S-三国战纪 2-群雄争霸 复制道具 (V204) | ./kov2p204.zip
+  fbneo/gamelist.xml | S-三国战纪 正宗Plus (V119) | ./kovplus.zip
+  fbneo/gamelist.xml | S-三国战纪-风云再起 | ./kovsh.zip
+  fbneo/gamelist.xml | S-三国战纪 乱世枭雄 (求生之路天王版, 版本 500) | ./kovshpqszltw.zip
+  fbneo/gamelist.xml | kov2p204 三国战纪 2 - 群雄争霸 (ver. M205XX) | ./ips/kov2p204/kov2p204 三国战纪 2 - 群雄争霸 (ver. M205XX).dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  1vs4游聚版 | ./ips/kov2/kov2 三国战纪2 v106  1vs4游聚版.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  全人物初始开启全部技能 | ./ips/kov2/kov2 三国战纪2 v106  全人物初始开启全部技能.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  全人物初始装备 | ./ips/kov2/kov2 三国战纪2 v106  全人物初始装备.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  全人物初始装备全神兵利器V2 | ./ips/kov2/kov2 三国战纪2 v106  全人物初始装备全神兵利器V2.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  全屏攻击 | ./ips/kov2/kov2 三国战纪2 v106  全屏攻击.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  初始B面装备 | ./ips/kov2/kov2 三国战纪2 v106  初始B面装备.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  寒霜版 | ./ips/kov2/kov2 三国战纪2 v106  寒霜版.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  游聚加强版 | ./ips/kov2/kov2 三国战纪2 v106  游聚加强版.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106  隐藏人物全开 | ./ips/kov2/kov2 三国战纪2 v106  隐藏人物全开.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 v106原版 | ./ips/kov2/kov2 三国战纪2 v106原版.dat
+  fbneo/gamelist.xml | kov2 三国战纪2 开启隐藏人物 | ./ips/kov2/kov2 三国战纪2 开启隐藏人物.dat
+  fbneo/gamelist.xml | S-三国战纪1(SGZJ1) | ./kov.zip
+  fbneo/gamelist.xml | S-三国战纪-乱世枭雄 (V101) | ./kovshp.zip
+  fbneo/images/gamelist.xml | S-三国战纪 2 (V107, 香港版) | ./kov2.zip
+  fbneo/images/gamelist.xml | S-三国战纪 2-群雄争霸 (V205) | ./kov2p.zip
+  fbneo/images/gamelist.xml | S-三国战纪-风云再起 | ./kovsh.zip
+  fbneo/images/gamelist.xml | S-三国战纪-乱世枭雄 (V101) | ./kovshp.zip
+  fbneo/images/gamelist.xml | S-三国战纪 傲世三国 (V202CN, 中国版) | ./kovassg.zip
+  fbneo/images/gamelist.xml | S-三国战纪 正宗Plus (V119) | ./kovplus.zip
+  fbneo/images/gamelist.xml | S-三国战纪 乱世枭雄 (求生之路天王版, 版本 500) | ./kovshpqszltw.zip
+  fbneo/images/gamelist.xml | S-三国战纪 乱世英雄 | ./kovlsyx.zip
+  fbneo/images/gamelist.xml | S-三国战纪 2-群雄争霸 复制道具 (V204) | ./kov2p204.zip
+  fbneo/images/gamelist.xml | S-三国战纪 一统中原-无双（内测版） | ./kovytzywscw.zip
+  fbneo/videos/gamelist.xml | kov2p204 三国战纪 2 - 群雄争霸 (ver. M205XX) | ./ips\kov2p204/kov2p204 三国战纪 2 - 群雄争霸 (ver. M205XX).dat
+  fbneo/videos/gamelist.xml | kov2 三国战纪2 v106  1vs4游聚版 | ./ips\kov2/kov2 三国战纪2 v106  1vs4游聚版.dat
+  其余未显示: 10
+
+[fbneo / 合金弹头] 21 条 XML 记录
+  fbneo/gamelist.xml | H-合金弹头 | ./mslug.zip
+  fbneo/gamelist.xml | H-合金弹头2 | ./mslug2.zip
+  fbneo/gamelist.xml | H-合金弹头3 | ./mslug3.zip
+  fbneo/gamelist.xml | H-合金弹头3 (解密版) | ./mslug3hd.zip
+  fbneo/gamelist.xml | H-合金弹头4 | ./mslug4.zip
+  fbneo/gamelist.xml | H-合金弹头4 (解密版) | ./mslug4d.zip
+  fbneo/gamelist.xml | H-合金弹头5 | ./mslug5.zip
+  fbneo/gamelist.xml | H-合金弹头5 (解密版) | ./mslug5fd.zip
+  fbneo/gamelist.xml | H-合金弹头X | ./mslugx.zip
+  fbneo/gamelist.xml | mslug3 mslug3b6 (合金弹头 3 的盗版) | ./ips/mslug3/mslug3 mslug3b6 (合金弹头 3 的盗版).dat
+  fbneo/images/gamelist.xml | H-合金弹头4 (解密版) | ./mslug4d.zip
+  fbneo/images/gamelist.xml | H-合金弹头5 (解密版) | ./mslug5fd.zip
+  fbneo/images/gamelist.xml | H-合金弹头 | ./mslug.zip
+  fbneo/images/gamelist.xml | H-合金弹头2 | ./mslug2.zip
+  fbneo/images/gamelist.xml | H-合金弹头3 | ./mslug3.zip
+  fbneo/images/gamelist.xml | H-合金弹头5 | ./mslug5.zip
+  fbneo/images/gamelist.xml | H-合金弹头4 | ./mslug4.zip
+  fbneo/images/gamelist.xml | H-合金弹头X | ./mslugx.zip
+  fbneo/images/gamelist.xml | H-合金弹头3 (解密版) | ./mslug3hd.zip
+  fbneo/images/gamelist.xml | H-H-合金弹头 | ./mslug.zip
+  fbneo/videos/gamelist.xml | mslug3 mslug3b6 (合金弹头 3 的盗版) | ./ips\mslug3/mslug3 mslug3b6 (合金弹头 3 的盗版).dat
+
+[fbneo / 名将] 5 条 XML 记录
+  fbneo/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+  fbneo/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+  fbneo/gamelist.xml | M-名将 加强版3(MJJQB3) | ./captcomm.zip
+  fbneo/images/gamelist.xml | M-名将 (世界版) | ./captcomm.zip
+  fbneo/images/gamelist.xml | M-名将 (扩容版) | ./captcommkr.zip
+
+[fbneo / 吞食天地] 7 条 XML 记录
+  fbneo/gamelist.xml | T-吞食天地 II-赤壁之战 (CPS转换版) | ./wofch.zip
+  fbneo/gamelist.xml | S-三国志2 吞食天地 III 外传-夏侯恩复仇 DX (修改版) | ./wofchdx.zip
+  fbneo/gamelist.xml | T-吞食天地 II-赤壁之战 (日版)降龙版(TSTD2JLB) | ./wofj.zip
+  fbneo/gamelist.xml | T-吞食天地2 降龙版(TSTD2) | ./wofr1.zip
+  fbneo/images/gamelist.xml | T-吞食天地 II-赤壁之战 (CPS转换版) | ./wofch.zip
+  fbneo/images/gamelist.xml | S-三国志2 吞食天地 III 外传-夏侯恩复仇 DX (修改版) | ./wofchdx.zip
+  fbneo/images/gamelist.xml | T-吞食天地 II-赤壁之战 (日版) | ./wofj.zip
+
+[fbneo / 恐龙快打] 209 条 XML 记录
+  fbneo/gamelist.xml | K-恐龙快打 天王版 (2022-10-27) | ./dinotw.zip
+  fbneo/gamelist.xml | K-恐龙快打 三叠纪版 (2022-10-31) | ./dinosdj.zip
+  fbneo/gamelist.xml | K-恐龙快打 | ./dino.zip
+  fbneo/gamelist.xml | K-恐龙快打 重新调整版 v1.4 | ./dinore.zip
+  fbneo/gamelist.xml | 恐龙快打炼狱版(2019-09-04 游聚) | ./ips/dino/恐龙快打炼狱版(2019-09-04 游聚).dat
+  fbneo/gamelist.xml | 恐龙快打龙神版 2022-01-16【扩容】 | ./ips/dino/恐龙快打龙神版 2022-01-16【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打全BOSS做小兵 | ./ips/dino/恐龙快打全BOSS做小兵.dat
+  fbneo/gamelist.xml | 恐龙快打10进制显示暴击值 2021-07-18.1 | ./ips/dino/恐龙快打10进制显示暴击值 2021-07-18.1.dat
+  fbneo/gamelist.xml | 恐龙快打1v3 - 20100303 | ./ips/dino/恐龙快打1v3 - 20100303.dat
+  fbneo/gamelist.xml | 恐龙快打1V3加强版 2019-08-10 | ./ips/dino/恐龙快打1V3加强版 2019-08-10.dat
+  fbneo/gamelist.xml | 恐龙快打2017超无双无限子弹版 | ./ips/dino/恐龙快打2017超无双无限子弹版.dat
+  fbneo/gamelist.xml | 恐龙快打全敌兵及建筑随机爆物 可自定义物品列表版 | ./ips/dino/恐龙快打全敌兵及建筑随机爆物 可自定义物品列表版.dat
+  fbneo/gamelist.xml | 恐龙快打全敌兵随机爆物 | ./ips/dino/恐龙快打全敌兵随机爆物.dat
+  fbneo/gamelist.xml | 恐龙快打C键使用武器 | ./ips/dino/恐龙快打C键使用武器.dat
+  fbneo/gamelist.xml | 恐龙快打乌兹冲锋枪版 | ./ips/dino/恐龙快打乌兹冲锋枪版.dat
+  fbneo/gamelist.xml | 恐龙快打三倍攻击力 | ./ips/dino/恐龙快打三倍攻击力.dat
+  fbneo/gamelist.xml | 恐龙快打30周年纪念版 2023-01-11【扩容】 | ./ips/dino/恐龙快打30周年纪念版 2023-01-11【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打三叠纪 2023-01-11【扩容】 | ./ips/dino/恐龙快打三叠纪 2023-01-11【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打 930201 日版【j】 | ./ips/dino/恐龙快打 930201 日版【j】.dat
+  fbneo/gamelist.xml | 恐龙快打930201 美版【u】 | ./ips/dino/恐龙快打930201 美版【u】.dat
+  fbneo/gamelist.xml | 恐龙快打 930223 台湾版【a】 | ./ips/dino/恐龙快打 930223 台湾版【a】.dat
+  fbneo/gamelist.xml | 恐龙快打97 恐龙二代 (盗版 第 2 套 (含 PIC16c57), 930201 世界版)【FBN提取】 | ./ips/dino/恐龙快打97 恐龙二代 (盗版 第 2 套 (含 PIC16c57), 930201 世界版)【FBN提取】.dat
+  fbneo/gamelist.xml | 恐龙快打97恐龙二代 V5加强版 2019-09-16 | ./ips/dino/恐龙快打97恐龙二代 V5加强版 2019-09-16.dat
+  fbneo/gamelist.xml | 恐龙快打97恐龙二代 无双版 2021 | ./ips/dino/恐龙快打97恐龙二代 无双版 2021.dat
+  fbneo/gamelist.xml | 恐龙快打97恐龙二代 极速版2 2018-01-06 | ./ips/dino/恐龙快打97恐龙二代 极速版2 2018-01-06.dat
+  fbneo/gamelist.xml | 恐龙快打97恐龙二代 骑士版2017 | ./ips/dino/恐龙快打97恐龙二代 骑士版2017.dat
+  fbneo/gamelist.xml | 恐龙快打三禁版 2020-06-21【扩容】 | ./ips/dino/恐龙快打三禁版 2020-06-21【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打99侏罗纪加强版 2021 | ./ips/dino/恐龙快打99侏罗纪加强版 2021.dat
+  fbneo/gamelist.xml | 恐龙快打审判之日 2022-06-20【扩容】 | ./ips/dino/恐龙快打审判之日 2022-06-20【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打C键使用武器【扩容】 | ./ips/dino/恐龙快打C键使用武器【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打手枪改散弹枪版 | ./ips/dino/恐龙快打手枪改散弹枪版.dat
+  fbneo/gamelist.xml | 恐龙快打JD 2020-11-30【扩容】 | ./ips/dino/恐龙快打JD 2020-11-30【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打JD 2021-01-01 | ./ips/dino/恐龙快打JD 2021-01-01.dat
+  fbneo/gamelist.xml | 恐龙快打JD 2021-03-03【扩容】 | ./ips/dino/恐龙快打JD 2021-03-03【扩容】.dat
+  fbneo/gamelist.xml | 恐龙快打JD版 2021-03-03 | ./ips/dino/恐龙快打JD版 2021-03-03.dat
+  其余未显示: 174
+
+[fbneo / 拳皇] 38 条 XML 记录
+  fbneo/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+  fbneo/gamelist.xml | Q-拳皇 2002 (解密版) | ./kof2k2fd.zip
+  fbneo/gamelist.xml | Q-拳皇 98 松连王 | ./kof98eck.zip
+  fbneo/gamelist.xml | Q-拳皇 2003 (解密版) | ./kof2k3fd.zip
+  fbneo/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+  fbneo/gamelist.xml | Q-拳皇 '98 (解密版) | ./kof98h.zip
+  fbneo/gamelist.xml | Q-拳皇 '99 (解密版) | ./kof99fd.zip
+  fbneo/gamelist.xml | Q-拳皇 2003 | ./kof2003.zip
+  fbneo/gamelist.xml | Q-拳皇 对 街霸-SVC 混沌 | ./svc.zip
+  fbneo/gamelist.xml | Q-拳皇 '97 | ./kof97.zip
+  fbneo/gamelist.xml | Q-拳皇 '94 | ./kof94.zip
+  fbneo/gamelist.xml | Q-拳皇 '95 | ./kof95.zip
+  fbneo/gamelist.xml | Q-拳皇 '96 | ./kof96.zip
+  fbneo/gamelist.xml | Q-拳皇 2002 | ./kof2002.zip
+  fbneo/gamelist.xml | Q-拳皇 '98 | ./kof98.zip
+  fbneo/gamelist.xml | Q-拳皇 '99 | ./kof99.zip
+  fbneo/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+  fbneo/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+  fbneo/gamelist.xml | Q-拳皇 对 街霸-SVC 混沌 (解密版) | ./svcfd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '94 | ./kof94.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '95 | ./kof95.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '96 | ./kof96.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '99 (解密版) | ./kof99fd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2000 (解密版) | ./kof2kfd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2001 | ./kof2001.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2001 (解密版) | ./kof2k1fd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2002 | ./kof2002.zip
+  fbneo/images/gamelist.xml | Q-拳皇 对 街霸-SVC 混沌 (解密版) | ./svcfd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2000 | ./kof2000.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '98 | ./kof98.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '99 | ./kof99.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2003 | ./kof2003.zip
+  fbneo/images/gamelist.xml | Q-拳皇 2003 (解密版) | ./kof2k3fd.zip
+  fbneo/images/gamelist.xml | Q-拳皇 对 街霸-SVC 混沌 | ./svc.zip
+  fbneo/images/gamelist.xml | Q-拳皇 '97 | ./kof97.zip
+  其余未显示: 3
+
+[fbneo / 街头霸王] 8 条 XML 记录
+  fbneo/gamelist.xml | J-街头霸王 II: 天下斗士 (世界版) | ./sf2.zip
+  fbneo/gamelist.xml | J-街头霸王 II': 四大天王 | ./sf2ce.zip
+  fbneo/gamelist.xml | J-街头霸王 II': 四大天王 (赤色波动 第一套) | ./sf2red.zip
+  fbneo/gamelist.xml | J-街头霸王3(JTBW3) | ./sfiii3.zip
+  fbneo/gamelist.xml | C-超级街头霸王2 Turbo(CJJTBW2) | ./ssf2t.zip
+  fbneo/images/gamelist.xml | J-街头霸王 II': 四大天王 (赤色波动 第一套) | ./sf2red.zip
+  fbneo/images/gamelist.xml | J-街头霸王 II: 天下斗士 (世界版) | ./sf2.zip
+  fbneo/images/gamelist.xml | J-街头霸王 II': 四大天王 | ./sf2ce.zip
+
+[fbneo / 西游释厄传] 11 条 XML 记录
+  fbneo/gamelist.xml | X-西游释厄传-群魔乱舞 | ./oldsplus.zip
+  fbneo/gamelist.xml | X-西游释厄传-群魔乱舞211 (最终版) | ./oldsplusnr.zip
+  fbneo/gamelist.xml | X-西游释厄传 特别版 (版本. 101, 韩国基板)(XYSEZ) | ./olds.zip
+  fbneo/gamelist.xml | X-西游释厄传 Super (版本. 100, 第 2 套) | ./olds100a.zip
+  fbneo/gamelist.xml | X-西游释厄传 (版本. 126) | ./orlegend.zip
+  fbneo/gamelist.xml | X-西游释厄传-群魔乱舞OK | ./oldsplusok.zip
+  fbneo/images/gamelist.xml | X-西游释厄传-群魔乱舞 | ./oldsplus.zip
+  fbneo/images/gamelist.xml | X-西游释厄传-群魔乱舞211 (最终版) | ./oldsplusnr.zip
+  fbneo/images/gamelist.xml | X-西游释厄传 超能归来 3 幻影传说 | ./西游释厄传 超能归来 3 幻影传说.lww
+  fbneo/images/gamelist.xml | X-西游释厄传 Super (版本. 100, 第 2 套) | ./olds100a.zip
+  fbneo/images/gamelist.xml | X-西游释厄传 (版本. 126) | ./orlegend.zip
+
+[genesis / 双截龙] 4 条 XML 记录
+  genesis/gamelist.xml | S-双截龙1(SJL1) | ./双截龙1.zip
+  genesis/gamelist.xml | S-双截龙2(SJL2) | ./双截龙2.zip
+  genesis/gamelist.xml | S-双截龙3(SJL3) | ./双截龙3.zip
+  genesis/gamelist.xml | S-双截龙5(SJL5) | ./双截龙5.zip
+
+[nes / 冒险岛] 4 条 XML 记录
+  nes/gamelist.xml | M-冒险岛1(MXD1) | ./冒险岛1.zip
+  nes/gamelist.xml | M-冒险岛2(MXD2) | ./冒险岛2.zip
+  nes/gamelist.xml | M-冒险岛3(MXD3) | ./冒险岛3.zip
+  nes/gamelist.xml | M-冒险岛4(MXD4) | ./冒险岛4.zip
+
+[nes / 吞食天地] 5 条 XML 记录
+  nes/gamelist.xml | T-吞食天地1 三国英杰传(TSTD1SGYJC) | ./吞食天地1 三国英杰传.zip
+  nes/gamelist.xml | T-吞食天地2 曹魏的野望(TSTD2CWDYW) | ./吞食天地2 曹魏的野望.zip
+  nes/gamelist.xml | T-吞食天地2 秋风五丈原(TSTD2QFWZY) | ./吞食天地2 秋风五丈原.zip
+  nes/gamelist.xml | T-吞食天地2 诸葛孔明传(TSTD2ZGKMC) | ./吞食天地2 诸葛孔明传.zip
+  nes/gamelist.xml | T-吞食天地2 诸葛孔明传复刻版(TSTD2ZGKMCFKB) | ./吞食天地2 诸葛孔明传复刻版.zip
+
+[nes / 忍者神龟] 4 条 XML 记录
+  nes/gamelist.xml | R-忍者神龟1(RZSG1) | ./忍者神龟1.zip
+  nes/gamelist.xml | R-忍者神龟2(RZSG2) | ./忍者神龟2.zip
+  nes/gamelist.xml | R-忍者神龟3(RZSG3) | ./忍者神龟3.zip
+  nes/gamelist.xml | R-忍者神龟4 激龟快打(RZSG4JGKD) | ./忍者神龟4.zip
+
+[nes / 恶魔城] 4 条 XML 记录
+  nes/gamelist.xml | E-恶魔城1(EMC1) | ./恶魔城1.zip
+  nes/gamelist.xml | E-恶魔城2(EMC2) | ./恶魔城2.zip
+  nes/gamelist.xml | E-恶魔城3(EMC3) | ./恶魔城3.zip
+  nes/gamelist.xml | E-恶魔城外传 王子外传(EMCWZWZWZ) | ./恶魔城外传 王子传奇.zip
+
+[nes / 热血] 11 条 XML 记录
+  nes/gamelist.xml | R-热血高校躲避球(RXGXDBQ) | ./热血高校躲避球.zip
+  nes/gamelist.xml | R-热血高校躲避球部 足球篇(RXGXDBQBZQP) | ./热血高校躲避球部 足球篇.zip
+  nes/gamelist.xml | R-热血格斗传说(RXGDCS) | ./热血格斗传说.zip
+  nes/gamelist.xml | R-热血进行曲(RXJXQ) | ./热血进行曲.zip
+  nes/gamelist.xml | R-热血篮球(RXLQ) | ./热血篮球.zip
+  nes/gamelist.xml | R-热血曲棍球(RXQGQ) | ./热血曲棍球.zip
+  nes/gamelist.xml | R-热血时代剧(RXSDJ) | ./热血时代剧.zip
+  nes/gamelist.xml | R-热血物语(RXWY) | ./热血物语.zip
+  nes/gamelist.xml | R-热血新记录(RXXJL) | ./热血新记录.zip
+  nes/gamelist.xml | R-热血硬派(RXYP) | ./热血硬派.zip
+  nes/gamelist.xml | R-热血足球联盟(RXZQLM) | ./热血足球联盟.zip
+
+[nes / 街霸] 14 条 XML 记录
+  nes/gamelist.xml | J-街霸 4人街霸(JB4RJB) | ./街霸 4人街霸.zip
+  nes/gamelist.xml | J-街霸 5人街霸(JB5RJB) | ./街霸 5人街霸.zip
+  nes/gamelist.xml | J-街霸 8人街霸(JB8RJB) | ./街霸 8人街霸.zip
+  nes/gamelist.xml | J-街霸 9人街霸(JB9RJB) | ./街霸 9人街霸.zip
+  nes/gamelist.xml | J-街霸 9人街霸汉化版(JB9RJBHHB) | ./街霸 9人街霸汉化版.zip
+  nes/gamelist.xml | J-街霸 12人街霸(JB12RJB) | ./街霸 12人街霸.zip
+  nes/gamelist.xml | J-街霸 16人街霸(JB16RJB) | ./街霸 16人街霸.zip
+  nes/gamelist.xml | J-街霸 20人街霸(JB20RJB) | ./街霸 20人街霸.zip
+  nes/gamelist.xml | J-街霸 20人街霸CONY(JB20RJB) | ./街霸 20人街霸CONY.zip
+  nes/gamelist.xml | J-街霸 56人街霸(JB56RJB) | ./街霸 56人街霸.zip
+  nes/gamelist.xml | J-街霸 60人街霸(JB60RJB) | ./街霸 60人街霸.zip
+  nes/gamelist.xml | J-街霸 少年街霸2 97(JBSNJB297) | ./街霸 少年街霸2 97.zip
+  nes/gamelist.xml | J-街霸 少年街霸2(JBSNJB2) | ./街霸 少年街霸2.zip
+  nes/gamelist.xml | J-街霸 2010(JB2010) | ./街霸2010.zip
+
+[nes / 超级马里奥] 13 条 XML 记录
+  nes/gamelist.xml | C-超级马里奥 2 (USA) | ./roms/Super Mario Bros. 2 (USA).zip
+  nes/gamelist.xml | C-超级马里奥兄弟(World) | ./Super Mario Bros. (World).zip
+  nes/gamelist.xml | C-超级马里奥兄弟3 (USA) | ./Super Mario Bros. 3 (USA).zip
+  nes/gamelist.xml | C-超级马里奥1(CJMLA1) | ./超级马里奥1.zip
+  nes/gamelist.xml | C-超级马里奥2 失落的关卡(CJMLA2SLDGK) | ./超级马里奥2 失落的关卡.zip
+  nes/gamelist.xml | C-超级马里奥2(CJMLA2) | ./超级马里奥2.zip
+  nes/gamelist.xml | C-超级马里奥3(CJMLA3) | ./超级马里奥3.zip
+  nes/gamelist.xml | C-超级马里奥拆屋工(CJMLACWG) | ./超级马里奥拆屋工.zip
+  nes/gamelist.xml | C-超级马里奥格斗(CJMLAGD) | ./超级马里奥格斗.zip
+  nes/gamelist.xml | C-超级马里奥世界(CJMLASJ) | ./超级马里奥世界.zip
+  nes/gamelist.xml | C-超级马里奥水管工(CJMLASGG) | ./超级马里奥水管工.zip
+  nes/gamelist.xml | C-超级马里奥无限-豪华版(CJMLAWXHHB) | ./超级马里奥无限-豪华版.zip
+  nes/gamelist.xml | C-超级马里奥医生(CJMLAYS) | ./超级马里奥医生.zip
+
+[nes / 魂斗罗] 11 条 XML 记录
+  nes/gamelist.xml | H-魂斗罗力量 | ./Contra Force (USA).zip
+  nes/gamelist.xml | H-魂斗罗1(HDL1) | ./魂斗罗1.zip
+  nes/gamelist.xml | H-魂斗罗2(HDL2) | ./魂斗罗2.zip
+  nes/gamelist.xml | H-魂斗罗3 力量(HDL3LL) | ./魂斗罗3 力量.zip
+  nes/gamelist.xml | H-魂斗罗7 超级战魂(HDL7CJZH) | ./魂斗罗7 超级战魂.zip
+  nes/gamelist.xml | K-空中魂斗罗 最终任务(KZHDLZZRW) | ./空中魂斗罗 最终任务.zip
+  nes/gamelist.xml | X-星际魂斗罗(XJHDL) | ./星际魂斗罗.zip
+  nes/gamelist.xml | H-魂斗罗1(USA) | ./Contra (USA).zip
+  nes/gamelist.xml | C-超级魂斗罗2 | ./Probotector II - Return of the Evil Forces (Europe).zip
+  nes/gamelist.xml | H-魂斗罗1日版(完全版) | ./魂斗罗日版(完全版).zip
+  nes/gamelist.xml | H-魂斗罗2日版(HDL2) | ./魂斗罗2日版.zip
+
+[nesh / 冒险岛] 9 条 XML 记录
+  nesh/gamelist.xml | M-冒险岛1汉化版(MXD1HHB) | ./冒险岛1汉化版.zip
+  nesh/gamelist.xml | M-冒险岛1无敌版(MXD1WDB) | ./冒险岛1无敌版.zip
+  nesh/gamelist.xml | M-冒险岛2汉化版(MXD2HHB) | ./冒险岛2汉化版.zip
+  nesh/gamelist.xml | M-冒险岛2换龙版(MXD2HLB) | ./冒险岛2换龙版.zip
+  nesh/gamelist.xml | M-冒险岛2无敌版(MXD2WDB) | ./冒险岛2无敌版.zip
+  nesh/gamelist.xml | M-冒险岛3汉化版(MXD3HHB) | ./冒险岛3汉化版.zip
+  nesh/gamelist.xml | M-冒险岛3可视化(MXD3KSH) | ./冒险岛3可视化.zip
+  nesh/gamelist.xml | M-冒险岛4汉化版(MXD4HHB) | ./冒险岛4汉化版.zip
+  nesh/gamelist.xml | M-冒险岛4可视化(MXD4KSH) | ./冒险岛4可视化.zip
+
+[nesh / 双截龙] 8 条 XML 记录
+  nesh/gamelist.xml | S-双截龙1(SJL1) | ./双截龙1.zip
+  nesh/gamelist.xml | S-双截龙2BOSS版(SJL2B) | ./双截龙2BOSS版.zip
+  nesh/gamelist.xml | S-双截龙2汉化版(SJL2HHB) | ./双截龙2汉化版.zip
+  nesh/gamelist.xml | S-双截龙2可视化(SJL2KSH) | ./双截龙2可视化.zip
+  nesh/gamelist.xml | S-双截龙3BOSS版(SJL3B) | ./双截龙3BOSS版.zip
+  nesh/gamelist.xml | S-双截龙3刀魂剑魄无限血(SJL3DHJPWXX) | ./双截龙3刀魂剑魄无限血.zip
+  nesh/gamelist.xml | S-双截龙3汉化版(SJL3HHB) | ./双截龙3汉化版.zip
+  nesh/gamelist.xml | S-双截龙3可视化(SJL3KSH) | ./双截龙3可视化.zip
+
+[nesh / 坦克大战] 4 条 XML 记录
+  nesh/gamelist.xml | T-坦克大战(TKDZ) | ./BattleCity (Japan).zip
+  nesh/gamelist.xml | T-坦克大战半屏(TKDZBP) | ./坦克大战半屏.zip
+  nesh/gamelist.xml | T-坦克大战可视化(TKDZKSH) | ./坦克大战可视化.zip
+  nesh/gamelist.xml | T-坦克大战4人版(TKDZ4RB) | ./坦克大战4人版.nes
+
+[nesh / 忍者神龟] 9 条 XML 记录
+  nesh/gamelist.xml | R-忍者神龟1(RZSG1) | ./忍者神龟1.zip
+  nesh/gamelist.xml | R-忍者神龟1汉化版(RZSG1HHB) | ./忍者神龟1汉化版.zip
+  nesh/gamelist.xml | R-忍者神龟2(RZSG2) | ./忍者神龟2.zip
+  nesh/gamelist.xml | R-忍者神龟2汉化版(RZSG2HHB) | ./忍者神龟2汉化版.zip
+  nesh/gamelist.xml | R-忍者神龟2无敌(RZSG2WD) | ./忍者神龟2无敌.zip
+  nesh/gamelist.xml | R-忍者神龟3(RZSG3) | ./忍者神龟3.zip
+  nesh/gamelist.xml | R-忍者神龟3汉化版(RZSG3HHB) | ./忍者神龟3汉化版.zip
+  nesh/gamelist.xml | R-忍者神龟格斗汉化版(RZSGGDHHB) | ./忍者神龟格斗汉化版.zip
+  nesh/gamelist.xml | R-忍者神龟格斗可视化(RZSGGDKSH) | ./忍者神龟格斗可视化.zip
+
+[nesh / 恶魔城] 9 条 XML 记录
+  nesh/gamelist.xml | E-恶魔城1 16BIT(EMC116) | ./Castlevania [T+Chi] 16bit.zip
+  nesh/gamelist.xml | E-恶魔城1 HD(EMC1) | ./Castlevania [T+Chi] HD.zip
+  nesh/gamelist.xml | E-恶魔城1 MSX(EMC1) | ./Castlevania [T+Chi] MSX.zip
+  nesh/gamelist.xml | E-恶魔城3(EMC3) | ./Castlevania 3 (CN).zip
+  nesh/gamelist.xml | E-恶魔城1(EMC1) | ./恶魔城1.zip
+  nesh/gamelist.xml | E-恶魔城1可视化(EMC1KSH) | ./恶魔城1可视化.zip
+  nesh/gamelist.xml | E-恶魔城2(EMC2) | ./恶魔城2.zip
+  nesh/gamelist.xml | E-恶魔城3(EMC3) | ./恶魔城3.zip
+  nesh/gamelist.xml | E-恶魔城外传 王子传奇(EMCWZWZCQ) | ./恶魔城外传 王子传奇.zip
+
+[nesh / 泡泡龙] 4 条 XML 记录
+  nesh/gamelist.xml | P-泡泡龙1(PPL1) | ./泡泡龙1.zip
+  nesh/gamelist.xml | P-泡泡龙1汉化版(PPL1HHB) | ./泡泡龙1汉化版.zip
+  nesh/gamelist.xml | P-泡泡龙2(PPL2) | ./泡泡龙2.zip
+  nesh/gamelist.xml | P-泡泡龙2汉化版(PPL2HHB) | ./泡泡龙2汉化版.zip
+
+[nesh / 热血] 9 条 XML 记录
+  nesh/gamelist.xml | R-热血硬派(RXYP) | ./热血硬派.zip
+  nesh/gamelist.xml | R-热血物语汉化版(RXWYHHB) | ./热血物语汉化版.zip
+  nesh/gamelist.xml | R-热血高校躲避球(RXGXDBQ) | ./热血高校躲避球.zip
+  nesh/gamelist.xml | R-热血格斗(RXGD) | ./热血格斗.zip
+  nesh/gamelist.xml | R-热血进行曲(RXJXQ) | ./热血进行曲.zip
+  nesh/gamelist.xml | R-热血篮球(RXLQ) | ./热血篮球.zip
+  nesh/gamelist.xml | R-热血曲棍球(RXQGQ) | ./热血曲棍球.zip
+  nesh/gamelist.xml | R-热血足球联盟(RXZQLM) | ./热血足球联盟.zip
+  nesh/gamelist.xml | R-热血足球联盟汉化版(RXZQLMHHB) | ./热血足球联盟汉化版.zip
+
+[nesh / 超级马里奥] 15 条 XML 记录
+  nesh/gamelist.xml | C-超级马里奥兄弟1 3D版(CJMLAXD13B) | ./Super Mario Bros. 3d.zip
+  nesh/gamelist.xml | C-超级马里奥兄弟1 Flash版(CJMLAXD1B) | ./Super Mario Bros. Flash.zip
+  nesh/gamelist.xml | C-超级马里奥兄弟1 蘑菇版(CJMLAXD1MGB) | ./Super Mario Bros. Mushroom.zip
+  nesh/gamelist.xml | C-超级马里奥兄弟1 纸片版(CJMLAXD1ZPB) | ./Super Mario Bros. paper.zip
+  nesh/gamelist.xml | C-超级马里奥兄弟2 碧姬公主高清版(CJMLAXD2BJGZGQB) | ./mario2.zip
+  nesh/gamelist.xml | C-超级马里奥1超级版(CJMLA1CJB) | ./超级马里奥1超级版.zip
+  nesh/gamelist.xml | C-超级马里奥1汉化版(CJMLA1HHB) | ./超级马里奥1汉化版.zip
+  nesh/gamelist.xml | C-超级马里奥1闪光无敌(CJMLA1SGWD) | ./超级马里奥1闪光无敌.zip
+  nesh/gamelist.xml | C-超级马里奥2美版强化1(CJMLA2MBQH1) | ./超级马里奥2美版强化1.zip
+  nesh/gamelist.xml | C-超级马里奥2美版强化2(CJMLA2MBQH2) | ./超级马里奥2美版强化2.zip
+  nesh/gamelist.xml | C-超级马里奥3汉化版(CJMLA3HHB) | ./超级马里奥3汉化版.zip
+  nesh/gamelist.xml | C-超级马里奥3换装超级版(CJMLA3HZCJB) | ./超级马里奥3换装超级版.zip
+  nesh/gamelist.xml | C-超级马里奥3可视化调宝(CJMLA3KSHDB) | ./超级马里奥3可视化调宝.zip
+  nesh/gamelist.xml | C-超级马里奥水管工(CJMLASGG) | ./超级马里奥水管工.zip
+  nesh/gamelist.xml | C-超级马里奥水管工汉化版(CJMLASGGHHB) | ./超级马里奥水管工汉化版.zip
+
+[nesh / 魂斗罗] 10 条 XML 记录
+  nesh/gamelist.xml | H-魂斗罗1 高清第一关(HDL1GQDYG) | ./Contra (U).zip
+  nesh/gamelist.xml | H-魂斗罗1 音乐替换(HDL1YLTH) | ./Contra (CN).zip
+  nesh/gamelist.xml | H-魂斗罗1红隼的复仇(HDL1HSDFC) | ./魂斗罗1红隼的复仇.zip
+  nesh/gamelist.xml | H-魂斗罗1可视化(HDL1KSH) | ./魂斗罗1可视化.zip
+  nesh/gamelist.xml | H-魂斗罗2可视化(HDL2KSH) | ./魂斗罗2可视化.zip
+  nesh/gamelist.xml | H-魂斗罗3力量(HDL3LL) | ./魂斗罗3力量.zip
+  nesh/gamelist.xml | H-魂斗罗3力量汉化版(HDL3LLHHB) | ./魂斗罗3力量汉化版.zip
+  nesh/gamelist.xml | H-魂斗罗7超级战魂(HDL7CJZH) | ./魂斗罗7超级战魂.zip
+  nesh/gamelist.xml | K-空中魂斗罗可视化(KZHDLKSH) | ./空中魂斗罗可视化.zip
+  nesh/gamelist.xml | X-星际魂斗罗可视化(XJHDLKSH) | ./星际魂斗罗可视化.zip
+
+[openbor / 双截龙] 16 条 XML 记录
+  openbor/gamelist.xml | S-双截龙归来[sjlgl] | ./双截龙归来.pak
+  openbor/gamelist.xml | S-双截龙3-罗塞塔之石 | ./双截龙3-罗塞塔之石.pak
+  openbor/gamelist.xml | S-双截龙1重制版 | ./双截龙13重制版.pak
+  openbor/gamelist.xml | S-双截龙35人版 | ./双截龙35人版.pak
+  openbor/gamelist.xml | S-双截龙传奇ver1.5 | ./双截龙传奇ver1.5.pak
+  openbor/gamelist.xml | S-双截龙-狙击风暴V4.2 | ./双截龙-狙击风暴V4.2.pak
+  openbor/gamelist.xml | S-双截龙魔改版 | ./双截龙魔改版.pak
+  openbor/gamelist.xml | C-超级双截龙格斗快打[C-cjsjlgdkd] | ./C-超级双截龙格斗快打.PAK
+  openbor/gamelist.xml | J-进击双截龙[J-jjsjl] | ./J-进击双截龙.pak
+  openbor/gamelist.xml | S-SNK双截龙[S-SNKsjl] | ./S-SNK双截龙.pak
+  openbor/gamelist.xml | S-双截龙 零[S-sjl l] | ./S-双截龙 零.PAK
+  openbor/gamelist.xml | S-双截龙4.0.4[S-sjl4.0.4] | ./S-双截龙4.0.4.pak
+  openbor/gamelist.xml | S-双截龙番外篇[S-sjlfwp] | ./S-双截龙番外篇.PAK
+  openbor/gamelist.xml | C-苍羽双截龙（动漫英雄大乱斗） | ./苍羽双截龙（动漫英雄大乱斗）.pak
+  openbor/gamelist.xml | S-双截龙魔改版 | ./S-双截龙魔改版.pak
+  openbor/gamelist.xml | S-双截龙-革命 2 | ./S-双截龙-革命 2.pak
+
+[openbor / 忍者神龟] 8 条 XML 记录
+  openbor/gamelist.xml | R-忍者神龟和忍者蛙 | ./忍者神龟和忍者蛙.pak
+  openbor/gamelist.xml | R-忍者神龟营救60人 | ./忍者神龟营救60人.pak
+  openbor/gamelist.xml | R-忍者神龟[R-rzsg] | ./R-忍者神龟.PAK
+  openbor/gamelist.xml | R-忍者神龟2[R-rzsg2] | ./R-忍者神龟2.pak
+  openbor/gamelist.xml | R-忍者神龟DX[R-rzsgDX] | ./R-忍者神龟DX.pak
+  openbor/gamelist.xml | R-忍者神龟大脚兵[R-rzsgdjb] | ./R-忍者神龟大脚兵.PAK
+  openbor/gamelist.xml | R-忍者神龟思莱德得愤怒[R-rzsgslddfn] | ./R-忍者神龟思莱德得愤怒.pak
+  openbor/gamelist.xml | R-忍者神龟VS战斧[R-rzsgVSzf] | ./R-忍者神龟VS战斧.pak
+
+[openbor / 忍者蛙] 4 条 XML 记录
+  openbor/gamelist.xml | R-忍者蛙与双截龙-T.伯德教授的任务 | ./忍者蛙与双截龙-T.伯德教授的任务.PAK
+  openbor/gamelist.xml | R-忍者蛙与双截龙复仇[R-rzwysjlfc] | ./R-忍者蛙与双截龙复仇.PAK
+  openbor/gamelist.xml | R-忍者蛙战斗世界[R-rzwzdsj] | ./R-忍者蛙战斗世界.pak
+  openbor/gamelist.xml | R-忍者蛙与双截龙 - 黑暗势力的回归 | ./R-忍者蛙与双截龙 - 黑暗势力的回归.pak
+
+[openbor / 快打旋风] 28 条 XML 记录
+  openbor/gamelist.xml | K-快打旋风-英雄 | ./K-快打旋风-英雄.pak
+  openbor/gamelist.xml | K-快打旋风 | ./快打旋风.pak
+  openbor/gamelist.xml | K-快打旋风阿尔法加强版-31人版 | ./快打旋风阿尔法加强版-31人版.pak
+  openbor/gamelist.xml | K-快打旋风和恐龙快打V2 | ./快打旋风和恐龙快打V2.pak
+  openbor/gamelist.xml | C-超级快打旋风黄金版 | ./超级快打旋风黄金版.pak
+  openbor/gamelist.xml | C-超级快打旋风[C-cjkdxf] | ./C-超级快打旋风.pak
+  openbor/gamelist.xml | K-快打旋风-最终战复兴[K-kdxf-zzzfx] | ./K-快打旋风-最终战复兴.pak
+  openbor/gamelist.xml | K-快打旋风16人街霸版本[K-kdxf16rjbbb] | ./K-快打旋风16人街霸版本.pak
+  openbor/gamelist.xml | K-快打旋风2013[K-kdxf2013] | ./K-快打旋风2013.pak
+  openbor/gamelist.xml | K-快打旋风2018[K-kdxf2018] | ./K-快打旋风2018.pak
+  openbor/gamelist.xml | K-快打旋风26人版最终版[K-kdxf26rbzzb] | ./K-快打旋风26人版最终版.pak
+  openbor/gamelist.xml | K-快打旋风BOSS版本[K-kdxfBOSSbb] | ./K-快打旋风BOSS版本.pak
+  openbor/gamelist.xml | K-快打旋风DC英雄版本[K-kdxfDCyxbb] | ./K-快打旋风DC英雄版本.pak
+  openbor/gamelist.xml | K-快打旋风VS恐龙快打[K-kdxfVSklkd] | ./K-快打旋风VS恐龙快打.pak
+  openbor/gamelist.xml | K-快打旋风X [K-kdxfX ] | ./K-快打旋风X .pak
+  openbor/gamelist.xml | K-快打旋风启示录[K-kdxfqsl] | ./K-快打旋风启示录.pak
+  openbor/gamelist.xml | K-快打旋风怒火重燃[K-kdxfnhzr] | ./K-快打旋风怒火重燃.pak
+  openbor/gamelist.xml | K-快打旋风特别版[K-kdxftbb] | ./K-快打旋风特别版.pak
+  openbor/gamelist.xml | K-快打旋风英雄[K-kdxfyx] | ./K-快打旋风英雄.pak
+  openbor/gamelist.xml | K-快打旋风豪鬼版本[K-kdxfhgbb] | ./K-快打旋风豪鬼版本.pak
+  openbor/gamelist.xml | K-快打旋风跟恐龙快打[K-kdxfgklkd] | ./K-快打旋风跟恐龙快打.pak
+  openbor/gamelist.xml | K-快打旋风阿恶二法[K-kdxfaeef] | ./K-快打旋风阿恶二法.PAK
+  openbor/gamelist.xml | K-快打旋风隆6人版本[K-kdxfl6rbb] | ./K-快打旋风隆6人版本.pak
+  openbor/gamelist.xml | S-SD快打旋风[S-SDkdxf] | ./S-SD快打旋风.pak
+  openbor/gamelist.xml | K-快打旋风LNS3.0[K-kdxfLNS3.0] | ./K-快打旋风LNS3.0.pak
+  openbor/gamelist.xml | K-终极快打旋风 3 | ./K-终极快打旋风 3.pak
+  openbor/gamelist.xml | K-快打旋风阿尔法(kdxfaef) | ./K-快打旋风阿尔法.pak
+  openbor/gamelist.xml | K-快打旋风LNS终极版V4.2 | ./Final Fight LNS V4.2 By Finney.pak
+
+[openbor / 热血] 5 条 XML 记录
+  openbor/gamelist.xml | R-热血物语 | ./R-热血物语.pak
+  openbor/gamelist.xml | R-热血硬派 汉化版 | ./R-热血硬派 汉化版.pak
+  openbor/gamelist.xml | R-热血物语2009[R-rxwy2009] | ./R-热血物语2009.PAK
+  openbor/gamelist.xml | R-热血进行曲13人版本[R-rxjxq13rbb] | ./R-热血进行曲13人版本.pak
+  openbor/gamelist.xml | R-热血龙虎之拳[R-rxlhzq] | ./R-热血龙虎之拳.pak
+
+[openbor / 街霸] 7 条 XML 记录
+  openbor/gamelist.xml | C-超级街霸[C-cjjb] | ./C-超级街霸.pak
+  openbor/gamelist.xml | J-街霸大乱斗7人版本[J-jbdld7rbb] | ./J-街霸大乱斗7人版本.PAK
+  openbor/gamelist.xml | J-街霸怒之铁拳[J-jbnztq] | ./J-街霸怒之铁拳.PAK
+  openbor/gamelist.xml | J-街霸格斗 隆版[J-jbgd lb] | ./J-街霸格斗 隆版.pak
+  openbor/gamelist.xml | J-街霸格斗[J-jbgd] | ./J-街霸格斗.PAK
+  openbor/gamelist.xml | J-街霸隆[J-jbl] | ./J-街霸隆.pak
+  openbor/gamelist.xml | Z-战斗节拍 街霸版[Z-zdjp jbb] | ./Z-战斗节拍 街霸版.pak
+
+[pgm2 / 三国战纪] 9 条 XML 记录
+  pgm2/gamelist.xml | S-三国战纪2-盖世英雄(V302, 中国版)[SGZJ2GSYXV302ZGB] | ./kov2nl_302cn.zip
+  pgm2/gamelist.xml | S-三国战纪3[SGZJ3] | ./kov3.zip
+  pgm2/gamelist.xml | S-三国战纪 2 - 盖世英雄（v302, 中国版）[sgzjgsyx] | ./kov2nl_302cn.zip
+  pgm2/gamelist.xml | S-三国战纪2-盖世英雄(V300, 中国版)[SGZJ2GSYXV300ZGB] | ./kov2nl_300cn.zip
+  pgm2/gamelist.xml | S-三国战纪2-盖世英雄(V301, 中国版)[SGZJ2GSYXV301ZGB] | ./kov2nl_301cn.zip
+  pgm2/gamelist.xml | S-三国战纪3(V100)[SGZJ3V100] | ./kov3_100.zip
+  pgm2/gamelist.xml | S-三国战纪3(V102)[SGZJ3V102] | ./kov3_102.zip
+  pgm2/gamelist.xml | S-三国战纪2-盖世英雄[SGZJ2GSYX] | ./kov2nl.zip
+  pgm2/gamelist.xml | S-三国战纪 3[sgzj] | ./kov3.zip
+
+[pgm2 / 西游释厄传] 5 条 XML 记录
+  pgm2/gamelist.xml | X-西游释厄传2(v104, 中国版)[XYSEZ2V104ZGB] | ./orleg2_104cn.zip
+  pgm2/gamelist.xml | X-西游释厄传 2（v104, 中国版）[xysecz] | ./orleg2_104cn.zip
+  pgm2/gamelist.xml | X-西游释厄传2[XYSEZ2] | ./orleg2.zip
+  pgm2/gamelist.xml | X-西游释厄传2(v101, 中国版)[XYSEZ2V101ZGB] | ./orleg2_101cn.zip
+  pgm2/gamelist.xml | X-西游释厄传2(v103, 中国版)[XYSEZ2V103ZGB] | ./orleg2_103cn.zip
+
+[snes / 超级马里奥] 6 条 XML 记录
+  snes/gamelist.xml | C-超级马里奥1-3(CJMLA1) | ./超级马里奥1-3.zip
+  snes/gamelist.xml | C-超级马里奥4(CJMLA4) | ./超级马里奥4.zip
+  snes/gamelist.xml | C-超级马里奥RPG七星传奇(CJMLAQXCQ) | ./超级马里奥RPG七星传奇.zip
+  snes/gamelist.xml | C-超级马里奥拆屋工(CJMLACWG) | ./超级马里奥拆屋工.zip
+  snes/gamelist.xml | C-超级马里奥赛车(CJMLASC) | ./超级马里奥赛车.zip
+  snes/gamelist.xml | C-超级马里奥医生(CJMLAYS) | ./超级马里奥医生.zip
+
+[snesh / 快打旋风] 4 条 XML 记录
+  snesh/gamelist.xml | K-快打旋风1(KDXF1) | ./快打旋风1.zip
+  snesh/gamelist.xml | K-快打旋风2(KDXF2) | ./快打旋风2.zip
+  snesh/gamelist.xml | K-快打旋风3超级hack1(KDXF3CJ) | ./快打旋风3超级hack1.zip
+  snesh/gamelist.xml | K-快打旋风3超级hack2(KDXF3CJ) | ./快打旋风3超级hack2.zip
+
+[snesh / 街头霸王] 4 条 XML 记录
+  snesh/gamelist.xml | C-超级街头霸王2(CJJTBW2) | ./超级街头霸王2.zip
+  snesh/gamelist.xml | J-街头霸王2(JTBW2) | ./街头霸王2.zip
+  snesh/gamelist.xml | J-街头霸王2加速版(JTBW2JSB) | ./街头霸王2加速版.zip
+  snesh/gamelist.xml | J-街头霸王5(JTBW5) | ./街头霸王5.zip
+
+[snesh / 超级马里奥] 4 条 XML 记录
+  snesh/gamelist.xml | C-超级马里奥全明星(CJMLAQMX) | ./超级马里奥全明星.zip
+  snesh/gamelist.xml | C-超级马里奥全明星+世界强化(CJMLAQMXSJQH) | ./超级马里奥全明星+世界强化.zip
+  snesh/gamelist.xml | C-超级马里奥世界强化(CJMLASJQH) | ./超级马里奥世界强化.zip
+  snesh/gamelist.xml | C-超级马里奥世界无敌(CJMLASJWD) | ./超级马里奥世界无敌.zip
+
+========================================================================
+F. 历史备份出现过、当前 XML 中未找到的保护候选
+历史保护候选数: 1171
+[第一组] arcade/gamelist.xml | Y-影子传说(YZCS) | ./动作射击街机/lkage.7z
+[第一组,多人标记] arcade/gamelist.xml | C-赤色要塞(CSYS) | ./动作射击街机 小游戏/jackal.7z
+[第一组,多人标记,系列/改版] arcade/gamelist.xml | P-泡泡龙3(平台)(PPL3PT) | ./休闲娱乐街机/bubblem.7z
+[第一组,多人标记,系列/改版] arcade/gamelist.xml | P-泡泡龙2(平台)(PPL2PT) | ./休闲娱乐街机/bublbob2.7z
+[第一组] arcade/gamelist.xml | T-淘金者2 帝国逆袭(TJZ2DGNX) | ./休闲娱乐街机/ldrun2.7z
+[第一组] arcade/gamelist.xml | T-淘金者3 黄金迷宫(TJZ3HJMG) | ./休闲娱乐街机/ldrun3.7z
+[第一组] arcade/gamelist.xml | T-淘金者4 帝国脱出(TJZ4DGTC) | ./休闲娱乐街机/ldrun4.7z
+[第一组] arcade/gamelist.xml | T-淘金者5 挖掘战斗(TJZ5WJZD) | ./休闲娱乐街机/loderndf.7z
+[第一组,多人标记,系列/改版] arcade/gamelist.xml | P-泡泡龙2(弹球)(PPL2DQ) | ./休闲娱乐街机/pbobbl2n.7z
+[第一组,系列/改版] arcade/gamelist.xml | P-泡泡龙1(弹球)(PPL1DQ) | ./休闲娱乐街机/pbobble.7z
+[第一组,系列/改版] arcade/gamelist.xml | P-泡泡龙3(弹球)(PPL3DQ) | ./休闲娱乐街机/pbobble3.7z
+[第一组,系列/改版] arcade/gamelist.xml | P-泡泡龙4(弹球)(PPL4DQ) | ./休闲娱乐街机/pbobble4.7z
+[第一组,系列/改版] arcade/gamelist.xml | P-泡泡龙MD(弹球)(PPLDQ) | ./休闲娱乐街机/sbubsm.7z
+[第一组,系列/改版] arcade/gamelist.xml | X-雪人兄弟2(XRXD2) | ./休闲娱乐街机/snowbro2.7z
+[第一组,系列/改版] arcade/gamelist.xml | X-雪人兄弟1(XRXD1) | ./休闲娱乐街机/snowbros.7z
+[多人标记] arcade/gamelist.xml | Q-球拍也疯狂(QPYFK) | ./运动街机/paddlema.7z
+[第一组] arcade/gamelist.xml | W-网球绝招 近身攻击(WQJZJSGJ) | ./运动街机/passsht.7z
+[第一组] arcade/gamelist.xml | C-超级世界网球(CJSJWQ) | ./运动街机/swcourt.7z
+[第一组] arcade/gamelist.xml | Z-终极网球(ZJWQ) | ./运动街机/ultennis.7z
+[多人标记] arcade/gamelist.xml | Z-战王之王(ZWZW) | ./动作闯关街机/astyanax.7z
+[第一组,系列/改版] arcade/gamelist.xml | E-恶魔城(EMC) | ./动作闯关街机/hcastle.7z
+[第一组] arcade/gamelist.xml | C-彩虹岛特别版(CHDTBB) | ./休闲娱乐街机/rbislande.7z
+[第一组,系列/改版] arcade/gamelist.xml | P-泡泡龙1(平台)(PPL1PT) | ./休闲娱乐街机/bublbobl.7z
+[第一组,多人标记,系列/改版] arcade/gamelist.xml | P-泡泡龙2(平台)汉化版(PPL2PTHHB) | ./休闲娱乐街机/bubsymphj.7z
+[第一组] arcade/gamelist.xml | T-淘金者1(TJZ1) | ./休闲娱乐街机/ldrun.7z
+[第一组] arcade/gamelist.xml | C-彩虹岛(CHD) | ./休闲娱乐街机/rbisland.7z
+[第一组,系列/改版] arcade/gamelist.xml | X-雪人兄弟3(XRXD3) | ./休闲娱乐街机/snowbro3.7z
+[第一组,系列/改版] arcade/gamelist.xml | B-蝙蝠侠(BFX) | ./动作闯关街机/batman.7z
+[第一组] arcade/gamelist.xml | Y-影子传说 汉化版(YZCSHHB) | ./动作射击街机/lkageo.7z
+[第一组,系列/改版] genesis/gamelist.xml | E-恶魔城 血族(EMCXZ) | ./恶魔城 血族.zip
+[第一组,系列/改版] genesis/gamelist.xml | B-蝙蝠侠与罗宾(BFXYLB) | ./蝙蝠侠与罗宾.zip
+[第一组,多人标记] genesis/gamelist.xml | M-米老鼠-不可思议大马戏团(MLSBKSYDMXT) | ./米老鼠-不可思议大马戏团.zip
+[第一组,系列/改版] genesis/gamelist.xml | X-雪人兄弟(XRXD) | ./雪人兄弟.zip
+[第一组,多人标记] genesis/gamelist.xml | Z-中国象棋(ZGXQ) | ./中国象棋.zip
+[第一组,系列/改版] genh/gamelist.xml | E-恶魔城(EMC) | ./恶魔城.zip
+[第一组,系列/改版] genh/gamelist.xml | B-蝙蝠侠(BFX) | ./蝙蝠侠.zip
+[第一组,系列/改版] genh/gamelist.xml | B-蝙蝠侠与罗宾(BFXYLB) | ./蝙蝠侠与罗宾.zip
+[第一组] genh/gamelist.xml | C-彩虹岛(CHD) | ./彩虹岛.zip
+[第一组,系列/改版] genh/gamelist.xml | X-雪人兄弟(XRXD) | ./雪人兄弟.zip
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城-德库拉的遗产[emcdkl] | ./恶魔城-德库拉的遗产.pak
+[第一组,系列/改版] openbor/gamelist.xml | B-蝙蝠侠哥谭骑士[B-bfxgtqs] | ./B-蝙蝠侠哥谭骑士.pak
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城恶魔的毁灭[E-emcemdhm] | ./E-恶魔城恶魔的毁灭.PAK
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城月光猎手[E-emcygls] | ./E-恶魔城月光猎手.pak
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城脉冲小夜曲[E-emcmcxyq] | ./E-恶魔城脉冲小夜曲.PAK
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城脉冲得仇恨[E-emcmcdch] | ./E-恶魔城脉冲得仇恨.PAK
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城银夜得十字军[E-emcyydszj] | ./E-恶魔城银夜得十字军.pak
+[第一组,系列/改版] openbor/gamelist.xml | E-恶魔城银月十字[E-emcyysz] | ./E-恶魔城银月十字.pak
+[多人标记] snes/gamelist.xml | H-荒野双枪(HYSQ) | ./荒野双枪.zip
+[第一组,系列/改版] snes/gamelist.xml | E-恶魔城XX(EMC) | ./恶魔城XX.zip
+[第一组,系列/改版] snes/gamelist.xml | C-超级恶魔城4(CJEMC4) | ./超级恶魔城4.zip
+[第一组,系列/改版] snes/gamelist.xml | D-大冒险岛1(DMXD1) | ./大冒险岛1.zip
+[第一组,系列/改版] snes/gamelist.xml | D-大冒险岛2(DMXD2) | ./大冒险岛2.zip
+[第一组,多人标记,系列/改版] snes/gamelist.xml | B-蝙蝠侠与罗宾(BFXYLB) | ./蝙蝠侠与罗宾.zip
+[第一组] snes/gamelist.xml | D-大卫克拉尼网球(DWKLNWQ) | ./大卫克拉尼网球.zip
+[第一组,系列/改版] snesh/gamelist.xml | B-蝙蝠侠与罗宾的大冒险(BFXYLBDDMX) | ./蝙蝠侠与罗宾的大冒险.zip
+[第一组,系列/改版] snesh/gamelist.xml | B-蝙蝠侠重现江湖(BFXCXJH) | ./蝙蝠侠重现江湖.zip
+[第一组,系列/改版] snesh/gamelist.xml | C-超级恶魔城4(CJEMC4) | ./超级恶魔城4.zip
+[第一组,系列/改版] snesh/gamelist.xml | C-超级冒险岛1(CJMXD1) | ./超级冒险岛1.zip
+[第一组,系列/改版] snesh/gamelist.xml | E-恶魔城XX(EMC) | ./恶魔城XX.zip
+[第一组,系列/改版] snesh/gamelist.xml | Y-永远的蝙蝠侠(YYDBFX) | ./永远的蝙蝠侠.zip
+[第一组,系列/改版] snesh/gamelist.xml | P-泡泡龙(PPL) | ./泡泡龙.zip
+[第一组,系列/改版] snesh/gamelist.xml | K-科学冒险岛(KXMXD) | ./科学冒险岛.zip
+[第一组,系列/改版] snesh/gamelist.xml | C-超级冒险岛2(CJMXD2) | ./超级冒险岛2.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 简化版(QH97JHB) | ./格斗拳皇合集/kof97j/kof97.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 周年纪念(QH97ZNJN) | ./格斗拳皇合集/kof97ae.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 进化平衡(QH97JHPH) | ./格斗拳皇合集/kof97eb.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 梦回(QH97MH) | ./格斗拳皇合集/kof97m.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 特别版(QH97TBB) | ./格斗拳皇合集/kof97sp.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 狂龙版2023(QH97KLB2023) | ./格斗拳皇合集/kof97kl2023/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 狂龙版2023 简化版(QH97KLB2023JHB) | ./格斗拳皇合集/kof97kl2023j/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 天国神族 简化版(QH97TGSZJHB) | ./格斗拳皇合集/kof97orhj/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 无限梦幻 简化版(QH97WXMHJHB) | ./格斗拳皇合集/kof97mugen/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2(QH97TS) | ./格斗拳皇合集/kof97ts.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2 简化版(QH97TSJHB) | ./格斗拳皇合集/kof97tsj/kof97ts.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 最终决战(QH97ZZJZ) | ./格斗拳皇合集/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 所向披靡(QH97SXPM) | ./格斗拳皇合集/kof97inv.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 所向披靡 简化版(QH97SXPMJHB) | ./格斗拳皇合集/kof97invj/kof97inv.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 重出江湖加强版2003(QH97ZCJHJQB2003) | ./格斗拳皇合集/kof97oro.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 乱击2010 简化版(QH97LJ2010JHB) | ./格斗拳皇合集/kof97rcj/kof97rc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 风云再起Plus(QH97FYZQ) | ./格斗拳皇合集/kof97pls.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 格斗之王(QH97GDZW) | ./格斗拳皇合集/kog.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 格斗之王风云再起Plus(QH97GDZWFYZQ) | ./格斗拳皇合集/kogplus.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 Combo Plus(QH98) | ./格斗拳皇合集/kof98cp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 Boss汉化版(QH98HHB) | ./格斗拳皇合集/kof98bsc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 Boss Plus 汉化简化版(QH98HHJHB) | ./格斗拳皇合集/kof98plc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 简化版(QH98JHB) | ./格斗拳皇合集/kof98h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 无极限 简化版(QH98WJXJHB) | ./格斗拳皇合集/kof98mixj/kof98mix.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 终极比赛(QH98ZJBS) | ./格斗拳皇合集/kof98ult.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 终极比赛 简化版(QH98ZJBSJHB) | ./格斗拳皇合集/kof98ultj/kof98ult.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 BC 02风格版(QH98FGB) | ./格斗拳皇合集/kof98bc2k2.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 BC 二度冲击(QH98EDCJ) | ./格斗拳皇合集/kof98bc2nd.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 BC 二度冲击 简化版(QH98EDCJJHB) | ./格斗拳皇合集/kof98bc2ndj/kof98bc2nd.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 轻松连击王(QH98QSLJW) | ./格斗拳皇合集/kof98eck.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 Plus(QH99) | ./格斗拳皇合集/kof99t.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 Plus 简化版(QH99JHB) | ./格斗拳皇合集/kof99tj/kof99t.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 Remix Pro Final(QH99) | ./格斗拳皇合集/kof99rp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 AE(QH99) | ./格斗拳皇合集/kof99ae.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 AE 简化版(QH99JHB) | ./格斗拳皇合集/kof99aej/kof99ae.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 Combo版(QH99B) | ./格斗拳皇合集/kof99cb.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 加强(QH99JQ) | ./格斗拳皇合集/kof99jq.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 Ultimate(QH2001) | ./格斗拳皇合集/kf2k1ult.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 西游释厄传 2 - 新群魔乱舞 (修改版)(XYSEZ2XQMLWXGB) | ./动作闯关改版/orlegendjj/oldsplusnr.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念 Extra Plus(QHSZNJN) | ./格斗拳皇合集/kf10thep.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念 最终优化版2020(QHSZNJNZZYHB2020) | ./格斗拳皇合集/kf10thuo.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 PS2 库利扎里德版(QH2001KLZLDB) | ./格斗拳皇合集/kf2k1pkz.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 风云再起Plus(QH2001FYZQ) | ./格斗拳皇合集/kf2k1pla.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 天国神族第三版(QH2002TGSZDSB) | ./格斗拳皇合集/kf2k23rd.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Magic Plus(QH2002) | ./格斗拳皇合集/kf2k2mp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 2002 - 终极挑战 魔幻加强版 II (盗版)(QH2002ZJTZMHJQBDB) | ./格斗拳皇合集/kf2k2mp2.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Magic Plus3 简化版(QH2002JHB) | ./格斗拳皇合集/kf2k2mp3.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 风云再起2017(QH2002FYZQ2017) | ./格斗拳皇合集/kf2k2p17.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Super(QH2002) | ./格斗拳皇合集/kf2k2plc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 风云再起Plus(QH2002FYZQ) | ./格斗拳皇合集/kf2k2plh.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 风云再起(QH2002FYZQ) | ./格斗拳皇合集/kf2k2pls.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2004 加强版(QH2004JQB) | ./格斗拳皇合集/kf2k3pl.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2004 EX 风云 Plus(QH2004FY) | ./格斗拳皇合集/kf2k3upl.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2004 风云再起(QH2004FYZQ) | ./格斗拳皇合集/kf2k4pls.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念 2005 Unique(QHSZNJN2005) | ./格斗拳皇合集/kf2k5uni.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念(QHSZNJN) | ./格斗拳皇合集/kof10th.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念 简化版(QHSZNJNJHB) | ./格斗拳皇合集/kof10thd.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000(QH2000) | ./格斗拳皇合集/kof2000.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 2000 (NGM-2570 ~ NGH-2570)(QH2000) | ./格斗拳皇合集/kof2000.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 BC(QH2000) | ./格斗拳皇合集/kof2000bc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 2001 (NGM-262?)(QH2001) | ./格斗拳皇合集/kof2001.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 简化版(QH2001JHB) | ./格斗拳皇合集/kof2001h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 2002 - 终极挑战 (NGM-2650 ~ NGH-2650)(QH2002ZJTZ) | ./格斗拳皇合集/kof2002.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2003(QH2003) | ./格斗拳皇合集/kof2003.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 2003 (NGM-2710, 海外版)(QH2003HWB) | ./格斗拳皇合集/kof2003.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2003 加强版(QH2003JQB) | ./格斗拳皇合集/kof2003t.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 Boss版(QH2001B) | ./格斗拳皇合集/kof2k1bs.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 加强版(QH2002JQB) | ./格斗拳皇合集/kof2k2jq.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Remix(QH2002) | ./格斗拳皇合集/kof2k2ly.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Omega(QH2002) | ./格斗拳皇合集/kof2k2omg.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 Remix Ultra 3.5(QH2002) | ./格斗拳皇合集/kof2k2ru.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Kof2003 (Bootleg, fully decrypted) | ./格斗拳皇合集/kof2k3fd.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇94(QH94) | ./格斗拳皇合集/kof94.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '94 (NGM-055 ~ NGH-055)(QH) | ./格斗拳皇合集/kof94.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇94 Boss Remixed(QH94) | ./格斗拳皇合集/kof94rz.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇95(QH95) | ./格斗拳皇合集/kof95.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '95 (NGM-084)(QH) | ./格斗拳皇合集/kof95.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇95 特别版(QH95TBB) | ./格斗拳皇合集/kof95sp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '96 (NGM-214)(QH) | ./格斗拳皇合集/kof96.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 Plus++(QH96) | ./格斗拳皇合集/kof96h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 Plus(QH96) | ./格斗拳皇合集/kof96pls.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 COMBO版(QH97B) | ./格斗拳皇合集/kof97cb.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 Combo练习版(QH97LXB) | ./格斗拳皇合集/kof97cbt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 乱击2010(QH97LJ2010) | ./格斗拳皇合集/kof97rc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '98 - 梦战斗未结束 (NGM-2420)(QHMZDWJS) | ./格斗拳皇合集/kof98.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '98 - 梦战斗未结束 (NGH-2420)(QHMZDWJS) | ./格斗拳皇合集/kof98h.zip
+[第二组,4P/4人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99(QH99) | ./格斗拳皇合集/kof99.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 拳皇 '99 - 千年之战 (NGM-2510)(QHQNZZ) | ./格斗拳皇合集/kof99.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 终极进化混合(QH99ZJJHHH) | ./格斗拳皇合集/kof99eur.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 进化(QH99JH) | ./格斗拳皇合集/kof99jh.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 简化版(QH99JHB) | ./格斗拳皇合集/kof99ka.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇问答(QHWD) | ./格斗拳皇合集/quizkof.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇十周年纪念 最终优化2020 简化版(QHSZNJNZZYH2020JHB) | ./格斗拳皇合集/kf10thuoj/kf10thuo.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 天国神族第三 简化版(QH2002TGSZDSJHB) | ./格斗拳皇合集/kf2k23rdj/kf2k23rd.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 魔幻2 通天(QH2002MH2TT) | ./格斗拳皇合集/kf2k287leon/kof2k2omg9.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 简化版(QH2002JHB) | ./格斗拳皇合集/kof2002j/kof2002.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2003 风云再起 简化版(QH2003FYZQJHB) | ./格斗拳皇合集/kof2003fyzq/kof2003.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 仿造加强 简化版(QH2002FZJQJHB) | ./格斗拳皇合集/kof2k2copymix3j/kof2k2omg9.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇94 简化版(QH94JHB) | ./格斗拳皇合集/kof94j/kof94.7z
+[第二组,4P/4人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇94 Plus 简化版(QH94JHB) | ./格斗拳皇合集/kof94pem/kof94.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇94 BR 简化版(QH94JHB) | ./格斗拳皇合集/kof94rzj/kof94rz.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇95 简化版(QH95JHB) | ./格斗拳皇合集/kof95j/kof95.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇95 特别版 简化版(QH95TBBJHB) | ./格斗拳皇合集/kof95spj/kof95sp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 混合加强 简化版(QH96HHJQJHB) | ./格斗拳皇合集/kof96rpj/kof96rp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 降龙优化 简化版(QH96JLYHJHB) | ./格斗拳皇合集/kof96xl/kof96.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 风云再起 中文版(QH98FYZQZWB) | ./格斗拳皇合集/kof98ph/kof98h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 降龙版v6(QH98JLB) | ./格斗拳皇合集/kof98xl/kof98h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | H-合金弹头X 疯狂火力版(HJDTFKHLB) | ./合金弹头合集/合金弹头疯狂火力.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | H-合金弹头2 混合子弹版(HJDT2HHZDB) | ./合金弹头合集/合金弹头 2 子弹混合.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | J-街头霸王2 四大天王 惩罚版(JTBW2SDTWCFB) | ./格斗街霸合集/街头霸王2 惩罚版 2.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 街头霸王2 惩罚版 2(JTBW2CFB2) | ./格斗街霸合集/街头霸王2 惩罚版 2.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 屠蛇版(QH2002TSB) | ./格斗拳皇合集/kof2k2ts.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 OTC(QH2000) | ./格斗拳皇合集/kof2kotc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 Plus 青版(QH2000QB) | ./格斗拳皇合集/kof2kpls.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 SP XXX(QH2000) | ./格斗拳皇合集/kof2kxxx.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇99 夏季革命(QH99XJGM) | ./格斗拳皇合集/kof99sr.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 OTC 简化版(QH2000JHB) | ./格斗拳皇合集/kof2kotcj/kof2kotc.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 街头霸王2 Mix1.3j简化(JTBW2JH) | ./格斗街霸合集/街头霸王2 Mix1.3j简化.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 街头霸王2 眼镜蛇(JTBW2YJS) | ./格斗街霸合集/街头霸王2 眼镜蛇.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 街头霸王2 简化版(JTBW2JHB) | ./格斗街霸合集/街头霸王2 简化版.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | 街头霸王2 豪华金色简化版(JTBW2HHJSJHB) | ./格斗街霸合集/街头霸王2 豪华金色简化版.lww
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 无限(QH2002WX) | ./格斗拳皇合集/kof2002m.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2004 特别版(QH2004TBB) | ./格斗拳皇合集/kof2k4se.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 强化最终版(QH98QHZZB) | ./格斗拳皇合集/kof98pfe.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 无境之地 简化版(QH2002WJZDJHB) | ./格斗拳皇合集/kof2002uniqj/kof2k2omg9.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 怒火机枪卢卡尔 简化版(QH98NHJQLKEJHB) | ./格斗拳皇合集/kof98nhlkr/kof98h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 怒火降龙 简化版(QH98NHJLJHB) | ./格斗拳皇合集/kof98nhxl/kof98h.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 最终决战 简化版(QH97ZZJZJHB) | ./格斗拳皇合集/kof97xtj/kof97xt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001 Boss 简化版(QH2001JHB) | ./格斗拳皇合集/kof2k1bsj/kof2k1bs.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 巅峰(QH2002DF) | ./格斗拳皇合集/kf2k2mix.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 简化版(QH2000JHB) | ./格斗拳皇合集/kof2000n.7z
+[第二组,4P/4人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2001(QH2001) | ./格斗拳皇合集/kof2001.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 周年纪念版(QH98ZNJNB) | ./格斗拳皇合集/kof98ae.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 Combo版(QH98B) | ./格斗拳皇合集/kof98cb.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 进化版(QH98JHB) | ./格斗拳皇合集/kof98evo.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 无极限(QH98WJX) | ./格斗拳皇合集/kof98mix.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 降龙版(QH2000JLB) | ./格斗拳皇合集/kof2000xl/kof2000n.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2000 降龙 简化版(QH2000JLJHB) | ./格斗拳皇合集/kof2000xlj/kof2000n.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇2002 无境之地(QH2002WJZD) | ./格斗拳皇合集/kof2002uniq/kof2k2omg9.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 全新明星(QH98QXMX) | ./格斗拳皇合集/kof98all/kof98mix.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98 Combo版 简化版(QH98BJHB) | ./格斗拳皇合集/kof98cbj/kof98cb.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96(QH96) | ./格斗拳皇合集/kof96.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 AE(QH96) | ./格斗拳皇合集/kof96ae.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 汉化版(QH96HHB) | ./格斗拳皇合集/kof96cn.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 混合加强版(QH96HHJQB) | ./格斗拳皇合集/kof96rp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 春季特别混合版(QH96CJTBHHB) | ./格斗拳皇合集/kof96rss.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 BOSS版(QH97B) | ./格斗拳皇合集/kof97bs.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 优化版(QH97YHB) | ./格斗拳皇合集/kof97t.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 最终决战加强版(QH97ZZJZJQB) | ./格斗拳皇合集/kof97ubp.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇98(QH98) | ./格斗拳皇合集/kof98.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇96 SP08优化出招版(QH96YHCZB) | ./格斗拳皇合集/kof96sp08/kof96.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 BC(QH97) | ./格斗拳皇合集/kof97bc/kof97.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 Combo练习 简化版(QH97LXJHB) | ./格斗拳皇合集/kof97cbtj/kof97cbt.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 重出江湖 清凉版(QH97ZCJHQLB) | ./格斗拳皇合集/kof97nude/kof97.7z
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97 天国神族(QH97TGSZ) | ./格斗拳皇合集/kof97orh/kof97xt.7z
+[第二组,多人标记,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-拳皇97(QH97) | ./格斗拳皇合集/kof97.zip
+[第二组,系列/改版] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | K-恐龙快打(KLKD) | ./动作闯关改版/dino.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | X-希魔复活(XMFH) | ./动作射击街机/bionicc.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | C-冲击步枪(CJBQ) | ./动作射击街机/blasted.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | B-爆裂激战(BLJZ) | ./动作射击街机/crkdown.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | M-魔兽王国(MSWG) | ./动作射击街机/devilw.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | M-魔域战线(MYZX) | ./动作射击街机/dmnfrnt.7z
+[第二组] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | D-电梯大战(DTDZ) | ./动作射击街机/elevator.7z
+[第二组] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | D-电梯大战2 归来(DTDZ2GL) | ./动作射击街机/elvactr.7z
+[第二组] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | D-电梯大战2 归来 汉化版(DTDZ2GLHHB) | ./动作射击街机/elvactrj.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | W-卧龙列传(WLLZ) | ./动作射击街机/garyoret.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | S-圣铠传说(SKCS) | ./动作射击街机/gauntlet.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | D-大地枪声(DDQS) | ./动作射击街机/gground.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Y-眼镜蛇特种部队(YJSTZBD) | ./动作射击街机/gijoe.7z
+[第二组] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | S-SD高达三国志彩虹大陆战记(GDSGZCHDLZJ) | ./动作射击街机/grainbow.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Q-枪火大师(QHDS) | ./动作射击街机/gunmast.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | J-艰难时世(JNSS) | ./动作射击街机/hrdtimes.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Z-最后的幸存者(ZHDXCZ) | ./动作射击街机/lastsurv.7z
+[第一组] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Y-影子传说(YZCS) | ./动作射击街机/lkage.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | W-午夜抵抗(WYDK) | ./动作射击街机/midres.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | N-怒之忍者(NZRZ) | ./动作射击街机/mystwarr.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | Y-越战1975(YZ1975) | ./动作射击街机/nam1975.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | R-忍者小子2(RZXZ2) | ./动作射击街机/ninjakd2.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | X-星战四人组(XZSRZ) | ./动作射击街机/quartet.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | T-太空哈利(TKHL) | ./动作射击街机/sharrier.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | T-突击奇兵2(TJQB2) | ./动作射击街机/shocktr2.7z
+[第二组,多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | X-西游记(XYJ) | ./动作射击街机/sonson.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | S-时空英雄(SKYX) | ./动作射击街机/spinlbrk.7z
+[多人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | S-S.P.Y特别计划(TBJH) | ./动作射击街机/spy.7z
+[4P/4人标记] gamelist_before_fixed_filter_20261012_182602/arcade/gamelist.xml | L-落日骑士(LRQS) | ./动作射击街机/ssriders.7z
+其余未显示: 921
+
+========================================================================
+G. 当前 XML 路径无法直接定位到 ROM 文件的候选
+无法直接定位的记录: 1919
+arcade/gamelist.xml | M-梦幻冒险(MHMX) | ./动作射击街机/nemo.7z
+arcade/gamelist.xml | Q-拳皇97 简化版(QH97JHB) | ./格斗拳皇合集/kof97j/kof97.7z
+arcade/gamelist.xml | Q-拳皇97 周年纪念(QH97ZNJN) | ./格斗拳皇合集/kof97ae.7z
+arcade/gamelist.xml | Q-拳皇97 进化平衡(QH97JHPH) | ./格斗拳皇合集/kof97eb.7z
+arcade/gamelist.xml | Q-拳皇97 梦回(QH97MH) | ./格斗拳皇合集/kof97m.7z
+arcade/gamelist.xml | Q-拳皇97 特别版(QH97TBB) | ./格斗拳皇合集/kof97sp.7z
+arcade/gamelist.xml | Q-拳皇97 进化新版(QH97JHXB) | ./格斗拳皇合集/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇97 进化新版  简化版(QH97JHXBJHB) | ./格斗拳皇合集/kof97evnj/kof97evn.7z
+arcade/gamelist.xml | Q-拳皇97 狂龙版2023(QH97KLB2023) | ./格斗拳皇合集/kof97kl2023/kof97xt.7z
+arcade/gamelist.xml | Q-拳皇97 狂龙版2023 简化版(QH97KLB2023JHB) | ./格斗拳皇合集/kof97kl2023j/kof97xt.7z
+arcade/gamelist.xml | Q-拳皇97 天国神族 简化版(QH97TGSZJHB) | ./格斗拳皇合集/kof97orhj/kof97xt.7z
+arcade/gamelist.xml | Q-拳皇97 无限梦幻 简化版(QH97WXMHJHB) | ./格斗拳皇合集/kof97mugen/kof97xt.7z
+arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2(QH97TS) | ./格斗拳皇合集/kof97ts.7z
+arcade/gamelist.xml | Q-拳皇97 屠蛇 V1.2 简化版(QH97TSJHB) | ./格斗拳皇合集/kof97tsj/kof97ts.7z
+arcade/gamelist.xml | Q-拳皇97 最终决战(QH97ZZJZ) | ./格斗拳皇合集/kof97xt.7z
+arcade/gamelist.xml | Q-拳皇97 所向披靡(QH97SXPM) | ./格斗拳皇合集/kof97inv.7z
+arcade/gamelist.xml | Q-拳皇97 所向披靡 简化版(QH97SXPMJHB) | ./格斗拳皇合集/kof97invj/kof97inv.7z
+arcade/gamelist.xml | Q-拳皇97 重出江湖加强版2003(QH97ZCJHJQB2003) | ./格斗拳皇合集/kof97oro.7z
+arcade/gamelist.xml | Q-拳皇97 乱击2010 简化版(QH97LJ2010JHB) | ./格斗拳皇合集/kof97rcj/kof97rc.7z
+arcade/gamelist.xml | Q-拳皇97 风云再起Plus(QH97FYZQ) | ./格斗拳皇合集/kof97pls.7z
+arcade/gamelist.xml | Q-拳皇97 格斗之王(QH97GDZW) | ./格斗拳皇合集/kog.7z
+arcade/gamelist.xml | Q-拳皇97 格斗之王风云再起Plus(QH97GDZWFYZQ) | ./格斗拳皇合集/kogplus.7z
+arcade/gamelist.xml | Q-拳皇98 Combo Plus(QH98) | ./格斗拳皇合集/kof98cp.7z
+arcade/gamelist.xml | Q-拳皇98 Boss汉化版(QH98HHB) | ./格斗拳皇合集/kof98bsc.7z
+arcade/gamelist.xml | Q-拳皇98 Boss Plus 汉化简化版(QH98HHJHB) | ./格斗拳皇合集/kof98plc.7z
+arcade/gamelist.xml | Q-拳皇98 简化版(QH98JHB) | ./格斗拳皇合集/kof98h.7z
+arcade/gamelist.xml | Q-拳皇98 无极限 简化版(QH98WJXJHB) | ./格斗拳皇合集/kof98mixj/kof98mix.7z
+arcade/gamelist.xml | Q-拳皇98 终极比赛(QH98ZJBS) | ./格斗拳皇合集/kof98ult.7z
+arcade/gamelist.xml | Q-拳皇98 终极比赛 简化版(QH98ZJBSJHB) | ./格斗拳皇合集/kof98ultj/kof98ult.7z
+arcade/gamelist.xml | Q-拳皇98 BC 02风格版(QH98FGB) | ./格斗拳皇合集/kof98bc2k2.7z
+arcade/gamelist.xml | Q-拳皇98 BC 二度冲击(QH98EDCJ) | ./格斗拳皇合集/kof98bc2nd.7z
+arcade/gamelist.xml | Q-拳皇98 BC 二度冲击 简化版(QH98EDCJJHB) | ./格斗拳皇合集/kof98bc2ndj/kof98bc2nd.7z
+arcade/gamelist.xml | Q-拳皇98 轻松连击王(QH98QSLJW) | ./格斗拳皇合集/kof98eck.7z
+arcade/gamelist.xml | Q-拳皇99 Plus(QH99) | ./格斗拳皇合集/kof99t.7z
+arcade/gamelist.xml | Q-拳皇99 Plus 简化版(QH99JHB) | ./格斗拳皇合集/kof99tj/kof99t.7z
+arcade/gamelist.xml | Q-拳皇99 Remix Pro Final(QH99) | ./格斗拳皇合集/kof99rp.7z
+arcade/gamelist.xml | Q-拳皇99 AE(QH99) | ./格斗拳皇合集/kof99ae.7z
+arcade/gamelist.xml | Q-拳皇99 AE 简化版(QH99JHB) | ./格斗拳皇合集/kof99aej/kof99ae.7z
+arcade/gamelist.xml | Q-拳皇99 Combo版(QH99B) | ./格斗拳皇合集/kof99cb.7z
+arcade/gamelist.xml | Q-拳皇99 加强(QH99JQ) | ./格斗拳皇合集/kof99jq.7z
+arcade/gamelist.xml | Q-拳皇2001 Ultimate(QH2001) | ./格斗拳皇合集/kf2k1ult.7z
+arcade/gamelist.xml | 西游释厄传 2 - 新群魔乱舞 (修改版)(XYSEZ2XQMLWXGB) | ./动作闯关改版/orlegendjj/oldsplusnr.7z
+arcade/gamelist.xml | W-卧虎藏龙2003 风云SuperPlus(WHCL2003FY) | ./格斗拳皇合集/ct2k3sp.7z
+arcade/gamelist.xml | W-卧虎藏龙2003(WHCL2003) | ./格斗拳皇合集/cthd2003.7z
+arcade/gamelist.xml | Q-拳皇十周年纪念 Extra Plus(QHSZNJN) | ./格斗拳皇合集/kf10thep.7z
+arcade/gamelist.xml | Q-拳皇十周年纪念 最终优化版2020(QHSZNJNZZYHB2020) | ./格斗拳皇合集/kf10thuo.7z
+arcade/gamelist.xml | Q-拳皇2001 PS2 库利扎里德版(QH2001KLZLDB) | ./格斗拳皇合集/kf2k1pkz.7z
+arcade/gamelist.xml | Q-拳皇2001 风云再起Plus(QH2001FYZQ) | ./格斗拳皇合集/kf2k1pla.7z
+arcade/gamelist.xml | Q-拳皇2002 天国神族第三版(QH2002TGSZDSB) | ./格斗拳皇合集/kf2k23rd.7z
+arcade/gamelist.xml | Q-拳皇2002 Magic Plus(QH2002) | ./格斗拳皇合集/kf2k2mp.7z
+arcade/gamelist.xml | 拳皇 2002 - 终极挑战 魔幻加强版 II (盗版)(QH2002ZJTZMHJQBDB) | ./格斗拳皇合集/kf2k2mp2.zip
+arcade/gamelist.xml | Q-拳皇2002 Magic Plus3 简化版(QH2002JHB) | ./格斗拳皇合集/kf2k2mp3.7z
+arcade/gamelist.xml | Q-拳皇2002 风云再起2017(QH2002FYZQ2017) | ./格斗拳皇合集/kf2k2p17.7z
+arcade/gamelist.xml | Q-拳皇2002 Super(QH2002) | ./格斗拳皇合集/kf2k2plc.7z
+arcade/gamelist.xml | Q-拳皇2002 风云再起Plus(QH2002FYZQ) | ./格斗拳皇合集/kf2k2plh.7z
+arcade/gamelist.xml | Q-拳皇2002 风云再起(QH2002FYZQ) | ./格斗拳皇合集/kf2k2pls.7z
+arcade/gamelist.xml | Q-拳皇2004 加强版(QH2004JQB) | ./格斗拳皇合集/kf2k3pl.7z
+arcade/gamelist.xml | Q-拳皇2004 EX 风云 Plus(QH2004FY) | ./格斗拳皇合集/kf2k3upl.7z
+arcade/gamelist.xml | Q-拳皇2004 风云再起(QH2004FYZQ) | ./格斗拳皇合集/kf2k4pls.7z
+arcade/gamelist.xml | Q-拳皇十周年纪念 2005 Unique(QHSZNJN2005) | ./格斗拳皇合集/kf2k5uni.7z
+arcade/gamelist.xml | Q-拳皇十周年纪念(QHSZNJN) | ./格斗拳皇合集/kof10th.7z
+arcade/gamelist.xml | Q-拳皇十周年纪念 简化版(QHSZNJNJHB) | ./格斗拳皇合集/kof10thd.7z
+arcade/gamelist.xml | Q-拳皇2000(QH2000) | ./格斗拳皇合集/kof2000.7z
+arcade/gamelist.xml | 拳皇 2000 (NGM-2570 ~ NGH-2570)(QH2000) | ./格斗拳皇合集/kof2000.zip
+arcade/gamelist.xml | Q-拳皇2000 BC(QH2000) | ./格斗拳皇合集/kof2000bc.7z
+arcade/gamelist.xml | 拳皇 2001 (NGM-262?)(QH2001) | ./格斗拳皇合集/kof2001.zip
+arcade/gamelist.xml | Q-拳皇2001 简化版(QH2001JHB) | ./格斗拳皇合集/kof2001h.7z
+arcade/gamelist.xml | 拳皇 2002 - 终极挑战 (NGM-2650 ~ NGH-2650)(QH2002ZJTZ) | ./格斗拳皇合集/kof2002.zip
+arcade/gamelist.xml | Q-拳皇2003(QH2003) | ./格斗拳皇合集/kof2003.7z
+arcade/gamelist.xml | 拳皇 2003 (NGM-2710, 海外版)(QH2003HWB) | ./格斗拳皇合集/kof2003.zip
+arcade/gamelist.xml | Q-拳皇2003 加强版(QH2003JQB) | ./格斗拳皇合集/kof2003t.7z
+arcade/gamelist.xml | Q-拳皇2001 Boss版(QH2001B) | ./格斗拳皇合集/kof2k1bs.7z
+arcade/gamelist.xml | The King of Fighters 2001 (Fully Decrypted) | ./格斗拳皇合集/kof2k1fd.7z
+arcade/gamelist.xml | The King of Fighters 2002 (Fully Decrypted) | ./格斗拳皇合集/kof2k2fd.7z
+arcade/gamelist.xml | Q-拳皇2002 加强版(QH2002JQB) | ./格斗拳皇合集/kof2k2jq.zip
+arcade/gamelist.xml | Q-拳皇2002 Remix(QH2002) | ./格斗拳皇合集/kof2k2ly.7z
+arcade/gamelist.xml | Q-拳皇2002 Omega(QH2002) | ./格斗拳皇合集/kof2k2omg.7z
+arcade/gamelist.xml | Q-拳皇2002 Remix Ultra 3.5(QH2002) | ./格斗拳皇合集/kof2k2ru.7z
+arcade/gamelist.xml | Kof2003 (Bootleg, fully decrypted) | ./格斗拳皇合集/kof2k3fd.zip
+arcade/gamelist.xml | The King of Fighters 2000 (Fully Decrypted) | ./格斗拳皇合集/kof2kfd.zip
+arcade/gamelist.xml | Q-拳皇94(QH94) | ./格斗拳皇合集/kof94.7z
+arcade/gamelist.xml | 拳皇 '94 (NGM-055 ~ NGH-055)(QH) | ./格斗拳皇合集/kof94.zip
+arcade/gamelist.xml | Q-拳皇94 Boss Remixed(QH94) | ./格斗拳皇合集/kof94rz.7z
+arcade/gamelist.xml | Q-拳皇95(QH95) | ./格斗拳皇合集/kof95.7z
+arcade/gamelist.xml | 拳皇 '95 (NGM-084)(QH) | ./格斗拳皇合集/kof95.zip
+arcade/gamelist.xml | Q-拳皇95 特别版(QH95TBB) | ./格斗拳皇合集/kof95sp.7z
+arcade/gamelist.xml | 拳皇 '96 (NGM-214)(QH) | ./格斗拳皇合集/kof96.zip
+arcade/gamelist.xml | Q-拳皇96 Plus++(QH96) | ./格斗拳皇合集/kof96h.7z
+arcade/gamelist.xml | Q-拳皇96 Plus(QH96) | ./格斗拳皇合集/kof96pls.7z
+arcade/gamelist.xml | Q-拳皇97 COMBO版(QH97B) | ./格斗拳皇合集/kof97cb.7z
+arcade/gamelist.xml | Q-拳皇97 Combo练习版(QH97LXB) | ./格斗拳皇合集/kof97cbt.7z
+arcade/gamelist.xml | Q-拳皇97 乱击2010(QH97LJ2010) | ./格斗拳皇合集/kof97rc.7z
+arcade/gamelist.xml | 拳皇 '98 - 梦战斗未结束 (NGM-2420)(QHMZDWJS) | ./格斗拳皇合集/kof98.zip
+arcade/gamelist.xml | 拳皇 '98 - 梦战斗未结束 (NGH-2420)(QHMZDWJS) | ./格斗拳皇合集/kof98h.zip
+arcade/gamelist.xml | Q-拳皇99(QH99) | ./格斗拳皇合集/kof99.7z
+arcade/gamelist.xml | 拳皇 '99 - 千年之战 (NGM-2510)(QHQNZZ) | ./格斗拳皇合集/kof99.zip
+arcade/gamelist.xml | Q-拳皇99 终极进化混合(QH99ZJJHHH) | ./格斗拳皇合集/kof99eur.7z
+arcade/gamelist.xml | The King of Fighters '99 - Millennium Battle (Fully Decrypted) | ./格斗拳皇合集/kof99fd.7z
+arcade/gamelist.xml | Q-拳皇99 进化(QH99JH) | ./格斗拳皇合集/kof99jh.7z
+arcade/gamelist.xml | Q-拳皇99 简化版(QH99JHB) | ./格斗拳皇合集/kof99ka.7z
+其余未显示: 1819
+注意：这不等于 ROM 确定丢失，可能是合集相对路径、子目录列表或路径格式差异。
+
+========================================================================
+H. 实际 ROM 文件数量（不含备份目录）
+arcade: 1546
+bios: 871
+fbneo: 73
+genesis: 350
+genh: 165
+nes: 542
+nesh: 421
+pgm2: 11
+ports: 2
+snes: 355
+snesh: 463
+全部检查结束：本脚本只读，没有修改 XML 或 ROM。
