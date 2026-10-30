@@ -1,0 +1,810 @@
+Q:\Downloads\platform-tools-latest-windows\platform-tools>adb -s f2505b35 shell su -c "ip -6 addr show dev wlan0; echo ====ROUTES====; ip -6 route show table wlan0; echo ====NEIGH====; ip -6 neigh show dev wlan0; echo ====CONNECTIVITY====; dumpsys connectivity"
+21: wlan0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP qlen 3000
+    inet6 2409:8a5c:8041:b4a0:ed9c:1eb3:2d4f:94d7/64 scope global temporary dynamic
+       valid_lft 259157sec preferred_lft 86047sec
+    inet6 2409:8a5c:8041:b4a0:6e5e:2683:98b0:4bd7/64 scope global dynamic mngtmpaddr stable-privacy
+       valid_lft 259157sec preferred_lft 172757sec
+    inet6 fe80::d8e9:98b1:9173:5d5d/64 scope link stable-privacy
+       valid_lft forever preferred_lft forever
+====ROUTES====
+Error: argument "wlan0" is wrong: table id value is invalid
+
+====NEIGH====
+fe80::1 lladdr 20:53:83:d5:20:82 router REACHABLE
+====CONNECTIVITY====
+NetworkProviders for: WIFI_AWARE_FACTORY PhoneSwitcherNetworkRequstListener TelephonyNetworkFactory[0] UntrustedWifiNetworkFactory Ethernet UntrustedWifiNetworkFactory WifiSlaveNetworkFactory TelephonyNetworkFactory[1] WifiNetworkFactory
+
+Active default network: 149
+
+Current Networks:
+  NetworkAgentInfo{ ni{[type: MOBILE[NR], state: CONNECTED/CONNECTED, reason: (unspecified), extra: ims, failover: false, available: true, roaming: false]}  network{101}  nethandle{437197393933}  lp{{InterfaceName: rmnet_data1 LinkAddresses: [ 2409:815c:81b8:b87:8e7a:7e82:df83:28a8/64 ] DnsAddresses: [ /2409:805c:2000:3000::1,/2409:805c:2000:3001::1 ] PcscfAddresses: [ /2409:805b:5002:5112::7:d02,/2409:805a:5002:510b::7:e02 ] Domains: null MTU: 1410 TcpBufferSizes: 2097152,4194304,8388608,262144,524288,1048576 Routes: [ ::/0 -> fe80::69d2:7a09:3f7e:4fe2 rmnet_data1 mtu 1410,2409:815c:81b8:b87::/64 -> :: rmnet_data1 mtu 0 ]}}  nc{[ Transports: CELLULAR Capabilities: IMS&NOT_METERED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED LinkUpBandwidth>=15000Kbps LinkDnBandwidth>=30000Kbps Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> AdministratorUids: [] RequestorUid: -1 RequestorPackageName: null]}  Score{45}  everValidated{true}  lastValidated{true}  created{true} lingering{false} explicitlySelected{false} acceptUnvalidated{false} everCaptivePortalDetected{false} lastCaptivePortalDetected{false} partialConnectivity{false} acceptPartialConnectivity{false} clat{mBaseIface: null, mIface: null, mState: IDLE} }
+    Requests: REQUEST:1 LISTEN:2 BACKGROUND_REQUEST:0 total:3
+      NetworkRequest [ LISTEN id=5, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ REQUEST id=39, [ Transports: CELLULAR Capabilities: IMS&TRUSTED&NOT_VPN Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+      NetworkRequest [ LISTEN id=952, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+    Lingered:
+  NetworkAgentInfo{ ni{[type: MOBILE[LTE], state: CONNECTED/CONNECTED, reason: (unspecified), extra: ims, failover: false, available: true, roaming: false]}  network{102}  nethandle{441492361229}  lp{{InterfaceName: rmnet_data2 LinkAddresses: [ 2408:855d:8100:f4c6:a9f1:ccb7:b20:362/64 ] DnsAddresses: [ /2408:8001:4000:9000:221:7:128:69 ] PcscfAddresses: [ /2408:8142:8001:400::22:3000,/2408:8142:8001:300::15:3000,/2408:8142:8001:300::16:3000,/2408:8142:8001:200::3020 ] Domains: null MTU: 1432 TcpBufferSizes: 2097152,4194304,8388608,262144,524288,1048576 Routes: [ ::/0 -> fe80::8c0f:afb5:f84d:e7c7 rmnet_data2 mtu 1432,2408:855d:8100:f4c6::/64 -> :: rmnet_data2 mtu 0 ]}}  nc{[ Transports: CELLULAR Capabilities: IMS&NOT_METERED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED LinkUpBandwidth>=15000Kbps LinkDnBandwidth>=30000Kbps Specifier: <TelephonyNetworkSpecifier [mSubId = 2]> AdministratorUids: [] RequestorUid: -1 RequestorPackageName: null]}  Score{45}  everValidated{true}  lastValidated{true}  created{true} lingering{false} explicitlySelected{false} acceptUnvalidated{false} everCaptivePortalDetected{false} lastCaptivePortalDetected{false} partialConnectivity{false} acceptPartialConnectivity{false} clat{mBaseIface: null, mIface: null, mState: IDLE} }
+    Requests: REQUEST:1 LISTEN:2 BACKGROUND_REQUEST:0 total:3
+      NetworkRequest [ LISTEN id=5, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ REQUEST id=40, [ Transports: CELLULAR Capabilities: IMS&TRUSTED&NOT_VPN Specifier: <TelephonyNetworkSpecifier [mSubId = 2]> Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+      NetworkRequest [ LISTEN id=952, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+    Lingered:
+  NetworkAgentInfo{ ni{[type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: , failover: false, available: true, roaming: false]}  network{149}  nethandle{643355824141}  lp{{InterfaceName: wlan0 LinkAddresses: [ fe80::d8e9:98b1:9173:5d5d/64,192.168.60.12/24,2409:8a5c:8041:b4a0:6e5e:2683:98b0:4bd7/64,2409:8a5c:8041:b4a0:ed9c:1eb3:2d4f:94d7/64 ] DnsAddresses: [ /fe80::1%wlan0,/192.168.60.1 ] Domains: lan MTU: 0 ServerAddress: /192.168.60.1 TcpBufferSizes: 524288,1048576,8808040,262144,524288,6710886 Routes: [ fe80::/64 -> :: wlan0 mtu 0,::/0 -> fe80::1 wlan0 mtu 0,2409:8a5c:8041:b4a0::/64 -> :: wlan0 mtu 0,192.168.60.0/24 -> 0.0.0.0 wlan0 mtu 0,0.0.0.0/0 -> 192.168.60.1 wlan0 mtu 0 ]}}  nc{[ Transports: WIFI Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED LinkUpBandwidth>=931000Kbps LinkDnBandwidth>=931000Kbps SignalStrength: -26 OwnerUid: 1000 SSID: "sakura_5G" RequestorUid: -1 RequestorPackageName: null]}  Score{60}  everValidated{true}  lastValidated{true}  created{true} lingering{false} explicitlySelected{false} acceptUnvalidated{false} everCaptivePortalDetected{false} lastCaptivePortalDetected{false} partialConnectivity{false} acceptPartialConnectivity{true} clat{mBaseIface: null, mIface: null, mState: IDLE} }
+    Requests: REQUEST:4 LISTEN:48 BACKGROUND_REQUEST:0 total:52
+      NetworkRequest [ REQUEST id=1, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ REQUEST id=3, [ Transports: WIFI Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=5, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=6, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=7, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=9, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=10, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ TRACK_DEFAULT id=11, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ TRACK_DEFAULT id=12, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=13, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ REQUEST id=14, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+      NetworkRequest [ LISTEN id=18, [ Transports: WIFI Capabilities: INTERNET&TRUSTED&NOT_VPN Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.android.phone] ]
+      NetworkRequest [ LISTEN id=19, [ Transports: WIFI Capabilities: INTERNET&TRUSTED&NOT_VPN Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.android.phone] ]
+      NetworkRequest [ TRACK_DEFAULT id=24, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10281 AdministratorUids: [] RequestorUid: 10281 RequestorPackageName: com.google.android.inputmethod.latin] ]
+      NetworkRequest [ LISTEN id=25, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10281 AdministratorUids: [] RequestorUid: 10281 RequestorPackageName: com.google.android.inputmethod.latin] ]
+      NetworkRequest [ TRACK_DEFAULT id=35, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+      NetworkRequest [ LISTEN id=36, [ Transports: WIFI Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+      NetworkRequest [ LISTEN id=53, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+      NetworkRequest [ TRACK_DEFAULT id=54, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+      NetworkRequest [ TRACK_DEFAULT id=71, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.qti.dpmserviceapp] ]
+      NetworkRequest [ LISTEN id=84, [ Transports: CELLULAR|WIFI|WIFI_SLAVE Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.qti.slaservice] ]
+      NetworkRequest [ LISTEN id=843, [ Capabilities: INTERNET&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ TRACK_DEFAULT id=844, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ TRACK_DEFAULT id=845, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=846, [ Transports: CELLULAR|WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=847, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=848, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ TRACK_DEFAULT id=849, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=850, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=851, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=852, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ TRACK_DEFAULT id=854, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=949, [ Transports: WIFI Capabilities: NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+      NetworkRequest [ TRACK_DEFAULT id=950, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+      NetworkRequest [ TRACK_DEFAULT id=951, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+      NetworkRequest [ LISTEN id=952, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+      NetworkRequest [ TRACK_DEFAULT id=989, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=1101, [ Capabilities: NOT_RESTRICTED&NOT_VPN Uid: 10321 AdministratorUids: [] RequestorUid: 10321 RequestorPackageName: com.tencent.mm] ]
+      NetworkRequest [ TRACK_DEFAULT id=1102, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10321 AdministratorUids: [] RequestorUid: 10321 RequestorPackageName: com.tencent.mm] ]
+      NetworkRequest [ TRACK_DEFAULT id=1108, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ LISTEN id=1109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+      NetworkRequest [ TRACK_DEFAULT id=2496, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+      NetworkRequest [ LISTEN id=2497, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+      NetworkRequest [ LISTEN id=3192, [ Transports: CELLULAR|WIFI|WIFI_AWARE Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10292 AdministratorUids: [] RequestorUid: 10292 RequestorPackageName: com.jingdong.app.mall] ]
+      NetworkRequest [ LISTEN id=3193, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+      NetworkRequest [ TRACK_DEFAULT id=3194, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+      NetworkRequest [ TRACK_DEFAULT id=3195, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+      NetworkRequest [ LISTEN id=3196, [ Transports: CELLULAR|WIFI|BLUETOOTH|ETHERNET Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+      NetworkRequest [ LISTEN id=3197, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+      NetworkRequest [ REQUEST id=3198, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+      NetworkRequest [ LISTEN id=3200, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+      NetworkRequest [ LISTEN id=3203, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&FOREGROUND Uid: 10226 AdministratorUids: [] RequestorUid: 10226 RequestorPackageName: com.ktestsipumys.lt] ]
+    Lingered:
+
+Restrict background: false
+
+Status for known UIDs:
+  UID=10074 rules=32 (ALLOW_ALL)
+  UID=10079 rules=64 (REJECT_ALL)
+  UID=10084 rules=64 (REJECT_ALL)
+  UID=10085 rules=64 (REJECT_ALL)
+  UID=10087 rules=64 (REJECT_ALL)
+  UID=10088 rules=64 (REJECT_ALL)
+  UID=10093 rules=32 (ALLOW_ALL)
+  UID=10095 rules=64 (REJECT_ALL)
+  UID=10096 rules=64 (REJECT_ALL)
+  UID=10103 rules=64 (REJECT_ALL)
+  UID=10104 rules=64 (REJECT_ALL)
+  UID=10110 rules=64 (REJECT_ALL)
+  UID=10113 rules=64 (REJECT_ALL)
+  UID=10118 rules=64 (REJECT_ALL)
+  UID=10122 rules=64 (REJECT_ALL)
+  UID=10123 rules=64 (REJECT_ALL)
+  UID=10124 rules=64 (REJECT_ALL)
+  UID=10125 rules=64 (REJECT_ALL)
+  UID=10129 rules=64 (REJECT_ALL)
+  UID=10131 rules=64 (REJECT_ALL)
+  UID=10134 rules=64 (REJECT_ALL)
+  UID=10162 rules=32 (ALLOW_ALL)
+  UID=10164 rules=64 (REJECT_ALL)
+  UID=10166 rules=64 (REJECT_ALL)
+  UID=10167 rules=64 (REJECT_ALL)
+  UID=10171 rules=64 (REJECT_ALL)
+  UID=10182 rules=64 (REJECT_ALL)
+  UID=10185 rules=1 (ALLOW_METERED)
+  UID=10192 rules=64 (REJECT_ALL)
+  UID=10197 rules=64 (REJECT_ALL)
+  UID=10218 rules=64 (REJECT_ALL)
+  UID=10223 rules=64 (REJECT_ALL)
+  UID=10224 rules=64 (REJECT_ALL)
+  UID=10225 rules=64 (REJECT_ALL)
+  UID=10227 rules=64 (REJECT_ALL)
+  UID=10230 rules=64 (REJECT_ALL)
+  UID=10232 rules=64 (REJECT_ALL)
+  UID=10239 rules=64 (REJECT_ALL)
+  UID=10241 rules=64 (REJECT_ALL)
+  UID=10244 rules=64 (REJECT_ALL)
+  UID=10245 rules=64 (REJECT_ALL)
+  UID=10246 rules=64 (REJECT_ALL)
+  UID=10247 rules=64 (REJECT_ALL)
+  UID=10248 rules=64 (REJECT_ALL)
+  UID=10249 rules=64 (REJECT_ALL)
+  UID=10250 rules=64 (REJECT_ALL)
+  UID=10251 rules=64 (REJECT_ALL)
+  UID=10252 rules=64 (REJECT_ALL)
+  UID=10254 rules=64 (REJECT_ALL)
+  UID=10255 rules=64 (REJECT_ALL)
+  UID=10256 rules=64 (REJECT_ALL)
+  UID=10257 rules=64 (REJECT_ALL)
+  UID=10258 rules=64 (REJECT_ALL)
+  UID=10260 rules=64 (REJECT_ALL)
+  UID=10261 rules=64 (REJECT_ALL)
+  UID=10262 rules=64 (REJECT_ALL)
+  UID=10263 rules=64 (REJECT_ALL)
+  UID=10264 rules=64 (REJECT_ALL)
+  UID=10265 rules=64 (REJECT_ALL)
+  UID=10266 rules=64 (REJECT_ALL)
+  UID=10267 rules=64 (REJECT_ALL)
+  UID=10268 rules=64 (REJECT_ALL)
+  UID=10269 rules=64 (REJECT_ALL)
+  UID=10271 rules=64 (REJECT_ALL)
+  UID=10272 rules=64 (REJECT_ALL)
+  UID=10274 rules=64 (REJECT_ALL)
+  UID=10276 rules=64 (REJECT_ALL)
+  UID=10279 rules=64 (REJECT_ALL)
+  UID=10280 rules=64 (REJECT_ALL)
+  UID=10281 rules=32 (ALLOW_ALL)
+  UID=10283 rules=64 (REJECT_ALL)
+  UID=10284 rules=64 (REJECT_ALL)
+  UID=10285 rules=64 (REJECT_ALL)
+  UID=10286 rules=64 (REJECT_ALL)
+  UID=10287 rules=64 (REJECT_ALL)
+  UID=10289 rules=64 (REJECT_ALL)
+  UID=10290 rules=64 (REJECT_ALL)
+  UID=10291 rules=64 (REJECT_ALL)
+  UID=10293 rules=64 (REJECT_ALL)
+  UID=10294 rules=64 (REJECT_ALL)
+  UID=10295 rules=64 (REJECT_ALL)
+  UID=10297 rules=64 (REJECT_ALL)
+  UID=10299 rules=64 (REJECT_ALL)
+  UID=10300 rules=64 (REJECT_ALL)
+  UID=10301 rules=64 (REJECT_ALL)
+  UID=10302 rules=64 (REJECT_ALL)
+  UID=10304 rules=64 (REJECT_ALL)
+  UID=10305 rules=64 (REJECT_ALL)
+  UID=10307 rules=64 (REJECT_ALL)
+  UID=10309 rules=64 (REJECT_ALL)
+  UID=10310 rules=64 (REJECT_ALL)
+  UID=10311 rules=64 (REJECT_ALL)
+  UID=10313 rules=64 (REJECT_ALL)
+  UID=10314 rules=64 (REJECT_ALL)
+  UID=10315 rules=64 (REJECT_ALL)
+  UID=10316 rules=64 (REJECT_ALL)
+  UID=10317 rules=64 (REJECT_ALL)
+  UID=10318 rules=64 (REJECT_ALL)
+  UID=10320 rules=64 (REJECT_ALL)
+  UID=10323 rules=64 (REJECT_ALL)
+  UID=10324 rules=64 (REJECT_ALL)
+  UID=10325 rules=64 (REJECT_ALL)
+  UID=10326 rules=64 (REJECT_ALL)
+  UID=10328 rules=64 (REJECT_ALL)
+  UID=10329 rules=64 (REJECT_ALL)
+  UID=10330 rules=64 (REJECT_ALL)
+  UID=10332 rules=64 (REJECT_ALL)
+  UID=10333 rules=64 (REJECT_ALL)
+  UID=10334 rules=64 (REJECT_ALL)
+  UID=10336 rules=64 (REJECT_ALL)
+  UID=10337 rules=64 (REJECT_ALL)
+  UID=10338 rules=64 (REJECT_ALL)
+  UID=10339 rules=64 (REJECT_ALL)
+  UID=10342 rules=64 (REJECT_ALL)
+  UID=10344 rules=64 (REJECT_ALL)
+  UID=10345 rules=64 (REJECT_ALL)
+  UID=10346 rules=64 (REJECT_ALL)
+  UID=10347 rules=64 (REJECT_ALL)
+  UID=10348 rules=64 (REJECT_ALL)
+  UID=10349 rules=64 (REJECT_ALL)
+  UID=10350 rules=64 (REJECT_ALL)
+  UID=10351 rules=64 (REJECT_ALL)
+  UID=10354 rules=64 (REJECT_ALL)
+  UID=10367 rules=64 (REJECT_ALL)
+  UID=10371 rules=64 (REJECT_ALL)
+  UID=10380 rules=64 (REJECT_ALL)
+  UID=10383 rules=64 (REJECT_ALL)
+  UID=10385 rules=64 (REJECT_ALL)
+  UID=10401 rules=64 (REJECT_ALL)
+  UID=10405 rules=64 (REJECT_ALL)
+  UID=10413 rules=64 (REJECT_ALL)
+  UID=10419 rules=64 (REJECT_ALL)
+  UID=10424 rules=64 (REJECT_ALL)
+  UID=10426 rules=64 (REJECT_ALL)
+  UID=10428 rules=64 (REJECT_ALL)
+  UID=10434 rules=64 (REJECT_ALL)
+  UID=10436 rules=64 (REJECT_ALL)
+  UID=10437 rules=64 (REJECT_ALL)
+  UID=10438 rules=64 (REJECT_ALL)
+  UID=10439 rules=64 (REJECT_ALL)
+  UID=10441 rules=64 (REJECT_ALL)
+
+Network Requests:
+  uid/pid:1000/1757 NetworkRequest [ REQUEST id=1, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ REQUEST id=3, [ Transports: WIFI Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=5, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=6, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=7, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=8, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=9, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=10, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ TRACK_DEFAULT id=11, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ TRACK_DEFAULT id=12, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ LISTEN id=13, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1000/1757 NetworkRequest [ REQUEST id=14, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: android] ]
+  uid/pid:1001/3093 NetworkRequest [ LISTEN id=18, [ Transports: WIFI Capabilities: INTERNET&TRUSTED&NOT_VPN Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.android.phone] ]
+  uid/pid:1001/3093 NetworkRequest [ LISTEN id=19, [ Transports: WIFI Capabilities: INTERNET&TRUSTED&NOT_VPN Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.android.phone] ]
+  uid/pid:10281/4010 NetworkRequest [ TRACK_DEFAULT id=24, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10281 AdministratorUids: [] RequestorUid: 10281 RequestorPackageName: com.google.android.inputmethod.latin] ]
+  uid/pid:10281/4010 NetworkRequest [ LISTEN id=25, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&FOREGROUND Uid: 10281 AdministratorUids: [] RequestorUid: 10281 RequestorPackageName: com.google.android.inputmethod.latin] ]
+  uid/pid:10174/3076 NetworkRequest [ TRACK_DEFAULT id=35, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+  uid/pid:10174/3076 NetworkRequest [ LISTEN id=36, [ Transports: WIFI Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+  uid/pid:10174/3076 NetworkRequest [ LISTEN id=37, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+  uid/pid:10174/3076 NetworkRequest [ REQUEST id=39, [ Transports: CELLULAR Capabilities: IMS&TRUSTED&NOT_VPN Specifier: <TelephonyNetworkSpecifier [mSubId = 1]> Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+  uid/pid:10174/3076 NetworkRequest [ REQUEST id=40, [ Transports: CELLULAR Capabilities: IMS&TRUSTED&NOT_VPN Specifier: <TelephonyNetworkSpecifier [mSubId = 2]> Uid: 10174 AdministratorUids: [] RequestorUid: 10174 RequestorPackageName: com.qualcomm.qti.cne] ]
+  uid/pid:10322/7958 NetworkRequest [ LISTEN id=53, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  uid/pid:10322/7958 NetworkRequest [ TRACK_DEFAULT id=54, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  uid/pid:1001/4483 NetworkRequest [ TRACK_DEFAULT id=71, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1001 AdministratorUids: [] RequestorUid: 1001 RequestorPackageName: com.qti.dpmserviceapp] ]
+  uid/pid:1000/4463 NetworkRequest [ LISTEN id=84, [ Transports: CELLULAR|WIFI|WIFI_SLAVE Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.qti.slaservice] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=843, [ Capabilities: INTERNET&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=844, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=845, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=846, [ Transports: CELLULAR|WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=847, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=848, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=849, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=850, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=851, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=852, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=854, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:1000/11326 NetworkRequest [ LISTEN id=949, [ Transports: WIFI Capabilities: NOT_VPN AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+  uid/pid:1000/11326 NetworkRequest [ TRACK_DEFAULT id=950, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+  uid/pid:1000/11326 NetworkRequest [ TRACK_DEFAULT id=951, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 1000 AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+  uid/pid:1000/11326 NetworkRequest [ LISTEN id=952, [ AdministratorUids: [] RequestorUid: 1000 RequestorPackageName: com.android.systemui] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=989, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10321/24353 NetworkRequest [ LISTEN id=1101, [ Capabilities: NOT_RESTRICTED&NOT_VPN Uid: 10321 AdministratorUids: [] RequestorUid: 10321 RequestorPackageName: com.tencent.mm] ]
+  uid/pid:10321/24353 NetworkRequest [ TRACK_DEFAULT id=1102, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10321 AdministratorUids: [] RequestorUid: 10321 RequestorPackageName: com.tencent.mm] ]
+  uid/pid:10185/18570 NetworkRequest [ TRACK_DEFAULT id=1108, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10185/18570 NetworkRequest [ LISTEN id=1109, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10185 AdministratorUids: [] RequestorUid: 10185 RequestorPackageName: com.google.android.gms] ]
+  uid/pid:10322/7726 NetworkRequest [ TRACK_DEFAULT id=2496, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  uid/pid:10322/7726 NetworkRequest [ LISTEN id=2497, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  uid/pid:10292/9333 NetworkRequest [ LISTEN id=3192, [ Transports: CELLULAR|WIFI|WIFI_AWARE Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10292 AdministratorUids: [] RequestorUid: 10292 RequestorPackageName: com.jingdong.app.mall] ]
+  uid/pid:10421/9316 NetworkRequest [ LISTEN id=3193, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+  uid/pid:10421/9316 NetworkRequest [ TRACK_DEFAULT id=3194, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+  uid/pid:10078/9429 NetworkRequest [ TRACK_DEFAULT id=3195, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ LISTEN id=3196, [ Transports: CELLULAR|WIFI|BLUETOOTH|ETHERNET Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ LISTEN id=3197, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ REQUEST id=3198, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ REQUEST id=3199, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ LISTEN id=3200, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10078/9429 NetworkRequest [ REQUEST id=3201, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  uid/pid:10226/11131 NetworkRequest [ LISTEN id=3203, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&FOREGROUND Uid: 10226 AdministratorUids: [] RequestorUid: 10226 RequestorPackageName: com.ktestsipumys.lt] ]
+  uid/pid:10322/7958 NetworkRequest [ REQUEST id=3204, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+
+mLegacyTypeTracker:
+  Supported types: 0 1 2 3 4 5 7 9 10 11 12 15 17 30
+  Current state:
+    1 [149 WIFI]
+
+
+Supported Socket keepalives: [1, 3, 0, 0, 0, 0, 0, 0]
+Reserved Privileged keepalives: 2
+Allowed Unprivileged keepalives per uid: 2
+Socket keepalives:
+
+Bad Wi-Fi avoidance: unrestricted
+
+MultipathPolicyTracker:
+
+mNetworkRequestInfoLogs (most recent first):
+  2026-10-31T04:48:50.546 - REGISTER uid/pid:10322/7958 NetworkRequest [ REQUEST id=3204, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  2026-10-31T04:44:54.343 - REGISTER uid/pid:10226/11131 NetworkRequest [ LISTEN id=3203, [ Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&FOREGROUND Uid: 10226 AdministratorUids: [] RequestorUid: 10226 RequestorPackageName: com.ktestsipumys.lt] ]
+  2026-10-31T04:44:51.462 - RELEASE uid/pid:10322/7958 NetworkRequest [ REQUEST id=3202, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  2026-10-31T04:43:38.872 - REGISTER uid/pid:10322/7958 NetworkRequest [ REQUEST id=3202, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10322 AdministratorUids: [] RequestorUid: 10322 RequestorPackageName: com.tencent.mobileqq] ]
+  2026-10-31T04:43:35.669 - REGISTER uid/pid:10078/9429 NetworkRequest [ REQUEST id=3201, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.659 - REGISTER uid/pid:10078/9429 NetworkRequest [ LISTEN id=3200, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.619 - REGISTER uid/pid:10078/9429 NetworkRequest [ REQUEST id=3199, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.617 - REGISTER uid/pid:10078/9429 NetworkRequest [ REQUEST id=3198, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.364 - REGISTER uid/pid:10078/9429 NetworkRequest [ LISTEN id=3197, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.312 - REGISTER uid/pid:10078/9429 NetworkRequest [ LISTEN id=3196, [ Transports: CELLULAR|WIFI|BLUETOOTH|ETHERNET Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.304 - REGISTER uid/pid:10078/9429 NetworkRequest [ TRACK_DEFAULT id=3195, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.228 - RELEASE uid/pid:10078/6447 NetworkRequest [ LISTEN id=3149, [ Transports: CELLULAR|WIFI|BLUETOOTH|ETHERNET Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.228 - RELEASE uid/pid:10078/6447 NetworkRequest [ REQUEST id=3155, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.227 - RELEASE uid/pid:10078/6447 NetworkRequest [ LISTEN id=3150, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.227 - RELEASE uid/pid:10078/6447 NetworkRequest [ TRACK_DEFAULT id=3148, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.226 - RELEASE uid/pid:10078/6447 NetworkRequest [ LISTEN id=3156, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.226 - RELEASE uid/pid:10078/6447 NetworkRequest [ REQUEST id=3157, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:35.225 - RELEASE uid/pid:10078/6447 NetworkRequest [ REQUEST id=3154, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10078 AdministratorUids: [] RequestorUid: 10078 RequestorPackageName: com.tencent.news] ]
+  2026-10-31T04:43:34.996 - REGISTER uid/pid:10421/9316 NetworkRequest [ TRACK_DEFAULT id=3194, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+  2026-10-31T04:43:34.991 - REGISTER uid/pid:10421/9316 NetworkRequest [ LISTEN id=3193, [ Transports: CELLULAR|WIFI|ETHERNET|VPN|WIFI_AWARE|LOWPAN Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Uid: 10421 AdministratorUids: [] RequestorUid: 10421 RequestorPackageName: com.tencent.qqlive] ]
+
+mNetworkInfoBlockingLogs (most recent first):
+  2026-10-31T04:43:34.480 - BLOCKED 10428(3189) on netId 143
+  2026-10-31T04:43:34.480 - BLOCKED 10428(3187) on netId 143
+  2026-10-31T04:43:34.478 - BLOCKED 10428(3185) on netId 143
+  2026-10-31T04:43:34.478 - BLOCKED 10428(3183) on netId 143
+  2026-10-31T04:43:34.478 - BLOCKED 10428(3182) on netId 143
+  2026-10-31T04:43:34.478 - BLOCKED 10428(3181) on netId 143
+  2026-10-31T04:40:16.180 - BLOCKED 10428(3180) on netId 143
+  2026-10-31T04:40:16.180 - BLOCKED 10428(3179) on netId 143
+  2026-10-31T04:40:16.180 - BLOCKED 10428(3178) on netId 143
+  2026-10-31T04:40:16.179 - BLOCKED 10428(3175) on netId 143
+  2026-10-31T04:40:16.179 - BLOCKED 10428(3174) on netId 143
+  2026-10-31T04:40:16.179 - BLOCKED 10428(3173) on netId 143
+  2026-10-31T04:40:09.996 - BLOCKED 10428(3172) on netId 143
+  2026-10-31T04:40:09.996 - BLOCKED 10428(3168) on netId 143
+  2026-10-31T04:40:09.996 - BLOCKED 10428(3165) on netId 143
+  2026-10-31T04:40:09.996 - BLOCKED 10428(3164) on netId 143
+  2026-10-31T04:40:09.996 - BLOCKED 10428(3163) on netId 143
+  2026-10-31T04:40:09.995 - BLOCKED 10428(3162) on netId 143
+  2026-10-31T04:39:30.536 - BLOCKED 10428(3161) on netId 143
+  2026-10-31T04:39:30.536 - BLOCKED 10428(3158) on netId 143
+  2026-10-31T04:39:30.536 - BLOCKED 10428(3153) on netId 143
+  2026-10-31T04:39:30.536 - BLOCKED 10428(3152) on netId 143
+  2026-10-31T04:39:30.535 - BLOCKED 10428(3151) on netId 143
+  2026-10-31T04:39:25.075 - BLOCKED 10428(3141) on netId 143
+  2026-10-31T04:39:25.075 - BLOCKED 10428(3137) on netId 143
+  2026-10-31T04:39:25.075 - BLOCKED 10428(3136) on netId 143
+  2026-10-31T04:39:25.074 - BLOCKED 10428(3135) on netId 143
+  2026-10-31T04:39:25.074 - BLOCKED 10428(3134) on netId 143
+  2026-10-31T04:39:25.074 - BLOCKED 10428(3133) on netId 143
+  2026-10-31T04:36:36.204 - UNBLOCKED 10428
+  2026-10-31T04:36:22.087 - UNBLOCKED 10078(3095) on netId 143
+  2026-10-31T04:36:22.087 - UNBLOCKED 10078(3093) on netId 143
+  2026-10-31T04:36:22.087 - UNBLOCKED 10078(3092) on netId 143
+  2026-10-31T04:36:22.086 - UNBLOCKED 10078(3091) on netId 143
+  2026-10-31T04:36:22.085 - UNBLOCKED 10078(3090) on netId 143
+  2026-10-31T04:36:21.878 - BLOCKED 10078(3095) on netId 143
+  2026-10-31T04:36:21.877 - BLOCKED 10078(3093) on netId 143
+  2026-10-31T04:36:21.877 - BLOCKED 10078(3092) on netId 143
+  2026-10-31T04:36:21.877 - BLOCKED 10078(3091) on netId 143
+  2026-10-31T04:36:21.877 - BLOCKED 10078(3090) on netId 143
+
+NetTransition WakeLock activity (most recent first):
+  total acquisitions: 43
+  total releases: 43
+  cumulative duration: 386s
+  longest duration: 60s
+  2026-10-31T04:49:14.699 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:49:08.348 - ACQUIRE for [148 WIFI]
+  2026-10-31T04:49:03.051 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:49:00.177 - ACQUIRE for [147 WIFI]
+  2026-10-31T04:48:56.882 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:48:48.750 - ACQUIRE for [146 WIFI]
+  2026-10-31T04:44:06.717 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:44:02.143 - ACQUIRE for [145 WIFI]
+  2026-10-31T04:43:52.242 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:43:48.537 - ACQUIRE for [144 WIFI]
+  2026-10-31T04:43:47.183 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:43:36.969 - ACQUIRE for [143 WIFI]
+  2026-10-31T04:07:30.482 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T04:07:22.970 - ACQUIRE for [142 CELLULAR]
+  2026-10-31T02:38:36.176 - RELEASE (EVENT_EXPIRE_NET_TRANSITION_WAKELOCK)
+  2026-10-31T02:37:36.159 - ACQUIRE for [141 WIFI]
+  2026-10-31T01:10:43.187 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T01:10:38.980 - ACQUIRE for [140 WIFI]
+  2026-10-31T01:05:45.349 - RELEASE (EVENT_CLEAR_NET_TRANSITION_WAKELOCK)
+  2026-10-31T01:05:41.918 - ACQUIRE for [139 WIFI]
+
+  bandwidth update requests (by uid):
+
+NetworkStackClient logs:
+  2026-10-29T22:48:55.314 - Network stack init
+  2026-10-29T22:48:57.692 - Network stack service start requested
+  2026-10-29T22:48:59.780 - Network stack service connected
+  2026-10-29T22:48:59.784 - Network stack service registered
+  2026-10-29T22:48:55.314 - Network stack init
+  2026-10-29T22:48:57.688 - Starting networking module android.net.INetworkStackConnector
+  2026-10-29T22:48:57.689 - Starting networking module in system_server process
+  2026-10-29T22:48:57.692 - Networking module service start requested
+  2026-10-29T22:48:57.692 - Starting networking module android.net.ITetheringConnector
+  2026-10-29T22:48:57.692 - Starting networking module in system_server process
+  2026-10-29T22:48:57.694 - Networking module service start requested
+  2026-10-29T22:48:59.779 - Networking module service connected
+  2026-10-29T22:48:59.785 - Networking module service connected
+
+  pendingNetStackRequests length: 0
+
+Permission Monitor:
+  Interface filtering rules:
+
+
+WifiAssistant:
+  2026-10-29T22:49:07.678 - handleNetworkValidationResult: 100 | true | false | false
+  2026-10-29T22:49:07.679 - maybeClearNotification: 100
+  2026-10-29T22:49:07.679 - maybeClearNotification: no eventId 100
+  2026-10-29T22:49:07.680 - maybeClearNoInternetAccessFeature: 100
+  2026-10-29T22:49:07.683 - getAssociatedWifiConfiguration: 100 | 7
+  2026-10-29T22:49:07.683 - handleNetworkValidationResult: abort for validated: true
+  2026-10-29T22:49:16.277 - handleNetworkValidationResult: 101 | true | false | false
+  2026-10-29T22:49:16.280 - handleNetworkValidationResult: 102 | true | false | false
+  2026-10-29T23:01:14.842 - maybeClearNotification: 100
+  2026-10-29T23:01:14.842 - maybeClearNotification: no eventId 100
+  2026-10-30T00:25:08.128 - handleNetworkValidationResult: 103 | true | false | false
+  2026-10-30T02:28:38.469 - maybeClearNotification: 103
+  2026-10-30T02:28:38.469 - maybeClearNotification: no eventId 103
+  2026-10-30T03:00:33.585 - handleNetworkValidationResult: 104 | true | false | false
+  2026-10-30T03:13:12.470 - handleNetworkValidationResult: 105 | true | false | false
+  2026-10-30T03:13:12.470 - maybeClearNotification: 105
+  2026-10-30T03:13:12.470 - maybeClearNotification: no eventId 105
+  2026-10-30T03:13:12.470 - maybeClearNoInternetAccessFeature: 105
+  2026-10-30T03:13:12.479 - getAssociatedWifiConfiguration: 105 | 12
+  2026-10-30T03:13:12.479 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T03:14:02.629 - maybeClearNotification: 105
+  2026-10-30T03:14:02.629 - maybeClearNotification: no eventId 105
+  2026-10-30T03:14:03.392 - handleNetworkValidationResult: 106 | true | false | false
+  2026-10-30T03:14:03.392 - maybeClearNotification: 106
+  2026-10-30T03:14:03.392 - maybeClearNotification: no eventId 106
+  2026-10-30T03:14:03.392 - maybeClearNoInternetAccessFeature: 106
+  2026-10-30T03:14:03.396 - getAssociatedWifiConfiguration: 106 | 13
+  2026-10-30T03:14:03.396 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T03:25:59.512 - maybeClearNotification: 106
+  2026-10-30T03:25:59.512 - maybeClearNotification: no eventId 106
+  2026-10-30T03:26:07.416 - maybeClearNotification: 107
+  2026-10-30T03:26:07.416 - maybeClearNotification: no eventId 107
+  2026-10-30T03:26:11.253 - handleNetworkValidationResult: 108 | true | false | false
+  2026-10-30T03:26:11.254 - maybeClearNotification: 108
+  2026-10-30T03:26:11.254 - maybeClearNotification: no eventId 108
+  2026-10-30T03:26:11.254 - maybeClearNoInternetAccessFeature: 108
+  2026-10-30T03:26:11.255 - getAssociatedWifiConfiguration: 108 | 12
+  2026-10-30T03:26:11.256 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T03:58:38.886 - maybeClearNotification: 104
+  2026-10-30T03:58:38.886 - maybeClearNotification: no eventId 104
+  2026-10-30T03:58:39.471 - maybeClearNotification: 108
+  2026-10-30T03:58:39.471 - maybeClearNotification: no eventId 108
+  2026-10-30T04:23:07.253 - handleNetworkValidationResult: 110 | true | false | false
+  2026-10-30T04:23:07.253 - maybeClearNotification: 110
+  2026-10-30T04:23:07.253 - maybeClearNotification: no eventId 110
+  2026-10-30T04:23:07.253 - maybeClearNoInternetAccessFeature: 110
+  2026-10-30T04:23:07.256 - getAssociatedWifiConfiguration: 110 | 10
+  2026-10-30T04:23:07.257 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T04:23:11.164 - handleNetworkValidationResult: 109 | true | false | false
+  2026-10-30T04:23:42.165 - maybeClearNotification: 110
+  2026-10-30T04:23:42.165 - maybeClearNotification: no eventId 110
+  2026-10-30T04:23:43.700 - handleNetworkValidationResult: 111 | true | false | false
+  2026-10-30T04:23:43.700 - maybeClearNotification: 111
+  2026-10-30T04:23:43.700 - maybeClearNotification: no eventId 111
+  2026-10-30T04:23:43.700 - maybeClearNoInternetAccessFeature: 111
+  2026-10-30T04:23:43.703 - getAssociatedWifiConfiguration: 111 | 9
+  2026-10-30T04:23:43.703 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T05:35:12.299 - maybeClearNotification: 109
+  2026-10-30T05:35:12.299 - maybeClearNotification: no eventId 109
+  2026-10-30T05:35:14.980 - handleNetworkValidationResult: 112 | true | false | false
+  2026-10-30T07:58:35.984 - maybeClearNotification: 111
+  2026-10-30T07:58:35.984 - maybeClearNotification: no eventId 111
+  2026-10-30T07:58:36.553 - handleNetworkValidationResult: 113 | true | false | false
+  2026-10-30T07:58:36.553 - maybeClearNotification: 113
+  2026-10-30T07:58:36.553 - maybeClearNotification: no eventId 113
+  2026-10-30T07:58:36.553 - maybeClearNoInternetAccessFeature: 113
+  2026-10-30T07:58:36.556 - getAssociatedWifiConfiguration: 113 | 10
+  2026-10-30T07:58:36.556 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T09:29:11.082 - handleNetworkValidationResult: 114 | true | false | false
+  2026-10-30T09:29:14.263 - maybeClearNotification: 114
+  2026-10-30T09:29:14.263 - maybeClearNotification: no eventId 114
+  2026-10-30T11:13:59.016 - maybeClearNotification: 112
+  2026-10-30T11:13:59.016 - maybeClearNotification: no eventId 112
+  2026-10-30T11:14:14.691 - maybeClearNotification: 113
+  2026-10-30T11:14:14.691 - maybeClearNotification: no eventId 113
+  2026-10-30T11:14:23.098 - handleNetworkValidationResult: 115 | false | false | false
+  2026-10-30T11:14:23.099 - handleNetworkValidationResult: abort for lastValidated: false
+  2026-10-30T11:14:23.970 - handleNetworkNoInternet: 115
+  2026-10-30T11:14:23.976 - getAssociatedWifiConfiguration: 115 | 10
+  2026-10-30T11:14:23.978 - Select network start for: *:*:*:79:03:ed
+  2026-10-30T11:14:23.979 -     Select network: 9 | *:*:*:79:03:eb | true | 0 | true | true
+  2026-10-30T11:14:23.979 - Select WIFI for available: 9
+  2026-10-30T11:14:23.979 - handleExplicitlySelected: 115
+  2026-10-30T11:14:23.979 - showNotValidatedDialog: 115 | true | 1
+  2026-10-30T11:14:24.006 - showValidationNotification: 115 | 2 | false
+  2026-10-30T11:14:24.353 - handleNetworkValidationResult: 115 | true | false | false
+  2026-10-30T11:14:24.353 - maybeClearNotification: 115
+  2026-10-30T11:14:24.353 - maybeClearNoInternetAccessFeature: 115
+  2026-10-30T11:14:24.360 - getAssociatedWifiConfiguration: 115 | 10
+  2026-10-30T11:14:24.361 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T12:57:08.414 - maybeClearNotification: 115
+  2026-10-30T12:57:08.414 - maybeClearNotification: no eventId 115
+  2026-10-30T12:57:09.341 - handleNetworkValidationResult: 116 | true | false | false
+  2026-10-30T12:57:09.341 - maybeClearNotification: 116
+  2026-10-30T12:57:09.341 - maybeClearNotification: no eventId 116
+  2026-10-30T12:57:09.341 - maybeClearNoInternetAccessFeature: 116
+  2026-10-30T12:57:09.344 - getAssociatedWifiConfiguration: 116 | 10
+  2026-10-30T12:57:09.344 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T12:57:45.497 - maybeClearNotification: 116
+  2026-10-30T12:57:45.497 - maybeClearNotification: no eventId 116
+  2026-10-30T12:57:47.427 - handleNetworkValidationResult: 117 | true | false | false
+  2026-10-30T12:57:47.427 - maybeClearNotification: 117
+  2026-10-30T12:57:47.427 - maybeClearNotification: no eventId 117
+  2026-10-30T12:57:47.427 - maybeClearNoInternetAccessFeature: 117
+  2026-10-30T12:57:47.429 - getAssociatedWifiConfiguration: 117 | 9
+  2026-10-30T12:57:47.429 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T13:08:29.272 - maybeClearNotification: 117
+  2026-10-30T13:08:29.272 - maybeClearNotification: no eventId 117
+  2026-10-30T13:08:29.795 - handleNetworkValidationResult: 118 | true | false | false
+  2026-10-30T13:08:29.795 - maybeClearNotification: 118
+  2026-10-30T13:08:29.795 - maybeClearNotification: no eventId 118
+  2026-10-30T13:08:29.795 - maybeClearNoInternetAccessFeature: 118
+  2026-10-30T13:08:29.797 - getAssociatedWifiConfiguration: 118 | 10
+  2026-10-30T13:08:29.798 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T13:11:06.374 - maybeClearNotification: 118
+  2026-10-30T13:11:06.374 - maybeClearNotification: no eventId 118
+  2026-10-30T13:11:12.431 - handleNetworkValidationResult: 119 | true | false | false
+  2026-10-30T13:12:11.694 - maybeClearNotification: 119
+  2026-10-30T13:12:11.694 - maybeClearNotification: no eventId 119
+  2026-10-30T13:12:13.459 - handleNetworkValidationResult: 120 | true | false | false
+  2026-10-30T13:12:13.459 - maybeClearNotification: 120
+  2026-10-30T13:12:13.459 - maybeClearNotification: no eventId 120
+  2026-10-30T13:12:13.459 - maybeClearNoInternetAccessFeature: 120
+  2026-10-30T13:12:13.462 - getAssociatedWifiConfiguration: 120 | 10
+  2026-10-30T13:12:13.462 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T13:39:18.295 - maybeClearNotification: 120
+  2026-10-30T13:39:18.295 - maybeClearNotification: no eventId 120
+  2026-10-30T13:39:18.892 - handleNetworkValidationResult: 121 | true | false | false
+  2026-10-30T13:39:18.892 - maybeClearNotification: 121
+  2026-10-30T13:39:18.893 - maybeClearNotification: no eventId 121
+  2026-10-30T13:39:18.893 - maybeClearNoInternetAccessFeature: 121
+  2026-10-30T13:39:18.894 - getAssociatedWifiConfiguration: 121 | 10
+  2026-10-30T13:39:18.894 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T13:40:04.958 - maybeClearNotification: 121
+  2026-10-30T13:40:04.958 - maybeClearNotification: no eventId 121
+  2026-10-30T13:40:13.509 - handleNetworkValidationResult: 122 | false | false | false
+  2026-10-30T13:40:13.510 - handleNetworkValidationResult: abort for lastValidated: false
+  2026-10-30T13:40:14.334 - handleNetworkNoInternet: 122
+  2026-10-30T13:40:14.337 - getAssociatedWifiConfiguration: 122 | 10
+  2026-10-30T13:40:14.340 - Select network start for: *:*:*:79:03:ed
+  2026-10-30T13:40:14.340 -     Select network: 9 | *:*:*:79:03:eb | true | 0 | true | true
+  2026-10-30T13:40:14.341 - Select WIFI for available: 9
+  2026-10-30T13:40:14.341 - handleExplicitlySelected: 122
+  2026-10-30T13:40:14.341 - showNotValidatedDialog: 122 | true | 1
+  2026-10-30T13:40:14.364 - showValidationNotification: 122 | 2 | false
+  2026-10-30T13:40:14.796 - handleNetworkValidationResult: 122 | true | false | false
+  2026-10-30T13:40:14.796 - maybeClearNotification: 122
+  2026-10-30T13:40:14.796 - maybeClearNoInternetAccessFeature: 122
+  2026-10-30T13:40:14.801 - getAssociatedWifiConfiguration: 122 | 10
+  2026-10-30T13:40:14.801 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T13:40:32.748 - maybeClearNotification: 122
+  2026-10-30T13:40:32.748 - maybeClearNotification: no eventId 122
+  2026-10-30T13:40:34.432 - handleNetworkValidationResult: 123 | true | false | false
+  2026-10-30T13:40:34.432 - maybeClearNotification: 123
+  2026-10-30T13:40:34.432 - maybeClearNotification: no eventId 123
+  2026-10-30T13:40:34.432 - maybeClearNoInternetAccessFeature: 123
+  2026-10-30T13:40:34.445 - getAssociatedWifiConfiguration: 123 | 10
+  2026-10-30T13:40:34.445 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T16:19:16.065 - maybeClearNotification: 123
+  2026-10-30T16:19:16.066 - maybeClearNotification: no eventId 123
+  2026-10-30T16:19:38.323 - handleNetworkValidationResult: 124 | true | false | false
+  2026-10-30T16:19:38.323 - maybeClearNotification: 124
+  2026-10-30T16:19:38.323 - maybeClearNotification: no eventId 124
+  2026-10-30T16:19:38.323 - maybeClearNoInternetAccessFeature: 124
+  2026-10-30T16:19:38.332 - getAssociatedWifiConfiguration: 124 | 9
+  2026-10-30T16:19:38.332 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T16:30:00.369 - maybeClearNotification: 124
+  2026-10-30T16:30:00.369 - maybeClearNotification: no eventId 124
+  2026-10-30T16:30:01.055 - handleNetworkValidationResult: 125 | true | false | false
+  2026-10-30T16:30:01.055 - maybeClearNotification: 125
+  2026-10-30T16:30:01.056 - maybeClearNotification: no eventId 125
+  2026-10-30T16:30:01.056 - maybeClearNoInternetAccessFeature: 125
+  2026-10-30T16:30:01.059 - getAssociatedWifiConfiguration: 125 | 10
+  2026-10-30T16:30:01.059 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T16:34:10.943 - maybeClearNotification: 125
+  2026-10-30T16:34:10.943 - maybeClearNotification: no eventId 125
+  2026-10-30T16:34:12.918 - handleNetworkValidationResult: 126 | true | false | false
+  2026-10-30T16:34:12.918 - maybeClearNotification: 126
+  2026-10-30T16:34:12.918 - maybeClearNotification: no eventId 126
+  2026-10-30T16:34:12.918 - maybeClearNoInternetAccessFeature: 126
+  2026-10-30T16:34:12.922 - getAssociatedWifiConfiguration: 126 | 9
+  2026-10-30T16:34:12.922 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T17:12:13.601 - maybeClearNotification: 126
+  2026-10-30T17:12:13.602 - maybeClearNotification: no eventId 126
+  2026-10-30T17:12:14.131 - handleNetworkValidationResult: 127 | true | false | false
+  2026-10-30T17:12:14.131 - maybeClearNotification: 127
+  2026-10-30T17:12:14.131 - maybeClearNotification: no eventId 127
+  2026-10-30T17:12:14.131 - maybeClearNoInternetAccessFeature: 127
+  2026-10-30T17:12:14.134 - getAssociatedWifiConfiguration: 127 | 10
+  2026-10-30T17:12:14.134 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T17:43:49.077 - maybeClearNotification: 127
+  2026-10-30T17:43:49.077 - maybeClearNotification: no eventId 127
+  2026-10-30T17:43:51.670 - handleNetworkValidationResult: 128 | true | false | false
+  2026-10-30T17:43:51.670 - maybeClearNotification: 128
+  2026-10-30T17:43:51.670 - maybeClearNotification: no eventId 128
+  2026-10-30T17:43:51.670 - maybeClearNoInternetAccessFeature: 128
+  2026-10-30T17:43:51.674 - getAssociatedWifiConfiguration: 128 | 10
+  2026-10-30T17:43:51.674 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T18:17:40.563 - maybeClearNotification: 128
+  2026-10-30T18:17:40.563 - maybeClearNotification: no eventId 128
+  2026-10-30T18:17:47.400 - handleNetworkValidationResult: 129 | true | false | false
+  2026-10-30T18:17:47.400 - maybeClearNotification: 129
+  2026-10-30T18:17:47.400 - maybeClearNotification: no eventId 129
+  2026-10-30T18:17:47.400 - maybeClearNoInternetAccessFeature: 129
+  2026-10-30T18:17:47.404 - getAssociatedWifiConfiguration: 129 | 9
+  2026-10-30T18:17:47.404 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T18:35:07.838 - maybeClearNotification: 129
+  2026-10-30T18:35:07.838 - maybeClearNotification: no eventId 129
+  2026-10-30T18:35:09.664 - handleNetworkValidationResult: 130 | true | false | false
+  2026-10-30T18:35:09.664 - maybeClearNotification: 130
+  2026-10-30T18:35:09.664 - maybeClearNotification: no eventId 130
+  2026-10-30T18:35:09.664 - maybeClearNoInternetAccessFeature: 130
+  2026-10-30T18:35:09.668 - getAssociatedWifiConfiguration: 130 | 10
+  2026-10-30T18:35:09.668 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T18:35:52.963 - maybeClearNotification: 130
+  2026-10-30T18:35:52.963 - maybeClearNotification: no eventId 130
+  2026-10-30T18:35:56.820 - handleNetworkValidationResult: 131 | true | false | false
+  2026-10-30T18:35:56.820 - maybeClearNotification: 131
+  2026-10-30T18:35:56.820 - maybeClearNotification: no eventId 131
+  2026-10-30T18:35:56.820 - maybeClearNoInternetAccessFeature: 131
+  2026-10-30T18:35:56.826 - getAssociatedWifiConfiguration: 131 | 10
+  2026-10-30T18:35:56.826 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T19:32:14.208 - maybeClearNotification: 131
+  2026-10-30T19:32:14.208 - maybeClearNotification: no eventId 131
+  2026-10-30T19:32:16.720 - handleNetworkValidationResult: 132 | true | false | false
+  2026-10-30T19:32:16.720 - maybeClearNotification: 132
+  2026-10-30T19:32:16.720 - maybeClearNotification: no eventId 132
+  2026-10-30T19:32:16.720 - maybeClearNoInternetAccessFeature: 132
+  2026-10-30T19:32:16.723 - getAssociatedWifiConfiguration: 132 | 10
+  2026-10-30T19:32:16.723 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T19:41:53.496 - maybeClearNotification: 132
+  2026-10-30T19:41:53.497 - maybeClearNotification: no eventId 132
+  2026-10-30T19:41:56.582 - handleNetworkValidationResult: 133 | true | false | false
+  2026-10-30T19:41:56.582 - maybeClearNotification: 133
+  2026-10-30T19:41:56.582 - maybeClearNotification: no eventId 133
+  2026-10-30T19:41:56.582 - maybeClearNoInternetAccessFeature: 133
+  2026-10-30T19:41:56.586 - getAssociatedWifiConfiguration: 133 | 10
+  2026-10-30T19:41:56.586 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T19:47:30.784 - maybeClearNotification: 133
+  2026-10-30T19:47:30.784 - maybeClearNotification: no eventId 133
+  2026-10-30T19:47:36.024 - handleNetworkValidationResult: 134 | true | false | false
+  2026-10-30T19:47:36.024 - maybeClearNotification: 134
+  2026-10-30T19:47:36.024 - maybeClearNotification: no eventId 134
+  2026-10-30T19:47:36.024 - maybeClearNoInternetAccessFeature: 134
+  2026-10-30T19:47:36.028 - getAssociatedWifiConfiguration: 134 | 10
+  2026-10-30T19:47:36.029 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T20:49:13.569 - maybeClearNotification: 134
+  2026-10-30T20:49:13.569 - maybeClearNotification: no eventId 134
+  2026-10-30T20:49:16.514 - handleNetworkValidationResult: 135 | true | false | false
+  2026-10-30T20:49:16.514 - maybeClearNotification: 135
+  2026-10-30T20:49:16.514 - maybeClearNotification: no eventId 135
+  2026-10-30T20:49:16.514 - maybeClearNoInternetAccessFeature: 135
+  2026-10-30T20:49:16.518 - getAssociatedWifiConfiguration: 135 | 10
+  2026-10-30T20:49:16.519 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T20:54:48.730 - maybeClearNotification: 135
+  2026-10-30T20:54:48.730 - maybeClearNotification: no eventId 135
+  2026-10-30T20:54:51.976 - handleNetworkValidationResult: 136 | true | false | false
+  2026-10-30T20:54:51.976 - maybeClearNotification: 136
+  2026-10-30T20:54:51.976 - maybeClearNotification: no eventId 136
+  2026-10-30T20:54:51.976 - maybeClearNoInternetAccessFeature: 136
+  2026-10-30T20:54:51.980 - getAssociatedWifiConfiguration: 136 | 10
+  2026-10-30T20:54:51.981 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T21:51:56.947 - maybeClearNotification: 136
+  2026-10-30T21:51:56.947 - maybeClearNotification: no eventId 136
+  2026-10-30T21:51:59.849 - handleNetworkValidationResult: 137 | true | false | false
+  2026-10-30T21:51:59.850 - maybeClearNotification: 137
+  2026-10-30T21:51:59.850 - maybeClearNotification: no eventId 137
+  2026-10-30T21:51:59.850 - maybeClearNoInternetAccessFeature: 137
+  2026-10-30T21:51:59.853 - getAssociatedWifiConfiguration: 137 | 10
+  2026-10-30T21:51:59.854 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T21:53:13.533 - maybeClearNotification: 137
+  2026-10-30T21:53:13.533 - maybeClearNotification: no eventId 137
+  2026-10-30T21:53:19.135 - handleNetworkValidationResult: 138 | true | false | false
+  2026-10-30T21:53:19.135 - maybeClearNotification: 138
+  2026-10-30T21:53:19.135 - maybeClearNotification: no eventId 138
+  2026-10-30T21:53:19.135 - maybeClearNoInternetAccessFeature: 138
+  2026-10-30T21:53:19.137 - getAssociatedWifiConfiguration: 138 | 10
+  2026-10-30T21:53:19.138 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T22:14:48.978 - maybeClearNotification: 138
+  2026-10-30T22:14:48.978 - maybeClearNotification: no eventId 138
+  2026-10-30T22:14:52.239 - handleNetworkValidationResult: 139 | true | false | false
+  2026-10-30T22:14:52.239 - maybeClearNotification: 139
+  2026-10-30T22:14:52.239 - maybeClearNotification: no eventId 139
+  2026-10-30T22:14:52.239 - maybeClearNoInternetAccessFeature: 139
+  2026-10-30T22:14:52.243 - getAssociatedWifiConfiguration: 139 | 10
+  2026-10-30T22:14:52.243 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T22:32:28.216 - handleNetworkValidationResult: 139 | true | true | true
+  2026-10-30T22:32:28.216 - maybeClearNotification: 139
+  2026-10-30T22:32:28.216 - maybeClearNotification: no eventId 139
+  2026-10-30T22:32:28.217 - maybeClearNoInternetAccessFeature: 139
+  2026-10-30T22:32:28.222 - getAssociatedWifiConfiguration: 139 | 10
+  2026-10-30T22:32:28.223 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T22:32:48.510 - handleNetworkValidationResult: 139 | true | true | true
+  2026-10-30T22:32:48.510 - maybeClearNotification: 139
+  2026-10-30T22:32:48.510 - maybeClearNotification: no eventId 139
+  2026-10-30T22:32:48.510 - maybeClearNoInternetAccessFeature: 139
+  2026-10-30T22:32:48.514 - getAssociatedWifiConfiguration: 139 | 10
+  2026-10-30T22:32:48.514 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T22:33:15.773 - handleNetworkValidationResult: 139 | true | true | true
+  2026-10-30T22:33:15.773 - maybeClearNotification: 139
+  2026-10-30T22:33:15.774 - maybeClearNotification: no eventId 139
+  2026-10-30T22:33:15.774 - maybeClearNoInternetAccessFeature: 139
+  2026-10-30T22:33:15.778 - getAssociatedWifiConfiguration: 139 | 10
+  2026-10-30T22:33:15.778 - handleNetworkValidationResult: abort for validated: true
+  2026-10-30T22:33:57.321 - handleNetworkValidationResult: 139 | true | true | true
+  2026-10-30T22:33:57.322 - maybeClearNotification: 139
+  2026-10-30T22:33:57.322 - maybeClearNotification: no eventId 139
+  2026-10-30T22:33:57.322 - maybeClearNoInternetAccessFeature: 139
+  2026-10-30T22:33:57.326 - getAssociatedWifiConfiguration: 139 | 10
+  2026-10-30T22:33:57.326 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T01:05:41.921 - maybeClearNotification: 139
+  2026-10-31T01:05:41.921 - maybeClearNotification: no eventId 139
+  2026-10-31T01:05:44.623 - handleNetworkValidationResult: 140 | true | false | false
+  2026-10-31T01:05:44.623 - maybeClearNotification: 140
+  2026-10-31T01:05:44.623 - maybeClearNotification: no eventId 140
+  2026-10-31T01:05:44.623 - maybeClearNoInternetAccessFeature: 140
+  2026-10-31T01:05:44.625 - getAssociatedWifiConfiguration: 140 | 10
+  2026-10-31T01:05:44.625 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T01:10:38.981 - maybeClearNotification: 140
+  2026-10-31T01:10:38.981 - maybeClearNotification: no eventId 140
+  2026-10-31T01:10:42.448 - handleNetworkValidationResult: 141 | true | false | false
+  2026-10-31T01:10:42.448 - maybeClearNotification: 141
+  2026-10-31T01:10:42.448 - maybeClearNotification: no eventId 141
+  2026-10-31T01:10:42.448 - maybeClearNoInternetAccessFeature: 141
+  2026-10-31T01:10:42.456 - getAssociatedWifiConfiguration: 141 | 10
+  2026-10-31T01:10:42.456 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T02:37:36.163 - maybeClearNotification: 141
+  2026-10-31T02:37:36.164 - maybeClearNotification: no eventId 141
+  2026-10-31T02:47:53.549 - handleNetworkValidationResult: 142 | true | false | false
+  2026-10-31T04:07:22.973 - maybeClearNotification: 142
+  2026-10-31T04:07:22.973 - maybeClearNotification: no eventId 142
+  2026-10-31T04:07:29.800 - handleNetworkValidationResult: 143 | true | false | false
+  2026-10-31T04:07:29.801 - maybeClearNotification: 143
+  2026-10-31T04:07:29.801 - maybeClearNotification: no eventId 143
+  2026-10-31T04:07:29.801 - maybeClearNoInternetAccessFeature: 143
+  2026-10-31T04:07:29.804 - getAssociatedWifiConfiguration: 143 | 10
+  2026-10-31T04:07:29.805 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:43:36.972 - maybeClearNotification: 143
+  2026-10-31T04:43:36.972 - maybeClearNotification: no eventId 143
+  2026-10-31T04:43:46.446 - handleNetworkValidationResult: 144 | true | false | false
+  2026-10-31T04:43:46.446 - maybeClearNotification: 144
+  2026-10-31T04:43:46.446 - maybeClearNotification: no eventId 144
+  2026-10-31T04:43:46.446 - maybeClearNoInternetAccessFeature: 144
+  2026-10-31T04:43:46.449 - getAssociatedWifiConfiguration: 144 | 10
+  2026-10-31T04:43:46.449 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:43:48.544 - maybeClearNotification: 144
+  2026-10-31T04:43:48.544 - maybeClearNotification: no eventId 144
+  2026-10-31T04:43:51.482 - handleNetworkValidationResult: 145 | true | false | false
+  2026-10-31T04:43:51.482 - maybeClearNotification: 145
+  2026-10-31T04:43:51.482 - maybeClearNotification: no eventId 145
+  2026-10-31T04:43:51.482 - maybeClearNoInternetAccessFeature: 145
+  2026-10-31T04:43:51.485 - getAssociatedWifiConfiguration: 145 | 10
+  2026-10-31T04:43:51.485 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:44:02.145 - maybeClearNotification: 145
+  2026-10-31T04:44:02.145 - maybeClearNotification: no eventId 145
+  2026-10-31T04:44:05.936 - handleNetworkValidationResult: 146 | true | false | false
+  2026-10-31T04:44:05.936 - maybeClearNotification: 146
+  2026-10-31T04:44:05.936 - maybeClearNotification: no eventId 146
+  2026-10-31T04:44:05.936 - maybeClearNoInternetAccessFeature: 146
+  2026-10-31T04:44:05.939 - getAssociatedWifiConfiguration: 146 | 10
+  2026-10-31T04:44:05.939 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:48:48.753 - maybeClearNotification: 146
+  2026-10-31T04:48:48.753 - maybeClearNotification: no eventId 146
+  2026-10-31T04:48:56.168 - handleNetworkValidationResult: 147 | true | false | false
+  2026-10-31T04:48:56.168 - maybeClearNotification: 147
+  2026-10-31T04:48:56.168 - maybeClearNotification: no eventId 147
+  2026-10-31T04:48:56.168 - maybeClearNoInternetAccessFeature: 147
+  2026-10-31T04:48:56.172 - getAssociatedWifiConfiguration: 147 | 10
+  2026-10-31T04:48:56.172 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:49:00.179 - maybeClearNotification: 147
+  2026-10-31T04:49:00.179 - maybeClearNotification: no eventId 147
+  2026-10-31T04:49:02.303 - handleNetworkValidationResult: 148 | true | false | false
+  2026-10-31T04:49:02.303 - maybeClearNotification: 148
+  2026-10-31T04:49:02.303 - maybeClearNotification: no eventId 148
+  2026-10-31T04:49:02.303 - maybeClearNoInternetAccessFeature: 148
+  2026-10-31T04:49:02.306 - getAssociatedWifiConfiguration: 148 | 10
+  2026-10-31T04:49:02.306 - handleNetworkValidationResult: abort for validated: true
+  2026-10-31T04:49:08.350 - maybeClearNotification: 148
+  2026-10-31T04:49:08.350 - maybeClearNotification: no eventId 148
+  2026-10-31T04:49:13.988 - handleNetworkValidationResult: 149 | true | false | false
+  2026-10-31T04:49:13.988 - maybeClearNotification: 149
+  2026-10-31T04:49:13.988 - maybeClearNotification: no eventId 149
+  2026-10-31T04:49:13.989 - maybeClearNoInternetAccessFeature: 149
+  2026-10-31T04:49:13.991 - getAssociatedWifiConfiguration: 149 | 10
+  2026-10-31T04:49:13.991 - handleNetworkValidationResult: abort for validated: true
+
+
+Q:\Downloads\platform-tools-latest-windows\platform-tools>
