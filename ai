@@ -608,6 +608,7 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
     echo
     echo '===== actual IPv6 HTTPS test from WAN IPv6 source ====='
     curl -6 --interface "$SRC6" --connect-timeout 8 -sS \
+      --resolve 'www.cloudflare.com:443:[2606:4700:4700::1111]' \
       'https://www.cloudflare.com/cdn-cgi/trace'
 
 结果解释：
