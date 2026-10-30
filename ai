@@ -1288,3 +1288,55 @@ ip -6 rule show
 4. 不要把手机 IPv6 网关 .200 当作已证实根因；它是重要共同变量。
 5. 不要将手机前缀加入 psw2_direct6，不要改 RA/网段/接线，不要关闭 IPv6。
 6. 只有拿到 .1 的只读状态后，才讨论是否存在有效的 IPv6 路径对照实验。
+
+
+---
+
+# 24. 2026-10-31 复核补遗：以本节修正前文冲突
+
+## 24.1 固件时间线
+2026-10-30 原始设备信息明确为 ImmortalWrt 24.10.6、r33869-cf234f8de6d5、x86/64、kernel 6.6.133，/etc/openwrt_release 与 ubus system board 一致。24.10.6 是固件版本。用户反馈降级到 24.10.6 后 PassWall2 曾恢复正常，当前手机 App 异常是在之后再次出现。10-28 的 kernel 6.12.103 / APK 阶段属于另一时间点，不能当作当前 24.10.6。23.05.4 / 5.15.167 曾被用户指出为助手误判，不能写成已核实旧环境。
+
+## 24.2 OpenClash / PassWall2 对照修正
+用户 10-31 明确提醒：此前两种插件抓包中的 IPv6 异常表现相当接近。因此：用户体验层面 OpenClash 下 YouTube 更流畅、PassWall2 下更慢；抓包层面两种插件都出现过 IPv6 发出后无接收；因果层面这削弱“PassWall2 是唯一根因”，但不能证明 .200 已是根因。共同 IPv6 路径、DNS、运营商上游/回程仍待区分。
+
+## 24.3 PassWall2 最新参数
+10-31 再次核对：tcp_proxy_way=redirect、ipv6_tproxy=0。此前 ipv6_tproxy=1 与 tcp_proxy_way=tproxy 已试过且无效，之后恢复。不要要求重复试验。
+
+## 24.4 10-31 nftables 已检查
+用户执行过 nft -a list chain inet passwall2 dstnat 和 nft list set inet passwall2 psw2_direct6。当时 dstnat 有 ip6 saddr @psw2_direct6 jump PSW2_DNS；集合中列有 2409:8a5c:7ea8:3b70::/64，但没有手机当时的 2409:8a5c:8041:b4a0::/64。不要建议直接把手机整个前缀加入该集合，因为它还参与 direct/return 判断，可能扩大绕过范围。手机 IPv6 DNS 属性指向 fe80::1（.200），发往 .200 的 DNS 不会先经过 .1 的 PassWall2 DNS 链。
+
+## 24.5 可重新读取的一份 PCAPdroid CSV
+PCAPdroid_30_10月_20_33_36.csv 共 201 行，约 2026-10-30 20:29:39 至 20:30:57。这只是当前可重新读取的一份 CSV，不是四份抓包总计。
+
+| IP族 | 协议 | 行数 | 发送字节 | 接收字节 |
+|---|---:|---:|---:|---:|
+| IPv6 | DNS | 2 | 178 | 222 |
+| IPv6 | QUIC | 11 | 84,348 | 0 |
+| IPv6 | TCP | 41 | 3,280 | 0 |
+| IPv4 | DNS | 41 | 2,972 | 4,268 |
+| IPv4 | QUIC | 20 | 149,526 | 0 |
+| IPv4 | HTTPS | 28 | 571,132 | 3,536,724 |
+| IPv4 | TLS | 47 | 93,613 | 30,977 |
+
+IPv6 DNS 发往 fe80::1:53；IPv6 QUIC/TCP 目标为 2a03:2880:f12a:83:face:b00c:0:25de，PCAPdroid 标注域名 youtubei.googleapis.com。CSV 没有 DNS 应答 RDATA，因此不能把域名标签写成已证实的 AAAA。IPv4 QUIC 也有仅发送无接收记录，所以 QUIC 无回包不是 IPv6 独有。TCP 汇总记录不能替代逐包 SYN/SYN-ACK 证据。
+
+## 24.6 关键未完成项和下一步
+此前没有证据证明手机曾成功经 .1 的 IPv6 WAN 出口上网。手机 IPv6 默认路由仍是 .200 的 fe80::1；IPv4 默认网关是 .1。用户明确指出之前没有真正使用过主路由 .1 的 IPv6 出口做有效 A/B。
+
+下一步只做只读盘点，先确认 .1 自身是否有 IPv6 WAN 默认路由和可用 PD，不要直接改手机路由或 RA：
+~~~sh
+echo '===== WAN / WAN6 status ====='
+ubus call network.interface.wan status 2>/dev/null
+ubus call network.interface.wan6 status 2>/dev/null
+echo '===== IPv6 addresses ====='
+ip -6 addr show
+echo '===== IPv6 routes and rules ====='
+ip -6 route show table all
+ip -6 rule show
+~~~
+
+此检查只确认 .1 自身条件，不等于手机已通过 .1 出口。若 .1 没有全球 IPv6 地址、默认路由或可用委派前缀，就不能把手机经 .1 的 IPv6 A/B 当成现成可做实验；若具备，再设计不改变现有接线、不影响 IPv4、可回滚的对照方案。
+
+## 24.7 之后不得重复或擅自做的事
+不重复抓包、TProxy 试验、手机默认路由/DNS 属性查询、相同 nftables 检查。不得换线、改 .2→.200、改 LAN 地址、关闭 RA/IPv6、调 RA 优先级、把手机前缀加入 psw2_direct6、重装固件/插件或随意修改 AdGuard Home。不要把 .200 说成已证实根因；它是重要共同变量。
