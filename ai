@@ -1340,3 +1340,21 @@ ip -6 rule show
 
 ## 24.7 之后不得重复或擅自做的事
 不重复抓包、TProxy 试验、手机默认路由/DNS 属性查询、相同 nftables 检查。不得换线、改 .2→.200、改 LAN 地址、关闭 RA/IPv6、调 RA 优先级、把手机前缀加入 psw2_direct6、重装固件/插件或随意修改 AdGuard Home。不要把 .200 说成已证实根因；它是重要共同变量。
+
+
+## 24.8 下一步命令的 PPPoE 接口名补充（重要）
+主路由 WAN 使用 PPPoE，因此不能只查名为 wan6 的逻辑接口。OpenWrt 官方 IPv6 文档说明：PPP 类协议需在父 WAN 接口启用 IPv6；若 option ipv6=auto，系统会创建 wan_6 虚拟接口并运行 DHCPv6 客户端；若 option ipv6=1，则可能需要单独配置 wan6。故只读盘点时应同时检查 wan、wan6、wan_6，避免因接口名不同误判“没有 IPv6”。
+
+建议命令修订为：
+~~~sh
+echo '===== PPPoE WAN / IPv6 logical interfaces ====='
+ubus call network.interface.wan status 2>/dev/null
+ubus call network.interface.wan6 status 2>/dev/null
+ubus call network.interface.wan_6 status 2>/dev/null
+echo '===== IPv6 addresses ====='
+ip -6 addr show
+echo '===== IPv6 routes and rules ====='
+ip -6 route show table all
+ip -6 rule show
+~~~
+这仍然是纯只读检查；wan6/wan_6 不存在或返回空，不应单独作为无 IPv6 的结论，必须结合父 WAN 状态、全局 IPv6 地址和默认路由一起判断。
