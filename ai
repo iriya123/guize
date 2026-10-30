@@ -1,0 +1,1219 @@
+# ImmortalWrt / OpenClash / PassWall2 / IPv6 / DNS 综合排查报告
+
+**整理范围：2026-10-26 至 2026-10-31，包含仍然有参考价值的早期环境信息。**
+
+**整理原则：**
+- 按时间记录，不把不同时间的配置当成同一份当前配置。
+- 区分原始命令输出、用户实际体验、历史助手归纳和技术推断。
+- 没有证据的地方明确标记为未确认。
+- 不把 DNS 解析异常、IPv6 路由问题、代理流量接管问题混为一谈。
+
+---
+
+# 1. 设备和网络拓扑
+
+## 1.1 主路由
+
+设备：
+- Lenovo Tiny x86 小主机
+- CPU：Celeron G4900T 2.90GHz
+- 设备型号标识：LENOVO 10T8S8HV00
+
+早期记录中的系统：
+- ImmortalWrt 23.05.4
+- 内核 5.15.167
+- LAN：192.168.60.1/24
+- 接口：br-lan
+- WAN：eth1
+- PPPoE：pppoe-wan
+- LAN 管理地址：192.168.60.1
+
+**重要：以上是早期环境信息。2026-10-28 出现了新的安装环境，内核变成 6.12.103。不能把 5.15.167 和 6.12.103 当成同一时间的系统状态。**
+
+## 1.2 网络设备
+
+| 地址 | 设备 | 作用 |
+|---|---|---|
+| 192.168.60.1 | ImmortalWrt | 主路由 |
+| 192.168.60.2 | AP | 手机无线接入 |
+| 192.168.60.3 | AP | 无线接入 |
+| 192.168.60.200 | 华为光猫/副路由 | IPv6 上游及手机 IPv6 默认网关 |
+
+华为设备：
+- 型号：Huawei OptiXstar HS8546X6-30
+- MAC：20:53:83:d5:20:82
+
+手机：
+- Xiaomi 10 Pro
+- MIUI 12.5
+- 已 Root，使用 ADB 进行过检查
+- IPv4：192.168.60.12
+- MAC：e0:cc:f8:9f:0e:23
+- 通过 `.2` AP 接入无线网络
+
+## 1.3 最重要的拓扑事实：手机 IPv6 默认网关是 `.200`
+
+手机执行：
+
+```bash
+ip -6 route get 2404:6800:4008::200e
+```
+
+历史输出：
+
+```text
+2404:6800:4008::200e from ::
+via fe80::1 dev wlan0 table wlan0
+```
+
+手机 IPv6 路由表：
+
+```text
+default via fe80::1 dev wlan0 table wlan0 proto ra
+```
+
+通过 MAC 地址确认：
+
+```text
+fe80::1
+MAC: 20:53:83:d5:20:82
+```
+
+对应华为光猫 `.200`。
+
+因此可以确认：
+
+**手机的 IPv6 默认路由由 `.200` 提供，而不是 ImmortalWrt `.1`。**
+
+手机 IPv4 和 IPv6 的默认路由不是同一个设备：
+
+- IPv4 默认网关：`.1`
+- IPv6 默认网关：`.200`
+
+这是分析所有后续问题时必须保留的网络事实。
+
+---
+
+# 2. 故障表现和用户实际体验
+
+历史记录中出现过以下症状：
+
+- YouTube App 封面加载缓慢、视频转圈。
+- YouTube 有时要等待几分钟才能恢复。
+- YouTube 偶尔能够成功加载，但成功后视频播放流畅。
+- X、Twitch、Pixiv 等 App 曾出现加载失败或网络错误。
+- Telegram 相对正常。
+- 浏览器访问 YouTube 最终有时能够正常工作，但 App 表现更差。
+- 电脑没有出现与手机完全相同的故障表现。
+
+另外，历史排查记录提到：
+
+- 曾有多台手机出现相似问题。
+- 同一手机、同一运营商、同一代理，在朋友家使用时正常。
+- 在当前家庭网络环境中，切换不同代理插件后，表现会有差异。
+
+这些信息的意义：
+
+1. 不能简单认定是单部手机故障。
+2. 不能简单认定是代理节点质量问题。
+3. 当前家庭网络环境值得重点调查。
+4. 浏览器正常不代表 App 使用的所有网络连接都正常。
+5. YouTube 视频播放成功后很流畅，不代表 DNS、连接建立或 CDN 选择过程没有问题。
+
+其中“朋友家正常”和“多台手机出现相似问题”属于历史用户反馈，不是已经有完整抓包证明的网络结论。
+
+---
+
+# 3. 2026-10-26：PassWall2 安装包和版本检查
+
+这一天主要是检查 PassWall2 官方发布版本和安装包获取方式。
+
+用户通过 ImmortalWrt SSH：
+
+- 成功访问 GitHub API。
+- 使用 wget 下载 `/tmp/passwall2-release.json`。
+- 文件大小约 64414 bytes。
+- API 显示 PassWall2 版本为 `26.10.20-1`。
+- 系统没有 Python3。
+- BusyBox wget 不支持 `--header`。
+- `/usr/bin/curl` 存在。
+- 使用 curl 携带 `Accept: application/octet-stream` 成功下载：
+  `/tmp/luci-app-passwall2.ipk`
+- 下载大小约 349.3 KB。
+
+当时：
+
+- `opkg info` 没有得到有效输出。
+- `ar` 命令不存在。
+- 用户没有安装这个下载的 IPK。
+
+因此，10 月 26 日这次下载不能记作 PassWall2 已安装或已经升级。
+
+---
+
+# 4. 2026-10-28：系统环境、OpenClash 清理及重新安装
+
+这是整个排查过程中非常重要的环境分界点。
+
+## 4.1 OpenClash 卸载
+
+当时 OpenClash 版本为：
+
+```text
+luci-app-openclash 0.48.002
+```
+
+用户执行了卸载和清理：
+
+```text
+apk del luci-app-openclash
+```
+
+随后清理：
+
+```text
+/etc/config/openclash
+/etc/openclash
+/usr/share/openclash
+/tmp/etc/openclash
+```
+
+用户检查后确认这些目录和配置已清理。
+
+卸载时，APK 同时移除了约 20 个关联包，包括：
+
+- curl
+- ip-full
+- bash
+- unzip
+- Ruby 相关组件
+
+这意味着不能把 10 月 28 日之后的环境当作 OpenClash 0.48.002 原封不动运行的旧环境。
+
+## 4.2 新环境内核
+
+卸载后检查：
+
+```text
+uname -r
+```
+
+结果：
+
+```text
+6.12.103
+```
+
+执行：
+
+```text
+apk update
+```
+
+成功，显示：
+
+```text
+11487 distinct packages available
+```
+
+当时软件源包含 ImmortalWrt、OpenWrt、PassWall 等源及相关签名密钥。
+
+**重要：这里的内核 6.12.103 与早期内核 5.15.167 是不同时间的系统环境。不能把早期系统的配置和新环境的运行结果直接合并。**
+
+目前历史材料不足以确认用户所说的 `24.10.6` 与这次新环境之间的确切版本关系，因此不擅自将内核 6.12.103 对应成某个固件版本。
+
+## 4.3 PassWall2 和 OpenClash 重装
+
+重装结果：
+
+```text
+luci-app-passwall2 26.10.20-r1
+PassWall2 中文包 26.10.20
+```
+
+OpenClash：
+
+```text
+0.48.011
+```
+
+Meta 核心：
+
+```text
+alpha-g5b79f3c
+linux-amd64-v1
+Go 1.26.10
+nftables
+```
+
+这些是 10 月 28 日重新安装后的版本记录，不应与早期 OpenClash 0.48.002 混用。
+
+---
+
+# 5. 2026-10-28：PassWall2 DNS 处理机制的关键发现
+
+这一部分是目前最值得其他 AI 关注的技术证据之一。
+
+## 5.1 sing-box 本地 DNS 查询
+
+曾经检查：
+
+```text
+127.0.0.1:2002
+```
+
+通过这个地址查询 Google、Baidu 的 AAAA 时，出现无响应或没有 AAAA 结果。
+
+同一时期，查询：
+
+```text
+223.5.5.5
+```
+
+能够得到 AAAA 结果。
+
+例如：
+
+- Google：返回 `2001::1`
+- Baidu：返回 `2409:...`
+
+这些结果属于不同 DNS 路径，不能直接把它们当作同一上游的结果。
+
+## 5.2 PassWall2 ACL 配置
+
+检查文件：
+
+```text
+/tmp/etc/passwall2/acl/acl_default.json
+```
+
+发现：
+
+```json
+{
+  "rcode": "NOERROR",
+  "action": "predefined",
+  "query_type": ["AAAA"]
+}
+```
+
+文件时间记录为：
+
+```text
+Oct 28 10:37
+```
+
+这个规则说明：该 ACL 配置中存在针对 AAAA 查询返回 NOERROR 的预定义处理。
+
+## 5.3 找到了生成规则的 Lua 代码
+
+文件：
+
+```text
+/usr/lib/lua/luci/passwall2/util_sing-box.lua
+```
+
+代码检查发现：
+
+当：
+
+```text
+remote_strategy == "ipv4_only"
+```
+
+时，会生成针对 AAAA 的：
+
+```text
+NOERROR
+```
+
+规则。
+
+同时当时 UCI 配置：
+
+```text
+remote_dns_query_strategy='UseIPv4'
+remote_fakedns='0'
+ipv6_tproxy='0'
+```
+
+这项发现非常重要：
+
+**PassWall2 的 `UseIPv4` 查询策略确实会影响 AAAA 查询处理。**
+
+但是：
+
+- `NOERROR` 不等于 DNS 请求超时。
+- `NOERROR` 不等于 NXDOMAIN。
+- 也不能仅凭这一条规则断言所有 AAAA 请求都被过滤。
+- 必须区分 PassWall2 本地 DNS、远程 DNS、直连 DNS 和 ACL 的不同处理路径。
+
+这项证据比单纯猜测 PassWall2 是否支持 IPv6 DNS 更有价值。
+
+---
+
+# 6. 2026-10-29：WAN、网络和故障转移相关背景
+
+历史记录中还涉及 WAN 故障转移脚本：
+
+```text
+/root/wan-failover.sh
+```
+
+脚本使用：
+
+- 主 WAN：PPPoE
+- 备用网关：`.200`
+
+但这一部分属于 WAN 故障转移配置，不能直接作为 DNS 或 PassWall2 IPv6 故障的证据。
+
+当时也检查过网络接口和路由，但不能把不同时间的 IPv6 路由输出混成同一份状态。
+
+特别是：
+
+- 主路由自身的 PPPoE IPv6 路由；
+- 手机经 `.200` 的 IPv6 默认路由；
+
+是两个不同设备的路由状态。
+
+---
+
+# 7. 2026-10-30 上午：PassWall2 DNS Leak Test
+
+这是一次独立的 DNS 泄漏测试阶段。
+
+当时用户明确提出：
+
+**PassWall2 使用之前，手机 IPv6 设置已经完成，之后没有修改，希望先排除 IPv6，不要围绕 IPv6 排查。**
+
+因此，这一阶段不能和下午重新开展的 IPv6 故障排查混为一谈。
+
+## 7.1 DNS Leak Test
+
+用户提供的结果：
+
+- 检测到 28 个 DNS 服务器。
+- 全部显示为 Cloudflare。
+- 包含 IPv4 和 IPv6 DNS。
+
+出口 IP：
+
+```text
+52.195.167.223
+```
+
+显示为 Amazon 日本出口。
+
+## 7.2 IPLeak 测试
+
+结果：
+
+- 16 个 DNS 服务器。
+- 58 次测试。
+- 均显示 Cloudflare。
+- IPv4 测试正常。
+- IPv6 测试不可达。
+
+## 7.3 用户当时的判断
+
+用户明确表示：
+
+**PassWall2 的 DNS 防泄漏效果很好，比 OpenClash 更好。**
+
+此前 OpenClash 曾在浏览器 DNS Leak Test 中显示 ISP DNS。
+
+这是一项重要的用户实测结论。
+
+但应当严格限定：
+
+- 它证明当时 PassWall2 的测试结果显示 Cloudflare。
+- 不能证明所有设备、所有 DNS 协议、所有 IPv6 路径都绝对没有泄漏。
+- IPv6 测试不可达也不等于 IPv6 DNS 泄漏。
+- DNS Leak Test 不能代替应用实际连接路径的检查。
+
+## 7.4 当时的排查方向
+
+用户一度接受彻底卸载 PassWall2、Xray、sing-box，不保留旧配置或备份，同时保留：
+
+- LAN
+- WAN
+- DHCP
+- AdGuard Home
+- OpenClash
+
+但这是当时讨论的方案，不应自动当作已经执行的操作。之后的记录仍然显示 PassWall2 正在运行和接受测试。
+
+---
+
+# 8. 2026-10-30 下午：PassWall2 与 OpenClash 同环境对照
+
+这一部分是整个排查中最有价值的应用层对照。
+
+用户确认：
+
+- 手机相同。
+- Wi-Fi AP `.2` 相同。
+- 接线环境相同。
+- 测试场景相同。
+- 只是切换代理插件。
+
+用户提供 OpenClash 下 YouTube 抓包 CSV。
+
+用户实际反馈：
+
+| 代理插件 | 用户实际体验 |
+|---|---|
+| OpenClash | YouTube 非常流畅 |
+| PassWall2 | 加载变慢，出现网络错误 |
+
+这说明两种代理插件在相同环境下表现不同。
+
+但要注意：
+
+这并不能自动证明是 PassWall2 的核心程序有 Bug，也不能证明 OpenClash 完整代理了手机所有 IPv6 流量。
+
+还需要考虑：
+
+- DNS 解析结果差异。
+- IPv4/IPv6 地址选择差异。
+- 分流规则差异。
+- 连接建立失败后的回退行为。
+- QUIC 和 TCP 的实际路径。
+- IPv6 流量是否绕过 `.1`。
+
+---
+
+# 9. 2026-10-30：OpenClash IPv6 配置历史
+
+这部分必须按配置层次和时间区分。
+
+## 9.1 曾检查到的 UCI 状态
+
+某次检查：
+
+```text
+ipv6_enable='0'
+ipv6_dns='0'
+```
+
+另一个历史时点曾主动启用 IPv6：
+
+```text
+ipv6_enable='1'
+ipv6_dns='1'
+```
+
+因此不能只把其中一组写成 OpenClash 始终使用的配置。
+
+## 9.2 曾检查到的运行 YAML
+
+```yaml
+enhanced-mode: fake-ip
+ipv6: true
+respect-rules: false
+fake-ip-range: 198.18.0.1/16
+```
+
+这里：
+
+```yaml
+ipv6: true
+```
+
+与某些时点的 UCI：
+
+```text
+ipv6_enable=0
+```
+
+存在配置层面的不一致。
+
+UCI 配置、生成的 YAML 和实际防火墙规则是三个不同层次。
+
+不能仅凭 UCI 的开关判断运行时的全部 IPv6 行为。
+
+## 9.3 OpenClash DNS 配置背景
+
+历史运行配置中：
+
+- Fake-IP 模式。
+- Fake-IP 地址段 `198.18.0.1/16`。
+- DNS 监听端口 `7874`。
+- nameserver 包含 `127.0.0.1:5335` 等地址。
+- fallback 包含 Google 和 Cloudflare DoH。
+- 某次 YAML 中 `respect-rules: false`。
+
+另一个历史状态中 OpenClash UCI 显示：
+
+```text
+ipv6_enable=0
+ipv6_dns=0
+```
+
+必须标明这些是不同检查时点，不能合并为一个当前配置。
+
+---
+
+# 10. 2026-10-30：PassWall2 DNS 端口和查询策略
+
+历史检查涉及以下端口：
+
+| 端口 | 历史用途/观察 |
+|---|---|
+| 2001 | PassWall2/Xray 相关监听检查中出现 |
+| 2002 | sing-box 本地 DNS 查询入口 |
+| 2003 | PassWall2 直连 DNS 路径 |
+| 2004 | PassWall2 转发 DNS 路径 |
+
+当时曾检查 2001、2002、2003、2004 的监听状态及 DNS 查询结果。
+
+部分 DNS 查询结果不同，例如：
+
+| 域名 | 一条查询路径 | 另一条查询路径 |
+|---|---|---|
+| Google | `64.233.187.x` | `142.251.169.x` |
+| Hugging Face | `199.59.149.236` 及 IPv6 | AWS `3.164.110.x` |
+
+b23.tv、知乎等域名也曾进行过测试。
+
+注意：
+
+- 这些是不同 DNS 路径返回的不同结果。
+- 不同 CDN 地址不必然表示 DNS 污染。
+- 不能仅凭不同 IP 断言某个 DNS 服务器有问题。
+- 还需要结合查询上游、节点出口和实际连接结果分析。
+
+历史配置中还确认过：
+
+```text
+remote DNS: 1.1.1.1
+remote DNS protocol: TCP
+remote_dns_query_strategy: UseIPv4
+direct DNS query strategy: UseIP
+DNS redirect: enabled
+```
+
+其中 `UseIPv4` 与 10 月 28 日找到的 AAAA `NOERROR` 规则生成代码相互印证。
+
+---
+
+# 11. 2026-10-30：PassWall2 IPv6 设置变更与恢复
+
+这一天用户曾测试过：
+
+```text
+ipv6_tproxy=1
+```
+
+以及：
+
+```text
+tcp_proxy_way=tproxy
+```
+
+结果没有解决故障。
+
+之后用户明确确认恢复为：
+
+```text
+passwall2.@global_forwarding[0].tcp_proxy_way='redirect'
+passwall2.@global_forwarding[0].ipv6_tproxy='0'
+```
+
+这是 10 月 30 日 17:09 左右确认的状态。
+
+因此：
+
+**不能把 `ipv6_tproxy=1` 当成当前配置。它只是曾经测试过的历史状态。**
+
+---
+
+# 12. 2026-10-30：PassWall2 nftables IPv6 计数
+
+这是需要谨慎解释的一组原始证据。
+
+用户提供的 nftables 输出：
+
+| 规则/链 | 计数 |
+|---|---:|
+| `PSW2_MANGLE_V6` | 24 packets / 1728 bytes |
+| `PSW2_OUTPUT_MANGLE_V6` | 6 packets / 990 bytes |
+| IPv6 `mangle_prerouting` 入口 | 24 packets / 1728 bytes |
+| 多条 IPv6 代理/TProxy 规则 | 0 |
+| IPv4 UDP 规则 | 223 packets，之后历史记录有 241 的计数 |
+
+曾经检查过：
+
+```text
+nft list chain inet passwall2 mangle_prerouting
+```
+
+确认 IPv6 入口规则有 24 包计数。
+
+也检查过 PassWall2 的 IPv6 规则。
+
+需要区分：
+
+- 入口链有计数；
+- 具体代理规则有计数；
+- TProxy 规则有计数；
+- Xray/sing-box 收到流量；
+
+这四件事不是一回事。
+
+目前可以说：
+
+**有少量 IPv6 包经过 PassWall2 相关入口链，但没有观察到对应 IPv6 TProxy 规则匹配。**
+
+不能说：
+
+- 已经证明手机流量进入 PassWall2；
+- 已经证明手机 IPv6 流量成功代理；
+- 已经证明所有 IPv6 流量绕过 PassWall2。
+
+因为计数来源没有被确认。
+
+## 12.1 Xray IPv6 监听
+
+历史检查中，Xray 出现：
+
+```text
+:::2001
+```
+
+说明存在 IPv6 通配监听。
+
+但：
+
+**监听 IPv6 socket 不代表手机 IPv6 流量已经被代理。**
+
+这需要和防火墙规则计数、实际连接建立情况结合分析。
+
+---
+
+# 13. 2026-10-30：QUIC 抓包结果
+
+OpenClash 与 PassWall2 的抓包分析中，都曾出现：
+
+- IPv4 QUIC 只有发送、没有接收的情况。
+- IPv6 QUIC 也有只有发送、没有接收的情况。
+- OpenClash 下 IPv4 HTTPS 有大量接收数据。
+- OpenClash 下 YouTube 用户体验非常流畅。
+
+这说明：
+
+**QUIC 无响应不是目前已经证明的 PassWall2 独有问题。**
+
+不能把 YouTube 故障直接等同于 QUIC 被阻断。
+
+需要区分：
+
+- QUIC/UDP 443；
+- TCP 443；
+- DNS；
+- IPv4；
+- IPv6；
+- 应用本身的重试和回退机制。
+
+---
+
+# 14. 2026-10-30：手机 IPv6 DNS 配置
+
+手机执行：
+
+```bash
+getprop | grep -i dns
+```
+
+结果：
+
+```text
+[net.dns1]: [fe80::1%wlan0]
+[net.dns2]: [192.168.60.1]
+```
+
+说明手机系统 DNS 属性中记录了：
+
+- IPv6 DNS：`fe80::1%wlan0`
+- IPv4 DNS：`192.168.60.1`
+
+其中 `fe80::1` 对应 `.200`。
+
+但这不能证明 Android 每次查询都优先使用 DNS1，也不能证明 DNS2 完全不会使用。
+
+Android 实际 DNS 解析过程可能受到系统解析器、网络验证、超时和应用连接行为影响。
+
+不能仅凭 DNS1/DNS2 的顺序判断实际查询顺序。
+
+---
+
+# 15. 2026-10-30：华为光猫 DNS 与 IPv6 路由配置
+
+## 15.1 当前 IPv6 路由角色
+
+手机 IPv6 默认网关是 `.200`。
+
+因此 `.200` 既是手机 IPv6 默认路由提供者，也参与手机 IPv6 DNS 环境。
+
+## 15.2 华为光猫 IPv6 LAN 页面
+
+页面中 DNS 来源选项：
+
+```text
+HGWProxy：家庭网关代理
+Static：静态配置
+WANConnection：网络连接
+```
+
+当前页面状态：
+
+```text
+IPv6DNSConfigType: HGWProxy
+IPv6DNSServers: fe80::1
+```
+
+其他配置：
+
+```text
+Prefix source: WANDelegated
+WAN interface: 2_VOIP_INTERNET_R_VID_66
+Subprefix: /64
+MTU: 1500
+```
+
+RA 页面：
+
+- RA 已启用。
+- DHCPv6 Server 未勾选。
+- Managed Flag 未勾选。
+- Other Config Flag 未勾选。
+- RA Max Interval：600。
+- RA Min Interval：200。
+
+**没有保存任何配置修改。**
+
+## 15.3 前端提交代码检查
+
+检查了：
+
+- `OnApplyButtonClick()`
+- `webSubmitForm`
+- `submit`
+- `addParameter`
+- `createNewFormElement`
+- 页面脚本搜索
+
+发现 DNS 参数：
+
+```javascript
+Form.addParameter('p.IPv6DNSConfigType', ...);
+Form.addParameter('p.IPv6DNSWANConnection', ...);
+Form.addParameter('p.IPv6DNSServers', ...);
+```
+
+提交到：
+
+```text
+InternetGatewayDevice.LANDevice.1.X_HW_IPv6Config
+```
+
+RA 参数：
+
+```text
+InternetGatewayDevice.LANDevice.1.X_HW_RouterAdvertisement
+```
+
+DHCPv6 参数：
+
+```text
+InternetGatewayDevice.LANDevice.1.X_HW_DHCPv6
+```
+
+前端表单封装只负责生成隐藏字段并提交：
+
+```javascript
+this.oForm.submit();
+```
+
+没有发现前端直接决定 RDNSS 或 DHCPv6 DNS 发送方式的代码。
+
+因此：
+
+**目前不能证明光猫到底通过 RA RDNSS 还是 DHCPv6 DNS 选项向手机发送 DNS。**
+
+页面前端检查到这里没有必要继续无限追踪。需要实际读取后台配置或观察实际通告才能确认。
+
+另外，不能关闭整个 RA，因为手机 IPv6 默认路由依赖 `.200` 的 RA。
+
+---
+
+# 16. 2026-10-30：不同 DNS 路径返回的异常地址
+
+测试域名：
+
+```text
+youtubei.googleapis.com
+```
+
+## 16.1 ImmortalWrt `.1`
+
+查询结果：
+
+```text
+A: 198.18.195.26
+AAAA: 无记录
+```
+
+A 记录属于 OpenClash Fake-IP 地址段。
+
+## 16.2 华为光猫 `.200`
+
+查询曾出现：
+
+```text
+A: 104.23.124.189
+AAAA: 2a03:2880:f11a:83:face:b00c:0:25de
+```
+
+还出现过其他：
+
+```text
+2a03:2880:f107:83:face:b00c:0:25de
+2a03:2880:f126:83:face:b00c:0:25de
+```
+
+这些 AAAA 地址属于 Meta 地址范围，与目标 Google 域名的预期地址不符。
+
+## 16.3 `.200` 上游 IPv6 DNS
+
+曾查询：
+
+```text
+2409:805c:2000:3001::1000
+2409:805c:2000:3000::1000
+```
+
+也出现过 Meta 地址范围的 AAAA 结果。
+
+## 16.4 公共 DNS 对照
+
+Google DNS 8.8.8.8 和 Google DoH 查询曾得到：
+
+```text
+A: 172.217.112.4
+AAAA: 2001:4860:...
+```
+
+阿里 DNS 223.5.5.5 也曾返回 Meta 地址范围的 AAAA。
+
+因此不能直接断言异常只由 `.200` 造成，也不能直接断言是光猫主动污染。
+
+目前能确认的是：
+
+**不同 DNS 查询路径返回的结果明显不同，部分路径返回了与目标域名服务不匹配的 AAAA 地址。**
+
+异常的具体来源仍未确定。
+
+---
+
+# 17. 2026-10-30：手机 IPv6 和 IPv4 强制连接测试
+
+## 17.1 IPv6
+
+手机执行：
+
+```bash
+curl -6 -v --connect-timeout 8 https://youtubei.googleapis.com/
+```
+
+尝试连接：
+
+```text
+2a03:2880:f134:183:face:b00c:0:25de:443
+```
+
+结果：
+
+```text
+connect timed out
+```
+
+说明这次使用该 IPv6 地址建立连接失败。
+
+## 17.2 普通 IPv4
+
+执行：
+
+```bash
+curl -4 -v --connect-timeout 8 https://youtubei.googleapis.com/
+```
+
+曾尝试：
+
+```text
+108.160.169.46:443
+```
+
+连接过程中出现异常。
+
+## 17.3 强制 Google IPv4
+
+执行：
+
+```bash
+curl -4 -v --connect-timeout 8 \
+--resolve youtubei.googleapis.com:443:172.217.112.4 \
+https://youtubei.googleapis.com/
+```
+
+结果：
+
+- TCP 成功。
+- TLS 握手成功。
+- 证书验证成功。
+- 返回 HTTP 405。
+
+HTTP 405 是访问根路径时服务器不接受该请求方式，不是连接失败。
+
+结论：
+
+**强制指定该 Google IPv4 地址时，手机能够建立 TCP 和 TLS 连接。**
+
+但这只证明这一次连接路径正常，不能据此证明所有 PassWall2 流量、所有域名、所有 IPv6 连接都正常。
+
+---
+
+# 18. AdGuard Home 相关背景
+
+主路由上安装了 AdGuard Home。
+
+历史检查：
+
+```text
+监听端口：5335
+监听地址：0.0.0.0
+```
+
+进程：
+
+```text
+/usr/bin/AdGuardHome/AdGuardHome
+-c /etc/AdGuardHome.yaml
+-w /usr/bin
+```
+
+曾观察到上游：
+
+```text
+211.138.240.100
+211.138.245.180
+223.6.6.6
+```
+
+曾经测试机场节点域名：
+
+```text
+vl.026.node-for-bigairport.com
+```
+
+通过上游：
+
+```text
+211.138.240.100
+```
+
+得到：
+
+```text
+35.78.91.104
+```
+
+用户观察到 AGH 首次查询可能较慢，后续查询很快。
+
+但目前没有证据证明 AdGuard Home 是 YouTube 或 PassWall2 故障的根因。
+
+用户曾明确要求：AGH 负责国内 DNS，不要在 OpenClash 防泄漏排查中随意修改、重启或重装 AGH。
+
+---
+
+# 19. 2026-10-31：PassWall2 状态复核
+
+用户再次确认：
+
+```text
+passwall2.@global_forwarding[0].tcp_proxy_way='redirect'
+passwall2.@global_forwarding[0].ipv6_tproxy='0'
+```
+
+这是当前已确认的 PassWall2 参数状态。
+
+用户要求：
+
+- 核对以前改过什么。
+- 总结已经排查的问题。
+- 明确下一步应该做什么。
+
+这一天的排查重点已经从单纯 DNS Leak Test 转向 PassWall2 与 IPv6 的关联。
+
+---
+
+# 20. 目前能够成立的结论
+
+## 20.1 已证实事实
+
+1. 手机 IPv4 默认网关是 ImmortalWrt `.1`。
+2. 手机 IPv6 默认网关是华为光猫 `.200`。
+3. 手机系统 DNS 属性中同时存在 `.200` 的 IPv6 DNS 和 `.1` 的 IPv4 DNS。
+4. 不同 DNS 路径对 `youtubei.googleapis.com` 返回过不同地址。
+5. 部分 DNS 路径返回了 Meta 地址范围的 AAAA。
+6. 手机使用其中一个异常 AAAA 地址连接时超时。
+7. 强制 Google IPv4 地址后，TCP/TLS 能成功建立。
+8. PassWall2 的 `UseIPv4` 策略在代码中存在生成 AAAA `NOERROR` 规则的逻辑。
+9. PassWall2 IPv6 入口链有计数，但具体 IPv6 代理规则未观察到匹配。
+10. Xray 有 IPv6 通配监听，但这不等于手机 IPv6 流量已成功进入代理。
+11. OpenClash 和 PassWall2 在相同手机、相同 AP、相同接线环境下，曾出现不同的 YouTube 体验。
+12. 两种代理抓包中都曾出现 QUIC 只有发送、没有接收的情况。
+13. 华为光猫前端页面当前 DNS 来源为 HGWProxy，且检查期间没有保存修改。
+14. 10 月 31 日 PassWall2 已确认恢复为 `tcp_proxy_way=redirect`、`ipv6_tproxy=0`。
+
+## 20.2 用户实测结论
+
+1. PassWall2 的 DNS Leak Test 曾全部显示 Cloudflare。
+2. OpenClash 曾在 DNS Leak Test 中显示 ISP DNS。
+3. 用户认为 PassWall2 的 DNS 防泄漏表现优于 OpenClash。
+4. PassWall2 + 手机 IPv6 开启时，曾出现 App 加载异常。
+5. 关闭手机 IPv6 后，PassWall2 下的 YouTube 曾恢复正常或明显改善。
+6. 同一手机在 OpenClash 下曾比 PassWall2 流畅。
+
+这些是用户实际测试反馈，不应升级成所有时间、所有配置下的绝对结论。
+
+---
+
+# 21. 尚未解决的问题
+
+1. 手机的 `fe80::1%wlan0` DNS 到底由 `.200` 通过 RA RDNSS 发送，还是其他机制提供？
+2. 手机实际发起每一次 DNS 查询时，究竟使用 `.200` 还是 `.1`？
+3. Meta AAAA 地址究竟来自运营商 DNS、光猫代理、DNS 上游还是其他环节？
+4. PassWall2 的 IPv6 入口链计数是否来自手机？
+5. 为什么 IPv6 入口链有计数，但具体代理规则没有匹配？
+6. 手机 IPv6 流量是否绕过 `.1`，直接从 `.200` 出口？
+7. PassWall2 的 `UseIPv4`、AAAA `NOERROR` 处理与 App 连接延迟之间是否存在直接因果关系？
+8. OpenClash 与 PassWall2 的不同体验究竟来自 DNS、IPv6 路由、代理规则还是连接回退？
+9. 为什么同一代理在其他家庭网络环境中表现正常？
+
+---
+
+# 22. 不应再重复的操作
+
+已经做过的测试，不要无意义重复：
+
+- PassWall2 `ipv6_tproxy=1` 测试，之后已恢复为 0。
+- PassWall2 `tcp_proxy_way=tproxy` 测试，之后已恢复为 redirect。
+- 多轮 PCAPdroid 抓包和 CSV 分析。
+- 手机 IPv6 默认路由查询。
+- 手机 DNS 属性查询。
+- 华为光猫 IPv6 LAN 页面前端代码检查。
+- PassWall2 IPv6 nftables 链计数检查。
+- OpenClash 和 PassWall2 同环境 YouTube 对照。
+- Google IPv4 强制连接测试。
+
+用户不希望继续无目的地抓包，也不希望未经同意修改网络配置。
+
+---
+
+# 23. 给下一位 AI 的任务要求
+
+请不要从安装、重装、修改 LAN IP 或重新搭建网络开始。
+
+优先分析以下问题：
+
+### 第一优先级：PassWall2 IPv6 流量是否真正接管
+
+结合以下证据：
+
+- 手机 IPv6 默认网关是 `.200`。
+- `.1` 不是手机 IPv6 默认网关。
+- PassWall2 IPv6 入口链有计数。
+- IPv6 TProxy 规则没有观察到匹配。
+- Xray 有 IPv6 监听。
+
+分析这些条件之间是否存在流量路径断裂。
+
+### 第二优先级：PassWall2 DNS 的 AAAA 处理
+
+结合：
+
+- `remote_dns_query_strategy=UseIPv4`
+- `util_sing-box.lua` 生成 AAAA NOERROR 的逻辑
+- `127.0.0.1:2002`
+- 2003/2004 DNS 路径
+- 手机 DNS 属性同时存在 `.200` 和 `.1`
+
+分析手机是否可能收到不同来源的 DNS 结果，以及 AAAA 处理是否影响 App 连接。
+
+### 第三优先级：华为光猫 IPv6 DNS
+
+不要关闭整个 RA。
+
+手机的 IPv6 默认路由依赖 `.200`，因此不能为了处理 DNS 而直接关闭 RA。
+
+先确认 DNS 实际通告机制，再讨论如何调整 DNS 来源。
+
+### 第四优先级：OpenClash 与 PassWall2 对照
+
+必须分别考虑：
+
+- UCI 配置
+- 运行 YAML
+- nftables 规则
+- DNS 请求路径
+- 手机 IPv6 默认路由
+
+不要把某个时点的 `ipv6_enable=0` 和另一个时点的 `ipv6_enable=1` 混成一个状态。
+
+### 操作约束
+
+- 优先只读检查。
+- 一次只提出一个最有价值的检查。
+- 明确说明该检查能证明什么、不能证明什么。
+- 不要要求重复抓包。
+- 不要未经同意修改配置。
+- 不要把不同日期、不同固件、不同插件的结果合并。
+- 对每个结论标记证据强度。
+我对这份报告的额外审查说明
+有四处特别容易被下一位 AI 搞混：
+1. **系统版本问题：**早期 23.05.4 / 5.15.167 与 10 月 28 日记录的 6.12.103 必须分开。24.10.6 的准确含义目前仍需核实。
+2. **10 月 30 日上午与下午：**上午用户曾要求先排除 IPv6，重点测试 DNS Leak；下午又重新开展 IPv6 故障分析。这是两个不同阶段。
+3. **OpenClash IPv6：**UCI、YAML、实际防火墙规则存在不同时间的状态，不能用单个开关代替全部运行状态。
+4. **PassWall2 IPv6：**入口链有计数不等于手机流量进入代理；Xray 监听 IPv6也不等于代理接管成功。
+
+明白了。你指的是 ImmortalWrt 固件版本 24.10.6，不是日期。
+
+那么之前的报告需要按这个边界重新整理：
+正确的时间和版本划分
+环境	处理方式
+ImmortalWrt 24.10.6 之前	作为历史背景，只保留仍有参考价值的证据
+ImmortalWrt 24.10.6	作为本次排查的正式起点
+24.10.6 安装后的 OpenClash、PassWall2 操作	按实际日期和配置变化逐项记录
+2026-10-28 之后	单独记录重装、软件包变化和新内核环境
+
+ImmortalWrt 官方下载站确实存在 24.10.6 发布目录。
+ImmortalWrt下载+1
+
+特别需要纠正的一处
+之前报告把：
+ImmortalWrt 23.05.4
+Kernel 5.15.167
+
+
+和：
+Kernel 6.12.103
+
+
+放在同一条时间线附近，容易让其他 AI 误以为它们是同一固件的配置。
+
+现在应该明确：
+- 23.05.4 / 5.15.167：24.10.6 之前的历史环境。
+- 24.10.6：你指定的正式排查起点。
+- 6.12.103：10 月 28 日检查到的内核信息，暂时不能仅凭这个数字断定它就是标准 24.10.6 内核，需要结合当时的系统版本文件确认。
+我会以 ImmortalWrt 24.10.6 为分界，重新组织整份报告，而不是简单在旧报告上修改标题。 特别保留每次 PassWall2、OpenClash 配置变更前后的状态，防止再次混淆。
