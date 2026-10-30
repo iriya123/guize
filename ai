@@ -258,7 +258,7 @@ DNS Leak 网站显示的解析器身份不等于应用连接路径；但若同�
 
 这说明 .1 当时的 RA Router Lifetime 被置为 0（不向客户端宣告自己是可用的 IPv6 默认路由器）。但不能仅凭该日志推断 .1 自身 IPv6 外网不通。
 
-2026 年 OpenWrt 已有类似报告：当系统只有 source-specific default routes 或特殊隧道路由时，odhcpd 可能报告没有默认路由并把 RA lifetime 设为 0，而底层 IPv6 路径仍可能可用。参考 OpenWrt issue #23246 和 odhcpd 源码。该 issue 的场景是 WireGuard，不是用户的 PPPoE；它只证明这条日志不能单独作为“IPv6 WAN 不通”的证据，不能直接认定用户遇到同一个 bug。
+外部复核发现两条相关报告，但都不是用户 PPPoE 环境的直接复现：OpenWrt issue #23246（2026-05，24.10.4 x86/64）报告 WireGuard 上存在可用 IPv6 默认路由和 IPv6 连通性，但 odhcpd 仍报该警告；issue #388（odhcpd，2026 年）报告 ipip6 隧道环境中存在 source-specific default routes、PD 和可用 IPv6 连通性，仍出现类似警告，并怀疑特定日志级别下 RA 发送路径异常。它们共同说明：这条警告不能单独证明 IPv6 WAN 不通，也不能证明用户遇到相同 bug。用户的 PPPoE 路由、odhcpd 版本和 RA 实际报文仍需独立判断。
 
 ### 6.7 这组 .1 IPv6 证据的正确结论
 
@@ -592,10 +592,12 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 - 手机 IPv6 route/DNS、TProxy、nftables、抓包也都已检查过。
 - 唯一缺失的关键事实是：.1 能否用它自己的 WAN IPv6 源地址真正访问公网 IPv6。
 
-当时 .1 的 WAN IPv6 源地址：
+当时 .1 的 WAN IPv6 源地址记录为：
 2409:8a5c:7e0a:3a6c:7d4e:a7b7:6b4a:1a3e
 
-若需要执行，使用下面这个只读测试（不改配置、不改路由、不改 RA）：
+注意：这是 10 月 30 日 13:35 左右记录的动态地址，可能已经变化。执行前必须确认它仍出现在当前 `ip -6 addr show` 的 `wan_6` 地址列表中；若不存在，不要继续用旧地址测试，应先从当前 `ifstatus wan_6` 读取最新 WAN GUA。该检查本身此前已经做过，不需要重复贴完整状态，只有在地址变化时才读取最新值。
+
+若地址仍然有效，使用下面这个只读测试（不改配置、不改路由、不改 RA）：
 
     SRC6='2409:8a5c:7e0a:3a6c:7d4e:a7b7:6b4a:1a3e'
     DST6='2606:4700:4700::1111'
@@ -666,3 +668,35 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 13. 不要改 LAN IP、换线、改变 .2→.200 上联、关闭 RA、永久关闭 IPv6、调 RA 优先级、把手机前缀加入 psw2_direct6、重装固件/插件或随意修改 AGH。
 14. 每次只提出一个真正未做、且能缩小判断范围的测试；先检索历史记录确认没做过，再提出。
 15. 明确区分“用户原始输出”“用户体验反馈”“源码说明”“推断”和“尚未验证”。
+
+
+---
+
+## 17. 2026-10-31 网上复核补充：odhcpd 警告的证据边界
+
+本次重新搜索官方资料后，补充以下结论：
+
+1. OpenWrt 官方 IPv6 配置文档明确：PPPoE 父接口设置 `option ipv6 'auto'` 时，会创建动态 `wan_6` 接口并启动 DHCPv6 客户端；`option ipv6 '1'` 则是另一种需要单独配置 `wan6` 的模式。用户 10 月 30 日的 `wan_6` 输出与前一种机制一致。  
+   资料：https://openwrt.org/docs/guide-user/network/ipv6/configuration
+
+2. OpenWrt issue #23246（2026-05，OpenWrt 24.10.4 x86/64）中，报告者的 WireGuard IPv6 默认路由和公网 IPv6 连通性均正常，但 odhcpd 仍报 “No default route present, setting ra_lifetime to 0!”。维护者解释，无下一跳的 VPN 默认路由可能让 odhcpd 的判断困惑。该案例不是 PPPoE，也不是用户的精确路由结构，只能证明不能单凭这条日志判定 WAN IPv6 不通。  
+   资料：https://github.com/openwrt/openwrt/issues/23246
+
+3. odhcpd issue #388（2026 年）另有 ipip6 隧道场景，报告存在 source-specific routes、PD 和路由器自身 IPv6 连通性，却出现相似警告；作者还报告 RA 发送行为异常。这是另一个隧道场景，不能直接套用到用户 PPPoE，但进一步说明“日志警告”与“实际 WAN IPv6 是否通”必须分别验证。  
+   资料：https://github.com/openwrt/odhcpd/issues/388
+
+4. 当前 odhcpd 源码显示，Router Lifetime 的设置与 default route、valid prefix 两项判断有关；条件不满足时会把 lifetime 置零。源码解释了警告的机制，但不能代替用户 LAN 上真实 RA 报文的观察。  
+   资料：https://github.com/openwrt/odhcpd/blob/master/src/router.c
+
+**重要：以上资料没有授权我们去设置 `ra_default=2`、调整 RA 优先级或改动 DHCPv6/RA。用户明确不希望再随意调整 RA。当前只用于修正推理：不能把 odhcpd warning 当成 IPv6 出口故障的定论。**
+
+## 18. 本轮重写的具体修正
+
+- 删除了旧报告末尾重复的 24.1、24.2、24.3 等多段补遗，改为按日期和主题组织的一份连续报告。
+- 将 10 月 30 日 13:07 的 `ifstatus wan6` 不存在，与 13:34–13:35 的 `ifstatus wan_6` up 分开记录，避免误判 .1 没有 IPv6。
+- 加入 .1 的 WAN GUA、PD、LAN 前缀、source-specific routes、RA lifetime 0 日志。
+- 明确区分“路由器 .1 有 WAN IPv6/PD”与“手机成功通过 .1 IPv6 上网”。
+- 把 10 月 30 日上午 DNS Leak 的 Cloudflare 结果，与 10 月 31 日多设备显示 ISP DNS 的后续反馈分开记录。
+- 加入 IPv4 8.8.8.8:443 直连测试及临时 psw2_direct 规则已删除的时间线，避免把 IPv4 测试混为 IPv6。
+- PassWall2 源码核对更新到用户当时安装的 26.10.29-1 tag。
+- 修正下一步：不再重复盘点 wan6/wan_6/PD，而是验证 .1 自身是否能以当前 WAN GUA 建立公网 IPv6 连接；若旧地址已变化，先确认当前地址再测。
