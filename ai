@@ -1217,3 +1217,74 @@ Kernel 6.12.103
 - 24.10.6：你指定的正式排查起点。
 - 6.12.103：10 月 28 日检查到的内核信息，暂时不能仅凭这个数字断定它就是标准 24.10.6 内核，需要结合当时的系统版本文件确认。
 我会以 ImmortalWrt 24.10.6 为分界，重新组织整份报告，而不是简单在旧报告上修改标题。 特别保留每次 PassWall2、OpenClash 配置变更前后的状态，防止再次混淆。
+
+
+---
+
+# 24. 2026-10-31 复核补遗（本节覆盖前文冲突处）
+
+## 24.1 固件版本纠正
+
+2026-10-30 用户提供的原始设备信息明确为 ImmortalWrt 24.10.6、r33869-cf234f8de6d5、x86/64、kernel 6.6.133；/etc/openwrt_release 与 ubus system board 一致。24.10.6 是固件版本，不是日期。用户明确反馈：降级到 24.10.6 后 PassWall2 曾恢复正常，当前手机 App 异常是在之后再次出现。
+
+前文 10-28 出现的 kernel 6.12.103 / APK 状态属于另一个时间点、另一套系统状态，不是当前 24.10.6。23.05.4 / 5.15.167 曾被用户指出为助手误判，不能作为已核实的旧固件事实。
+
+## 24.2 OpenClash 与 PassWall2 抓包结论修正
+
+用户在 10-31 明确提醒：此前比较 OpenClash 与 PassWall2 抓包时，两者 IPv6 异常表现相当接近。因此不能因 OpenClash 下 YouTube 体验更好，就把 IPv6 无响应归因成 PassWall2 独有问题。
+
+需要分开记录：用户体验层面，同手机、同 AP、同接线对照时 OpenClash 下 YouTube 更流畅、PassWall2 下更慢/报错；抓包层面，两种插件的 IPv6 连接都出现过发送后无接收，用户确认表现相似；因果层面，这削弱“PassWall2 是唯一根因”，但不能证明 .200 已是根因。共同 IPv6 路径、DNS、运营商上游/回程仍待区分。
+
+## 24.3 当前 PassWall2 参数与已做试验
+
+10-31 再次核对：tcp_proxy_way=redirect、ipv6_tproxy=0。此前 ipv6_tproxy=1 与 tcp_proxy_way=tproxy 已试过且无效，之后恢复。不要要求重复试验。
+
+## 24.4 10-31 已检查的 nftables 集合
+
+用户执行过 nft -a list chain inet passwall2 dstnat 和 nft list set inet passwall2 psw2_direct6。当时 dstnat 有 ip6 saddr @psw2_direct6 jump PSW2_DNS；集合中列有 2409:8a5c:7ea8:3b70::/64，但没有手机当时的 2409:8a5c:8041:b4a0::/64。不要建议直接把手机整个前缀加入该集合，因为它还参与 direct/return 判断，可能扩大绕过范围。手机 IPv6 DNS 属性指向 fe80::1（.200），发往 .200 的 DNS 不会先经过 .1 的 PassWall2 DNS 链。
+
+## 24.5 可重新读取的 PCAPdroid CSV 复核
+
+PCAPdroid_30_10月_20_33_36.csv 共 201 行，时间约 2026-10-30 20:29:39 至 20:30:57。这只是当前可重新读取的一份 CSV，不是四份抓包的合计。
+
+| IP族 | 协议 | 行数 | 发送字节 | 接收字节 |
+|---|---:|---:|---:|---:|
+| IPv6 | DNS | 2 | 178 | 222 |
+| IPv6 | QUIC | 11 | 84,348 | 0 |
+| IPv6 | TCP | 41 | 3,280 | 0 |
+| IPv4 | DNS | 41 | 2,972 | 4,268 |
+| IPv4 | QUIC | 20 | 149,526 | 0 |
+| IPv4 | HTTPS | 28 | 571,132 | 3,536,724 |
+| IPv4 | TLS | 47 | 93,613 | 30,977 |
+
+IPv6 DNS 发往 fe80::1:53；IPv6 QUIC/TCP 目标为 2a03:2880:f12a:83:face:b00c:0:25de，PCAPdroid 标注域名 youtubei.googleapis.com。CSV 没有 DNS 应答 RDATA，因此不能把域名标签写成已证实的 AAAA 解析结果。同一域名标签还出现到 31.13.75.12 的 IPv4 TLS，以及到 Google IPv4 172.217.112.4 的 HTTPS/TLS 成功收发。IPv4 QUIC 也有仅发送无接收记录，所以 QUIC 无回包不是 IPv6 独有。TCP 汇总记录不能替代逐包 SYN/SYN-ACK 证据。
+
+## 24.6 关键未完成项：没有完成手机经 .1 IPv6 WAN 出口的有效对照
+
+手机 IPv6 默认路由已知是 .200 的 fe80::1；IPv4 默认网关是 .1。此前没有证据证明手机曾成功经 .1 的 IPv6 WAN 出口上网。用户特别指出，之前分析没有真正使用过主路由 .1 的 IPv6 上网路径。
+
+因此下一步不是让手机直接改路由，也不是改 RA，而是先只读确认 .1 自身是否有 IPv6 WAN 默认路由和可用 delegated prefix。该检查只确认主路由自身条件，不等于手机已通过 .1 出口。
+
+建议唯一下一步只读检查：
+
+~~~sh
+echo '===== WAN / WAN6 status ====='
+ubus call network.interface.wan status 2>/dev/null
+ubus call network.interface.wan6 status 2>/dev/null
+echo '===== IPv6 addresses ====='
+ip -6 addr show
+echo '===== IPv6 routes and rules ====='
+ip -6 route show table all
+ip -6 rule show
+~~~
+
+若 .1 没有全球 IPv6 地址、默认路由或可用委派前缀，就不能把“手机经 .1 IPv6 出口 A/B”当成现成可做的实验。若具备这些条件，再设计不改变现有接线、不影响 IPv4、可回滚的方案；在此之前不改配置。
+
+## 24.7 下一步优先级
+
+1. 先判断 .1 是否具有自己的 IPv6 WAN 出口及 PD 条件。
+2. 不要重复抓包；现有抓包已足以说明 IPv6 无响应并非 PassWall2 独有。
+3. 不要把 PCAPdroid Info 域名标签当作 DNS RDATA。
+4. 不要把手机 IPv6 网关 .200 当作已证实根因；它是重要共同变量。
+5. 不要将手机前缀加入 psw2_direct6，不要改 RA/网段/接线，不要关闭 IPv6。
+6. 只有拿到 .1 的只读状态后，才讨论是否存在有效的 IPv6 路径对照实验。
