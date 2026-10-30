@@ -1,6 +1,6 @@
 # ImmortalWrt 24.10.6 / PassWall2 / OpenClash / Android IPv6 与 DNS 排查报告
 
-**最后复核：2026-10-31（按对话日期记录）**  
+**最后复核：2026-10-31（第二轮逐项复核；按对话日期记录）**  
 **当前基线：ImmortalWrt 24.10.6，r33869-cf234f8de6d5，x86/64，Linux 6.6.133。**
 
 > 本版是对整份报告的重写，不是追加补遗。按时间重排，合并重复内容，并纠正此前“没有检查过主路由 IPv6 状态”等错误表述。没有原始输出的项目明确标为未证实。
@@ -256,9 +256,9 @@ DNS Leak 网站显示的解析器身份不等于应用连接路径；但若同�
 - odhcpd 日志出现：
   No default route present, setting ra_lifetime to 0!
 
-这说明 .1 当时的 RA Router Lifetime 被置为 0（不向客户端宣告自己是可用的 IPv6 默认路由器）。但不能仅凭该日志推断 .1 自身 IPv6 外网不通。
+这说明 odhcpd 当时在处理 LAN RA 时计算/设置的 Router Lifetime 为 0，按协议语义这类 RA 不会把 .1 宣告为客户端的 IPv6 默认路由器。但**仅凭日志不能证明 RA 报文确实发出、手机确实收到该 RA，或 .1 自身 IPv6 外网不通**；这些是三个不同层次的事实。
 
-外部复核发现两条相关报告，但都不是用户 PPPoE 环境的直接复现：OpenWrt issue #23246（2026-05，24.10.4 x86/64）报告 WireGuard 上存在可用 IPv6 默认路由和 IPv6 连通性，但 odhcpd 仍报该警告；issue #388（odhcpd，2026 年）报告 ipip6 隧道环境中存在 source-specific default routes、PD 和可用 IPv6 连通性，仍出现类似警告，并怀疑特定日志级别下 RA 发送路径异常。它们共同说明：这条警告不能单独证明 IPv6 WAN 不通，也不能证明用户遇到相同 bug。用户的 PPPoE 路由、odhcpd 版本和 RA 实际报文仍需独立判断。
+外部复核的两条资料必须区别对待，不能合并成两个“已确认同类 bug”：OpenWrt issue #23246（2026-05，24.10.4 x86/64）是 WireGuard 场景，报告者明确称路由器 IPv6 连通性正常，但 odhcpd 仍报该警告；维护者解释 VPN 无下一跳默认路由可能令 odhcpd 困惑。odhcpd issue #388（2026 年）是另一份 RA 未发送报告，作者观察到默认日志级别下没有 RA，并**推测** source-specific default routes 与 odhcpd 的判断/发送路径有关；该 issue 的“source-specific route 是根因”属于作者推测，不是已确认结论。两者都不是用户 PPPoE 环境的直接复现。它们只能支持一个谨慎结论：日志警告不等于 WAN IPv6 已断；同时也不能据此认定 .1 的 RA 实际正常发出。用户的 PPPoE 路由、odhcpd 实际版本、RA 报文和 WAN 连通性仍需分别验证。
 
 ### 6.7 这组 .1 IPv6 证据的正确结论
 
@@ -424,10 +424,9 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 ### 9.1 当前可重新读取的一份 CSV
 
 文件：PCAPdroid_30_10月_20_33_36.csv  
-时间约：2026-10-30 20:29:39 至 20:30:57  
-总记录：201 行。
+本轮重新读取原始 CSV 核验：201 条数据记录，时间为 2026-10-30 20:29:39.759 至 20:30:59.921（+08:00）；201 条均归属 YouTube App（com.google.android.youtube）。
 
-此前统计结果：
+本轮按目标 IP 地址族和 Proto 重新分组统计：
 
 | IP 族 | 协议 | 记录数 | 发送字节 | 接收字节 |
 |---|---|---:|---:|---:|
@@ -439,7 +438,7 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 | IPv4 | HTTPS | 28 | 571,132 | 3,536,724 |
 | IPv4 | TLS | 47 | 93,613 | 30,977 |
 
-此表只对应这一份 CSV，不代表所有抓包的总计。若原始 CSV 未在当前会话重新挂载，不应声称本轮重新逐行复算了它。
+此表只对应这一份 CSV，不代表其他抓包或其他插件场景的总计。这里的“0 接收字节”是 PCAPdroid 连接统计字段，不等同于完整链路抓包证明远端绝对没有发包；但 41 条 IPv6 TCP 记录均只有 1 个发送包、0 接收包，11 条 IPv6 QUIC 记录均为 0 接收包，这构成明确的连接建立/响应异常线索。该导出不包含 TCP flags、完整重传时序或链路各跳观测，不能据此定位丢包位置。
 
 ### 9.2 这份 CSV 的关键线索
 
@@ -450,7 +449,7 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 
 关键限制：
 - PCAPdroid Info 域名标签不是 DNS 响应 RDATA。
-- 这份 CSV 没有完整展示 AAAA 应答内容，不能单凭标签认定 youtubei.googleapis.com 的 AAAA 就是 Meta 地址。
+- 这份 CSV 是 PCAPdroid 的按连接/应用统计导出，不是完整 DNS 报文 PCAP；虽然两条 IPv6 DNS 记录有响应字节，但导出没有 DNS QTYPE 和 Answer/RDATA 字段。因此不能从该 CSV 还原 AAAA 应答，也不能单凭 Info 标签认定 youtubei.googleapis.com 的 AAAA 就是 Meta 地址。
 - TCP 汇总记录不能替代逐包 SYN/SYN-ACK 分析，也不能定位丢包发生在手机、AP、.200、运营商还是远端。
 - 先前不同时间的查询还出现过其他 2a03:2880:... 地址，不能把 f12a、f134、f11a 等不同时点地址混成同一次连接。
 
@@ -595,9 +594,9 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 当时 .1 的 WAN IPv6 源地址记录为：
 2409:8a5c:7e0a:3a6c:7d4e:a7b7:6b4a:1a3e
 
-注意：这是 10 月 30 日 13:35 左右记录的动态地址，可能已经变化。执行前必须确认它仍出现在当前 `ip -6 addr show` 的 `wan_6` 地址列表中；若不存在，不要继续用旧地址测试，应先从当前 `ifstatus wan_6` 读取最新 WAN GUA。该检查本身此前已经做过，不需要重复贴完整状态，只有在地址变化时才读取最新值。
+注意：这是 10 月 30 日 13:35 左右记录的动态地址，可能已经变化。执行前只需用 ip -6 addr show 确认该地址仍在本机；若不存在，不要用旧地址测试，只需从当前 ifstatus wan_6 取最新 WAN GUA。wan_6/PD 的整体盘点已经做过，不需要重新贴完整状态。
 
-若地址仍然有效，使用下面这个只读测试（不改配置、不改路由、不改 RA）：
+**测试设计修正：**先做 route lookup，再做一次绑定 WAN GUA 的 HTTPS 连接；目标固定为 Cloudflare DNS 的 IPv6 地址 2606:4700:4700::1111，并将 cloudflare-dns.com 显式解析到该地址，避免把 DNS 解析路径混进 IPv6 出口测试。下面是只读操作，不改配置、不改路由、不改 RA：
 
     SRC6='2409:8a5c:7e0a:3a6c:7d4e:a7b7:6b4a:1a3e'
     DST6='2606:4700:4700::1111'
@@ -607,14 +606,16 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 
     echo
     echo '===== actual IPv6 HTTPS test from WAN IPv6 source ====='
-    curl -6 --interface "$SRC6" --connect-timeout 8 -sS \
-      --resolve 'www.cloudflare.com:443:[2606:4700:4700::1111]' \
-      'https://www.cloudflare.com/cdn-cgi/trace'
+    curl -6 --interface "$SRC6" --connect-timeout 8 --max-time 15 -sS -o /dev/null \
+      -w 'curl_exit=%{exitcode} http_code=%{http_code} remote_ip=%{remote_ip}\n' \
+      --resolve 'cloudflare-dns.com:443:[2606:4700:4700::1111]' \
+      'https://cloudflare-dns.com/dns-query'
 
 结果解释：
 - 若 ip -6 route get 找不到路由：说明当前源地址/策略路由下内核没有可用出口。
-- 若路由存在但 curl 超时：说明 .1 这次 IPv6 HTTPS 连接没有成功；还不能仅凭一次失败定位到 PPPoE、上游网关或回程。
-- 若 curl 成功：证明 .1 自身可使用该 WAN IPv6 源地址访问公网；**仍不等于手机已经经 .1 上网**。之后才有必要设计手机侧的受控路径 A/B。
+- 若路由存在但 curl 连接超时/失败：说明 .1 这次绑定该源地址的 IPv6 HTTPS 连接没有成功；仍不能仅凭一次失败定位到 PPPoE、上游网关、运营商回程或本机防火墙。
+- 若 curl 返回任意 HTTP 状态码（包括 4xx）：说明 TCP/TLS 至少已建立到指定 IPv6 目标；HTTP 4xx 不是连接失败。若返回 curl_exit=0，可确认 HTTPS 请求完成。
+- 若 curl 成功：证明 .1 自身可使用该 WAN IPv6 源地址访问该 Cloudflare IPv6 服务；**仍不等于手机已经经 .1 上网**。之后才有必要设计手机侧的受控路径 A/B。
 - 不要为了让测试成功而立即修改 ra_default、RA 优先级、手机路由或前缀；先保留结果。
 
 ### 为什么现在不做别的
@@ -644,7 +645,7 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 
 4. **PassWall2 26.10.29-1 nftables 源码**  
    https://github.com/Openwrt-Passwall/openwrt-passwall2/blob/26.10.29-1/luci-app-passwall2/root/usr/share/passwall2/nftables.sh  
-   对应用户当时安装版本；源码中 IPv6 DNS 入口使用 psw2_direct6 源地址集合，IPv6 代理规则受 PROXY_IPV6 控制。
+   已直接从该 tag 取回文件核对。源码中 LAN 接口 IPv6 地址会尝试加入 direct6 set；IPv6 DNS redirect 入口按 ip6 saddr @NFTSET_DIRECT6 匹配；IPv6 代理链另受 PROXY_IPV6 控制。源码只能解释规则生成逻辑，实际以用户当时 nft list 输出为准。
 
 5. **PassWall2 issue #1188**  
    https://github.com/Openwrt-Passwall/openwrt-passwall2/issues/1188  
@@ -686,7 +687,7 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 3. odhcpd issue #388（2026 年）另有 ipip6 隧道场景，报告存在 source-specific routes、PD 和路由器自身 IPv6 连通性，却出现相似警告；作者还报告 RA 发送行为异常。这是另一个隧道场景，不能直接套用到用户 PPPoE，但进一步说明“日志警告”与“实际 WAN IPv6 是否通”必须分别验证。  
    资料：https://github.com/openwrt/odhcpd/issues/388
 
-4. 当前 odhcpd 源码显示，Router Lifetime 的设置与 default route、valid prefix 两项判断有关；条件不满足时会把 lifetime 置零。源码解释了警告的机制，但不能代替用户 LAN 上真实 RA 报文的观察。  
+4. 当前 upstream odhcpd router.c 显示，Router Lifetime 的设置取决于代码检测到的 default route 和 valid prefix；条件不满足时把 lifetime 置零。**这是当前 master 源码，不等于已核对用户 ImmortalWrt 24.10.6 实际安装的 odhcpd 二进制版本。** 源码解释机制，不能代替用户 LAN 上真实 RA 报文的观察。  
    资料：https://github.com/openwrt/odhcpd/blob/master/src/router.c
 
 **重要：以上资料没有授权我们去设置 `ra_default=2`、调整 RA 优先级或改动 DHCPv6/RA。用户明确不希望再随意调整 RA。当前只用于修正推理：不能把 odhcpd warning 当成 IPv6 出口故障的定论。**
@@ -701,3 +702,61 @@ OpenClash 的 UCI/YAML 历史状态不一致，不能合并成单一配置：
 - 加入 IPv4 8.8.8.8:443 直连测试及临时 psw2_direct 规则已删除的时间线，避免把 IPv4 测试混为 IPv6。
 - PassWall2 源码核对更新到用户当时安装的 26.10.29-1 tag。
 - 修正下一步：不再重复盘点 wan6/wan_6/PD，而是验证 .1 自身是否能以当前 WAN GUA 建立公网 IPv6 连接；若旧地址已变化，先确认当前地址再测。
+
+
+---
+
+## 19. 2026-10-31 第二轮复核：本轮实际重新验证的内容
+
+本轮不是只看前一版报告，而是重新取回 GitHub 文件、重新读取附件 CSV，并再次检查相关上游资料与源码。
+
+### 19.1 GitHub 文件与 PassWall2 源码
+
+- 已重新取回仓库 iriya123/guize 的 main/ai，在其当前内容上继续修订。
+- 已直接取回 PassWall2 26.10.29-1 tag 的 nftables.sh。确认该版本代码会读取 LAN 接口 IPv6 地址并尝试加入 direct6 set；DNS redirect 入口以 IPv6 源地址是否属于该 set 作为条件；IPv6 透明代理规则受 PROXY_IPV6 条件控制。
+- 因此，报告关于该 tag 的源码描述有直接文件依据，不再只依赖当前 main 分支。
+- 仍需强调：源码逻辑不等于用户运行时规则一定完整生成；运行时以当时保存的 nft 输出为准。
+
+### 19.2 PCAPdroid CSV 已在本轮重新逐行读取并统计
+
+原始文件仍在当前会话附件目录，已重新读取：
+- 201 条数据记录；
+- 所有记录均属于 YouTube App / com.google.android.youtube；
+- 时间范围：2026-10-30 20:29:39.759 至 20:30:59.921（+08:00）；
+- IPv6 DNS：2 条，发送 178 bytes、接收 222 bytes；
+- IPv6 QUIC：11 条，发送 84,348 bytes、接收 0 bytes；
+- IPv6 TCP：41 条，发送 3,280 bytes、接收 0 bytes；
+- IPv4 DNS：41 条，发送 2,972 bytes、接收 4,268 bytes；
+- IPv4 QUIC：20 条，发送 149,526 bytes、接收 0 bytes；
+- IPv4 HTTPS：28 条，发送 571,132 bytes、接收 3,536,724 bytes；
+- IPv4 TLS：47 条，发送 93,613 bytes、接收 30,977 bytes；
+- 另有 IPv4 SSDP 11 条，发送 1,683 bytes、接收 0 bytes。
+
+这一轮重新统计确认了上表中的数字，并修正结束时间为 20:30:59.921。它仍然是 PCAPdroid 的连接统计 CSV，不是原始 pcap；不能读取 DNS Answer/RDATA、TCP flags 或每个包的完整时间序列。IPv6 的 41 条 TCP 连接每条只有一个发送包、没有接收包，是强烈异常线索，但不能直接写成“已证明 SYN 在某个路由器被丢弃”。
+
+### 19.3 两条 odhcpd issue 的证据强弱重新区分
+
+- OpenWrt #23246：WireGuard 场景，报告者提供了实际 IPv6 ping 成功证据，但 odhcpd 仍报无默认路由；维护者解释 VPN 默认路由无 next-hop 时可能令 odhcpd 误判。与用户 PPPoE 不同。
+- odhcpd #388：报告者称 RA 没有发送，观察到 source-specific default routes，并怀疑这是 odhcpd 误判/发送异常的原因；这部分是 issue 作者的怀疑，不是已确认根因。
+- 因此，不能把 #388 描述成“已确认 source-specific route 导致 bug”，也不能把任何一个 issue 当作用户本机的证明。
+
+### 19.4 纠正下一步命令中的目标地址/SNI 匹配
+
+之前草案把 www.cloudflare.com 的 SNI 与 2606:4700:4700::1111 组合，这个 IP 实际是 Cloudflare DNS 服务地址，不应冒充 www.cloudflare.com 的地址。本版已修正为：
+- 目标 IPv6：2606:4700:4700::1111
+- TLS 主机名：cloudflare-dns.com
+- curl --resolve 将该主机名固定到对应 IPv6
+- curl --interface "$SRC6" 绑定 .1 的 WAN GUA
+
+因此测试的目标 IP 与 TLS SNI/主机名一致，不会人为制造证书/虚拟主机错配。
+
+### 19.5 本轮没有做的事情
+
+- 没有登录用户路由器执行任何命令；
+- 没有改动路由器、手机、RA、DNS、PassWall2、OpenClash 或 AdGuard Home 配置；
+- 没有重新抓取手机流量；
+- 没有把旧动态 WAN IPv6 地址假设为当前仍有效；
+- 没有声称 .1 已经通过 IPv6 成功访问公网；
+- 没有声称手机已通过 .1 的 IPv6 WAN 出口上网。
+
+**本轮只完成文档、附件数据和公开源码/issue 的复核；下一项本机测试仍未执行。**
