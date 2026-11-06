@@ -12,11 +12,6 @@ DOMAIN-SUFFIX,time.windows.com
 DOMAIN-SUFFIX,lanzov.com
 DOMAIN-SUFFIX,ggkuai.com
 DOMAIN-SUFFIX,mgnacg.com
-DOMAIN-SUFFIX,xfani.com
-DOMAIN-SUFFIX,fsdm02.com
-DOMAIN-SUFFIX,catwcy.com
-DOMAIN-SUFFIX,girigirilove.com
-DOMAIN-SUFFIX,nyadm.org
 DOMAIN-SUFFIX,5kfz.com
 
 # 洛克王国
@@ -26,9 +21,9 @@ DOMAIN-SUFFIX,rocom.qq.com
 DOMAIN-SUFFIX,17roco.gamebbs.qq.com
 
 
-
 # -------------------------
 # 二、影视资源站
+# 暂时保留国内 API、CDN 和图片资源
 # -------------------------
 
 DOMAIN-SUFFIX,kkzycdn.com
@@ -40,10 +35,6 @@ DOMAIN-SUFFIX,ukuapi.com
 DOMAIN-SUFFIX,picturecdn.com
 DOMAIN-SUFFIX,jinyingimage.com
 DOMAIN-SUFFIX,hongniuzy2.com
-DOMAIN-SUFFIX,ddys.pro
-DOMAIN-SUFFIX,zxzj.pro
-
-
 
 
 # -------------------------
@@ -53,7 +44,6 @@ DOMAIN-SUFFIX,zxzj.pro
 DOMAIN-KEYWORD,dxmjuhe
 DOMAIN-KEYWORD,lzcdn2
 DOMAIN-KEYWORD,jiaozi
-DOMAIN-KEYWORD,agedm
 
 
 # -------------------------
