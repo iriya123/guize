@@ -18,6 +18,14 @@ DOMAIN-SUFFIX,catwcy.com
 DOMAIN-SUFFIX,girigirilove.com
 DOMAIN-SUFFIX,nyadm.org
 DOMAIN-SUFFIX,5kfz.com
+
+# 洛克王国
+DOMAIN-SUFFIX,17roco.qq.com
+DOMAIN-SUFFIX,roco.qq.com
+DOMAIN-SUFFIX,rocom.qq.com
+DOMAIN-SUFFIX,17roco.gamebbs.qq.com
+
+# 量子 ACG（仅 lzacg.org 直连）
 DOMAIN-SUFFIX,lzacg.org
 
 
@@ -48,10 +56,7 @@ DOMAIN-SUFFIX,hembed.com
 DOMAIN-KEYWORD,dxmjuhe
 DOMAIN-KEYWORD,lzcdn2
 DOMAIN-KEYWORD,jiaozi
-DOMAIN-KEYWORD,lzacg
 DOMAIN-KEYWORD,agedm
-DOMAIN-KEYWORD,17roco
-DOMAIN-KEYWORD,roco
 
 
 # -------------------------
